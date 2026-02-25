@@ -1,21 +1,13 @@
-import axios from "axios";
-
-export interface AuthUser {
-  id: string;
-  name: string;
-  email: string;
-  role: "student" | "tutor" | "admin";
-}
+import { api } from "@/lib/axios";
+import { User } from "@/types/user";
 
 export interface SessionResponse {
-  user: AuthUser;
+  user: User;
 }
 
 export const authService = {
   async login(payload: { email: string; password: string }) {
-    const { data } = await axios.post("/api/auth/login", payload, {
-      withCredentials: true,
-    });
+    const { data } = await api.post("/api/auth/login", payload);
     return data;
   },
 
@@ -23,19 +15,15 @@ export const authService = {
     name: string;
     email: string;
     password: string;
-    role: "student" | "tutor";
+    role: "STUDENT" | "TUTOR";
   }) {
-    const { data } = await axios.post("/api/auth/register", payload, {
-      withCredentials: true,
-    });
+    const { data } = await api.post("/api/auth/register", payload);
     return data;
   },
 
   async getSession(): Promise<SessionResponse | null> {
     try {
-      const { data } = await axios.get("/api/auth/me", {
-        withCredentials: true,
-      });
+      const { data } = await api.get("/api/auth/me");
       return data;
     } catch {
       return null;
@@ -43,6 +31,6 @@ export const authService = {
   },
 
   async logout() {
-    await axios.post("/api/auth/logout", {}, { withCredentials: true });
+    await api.post("/auth/logout");
   },
 };

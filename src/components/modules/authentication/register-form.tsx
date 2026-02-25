@@ -20,6 +20,7 @@ import { toast } from "sonner";
 import { useForm } from "@tanstack/react-form";
 import * as z from "zod";
 import { authClient } from "@/lib/auth-client";
+import { handleGoogleLogin } from "@/hooks/handleGoogleLogin";
 
 const formSchema = z.object({
   name: z.string().min(2, "Name is required"),
@@ -30,17 +31,6 @@ const formSchema = z.object({
   message: "Passwords do not match",
   path: ["confirmPassword"],
 });
-
-const handleGoogleSignup = async () => {
-  try {
-    await authClient.signIn.social({
-      provider: "google",
-      callbackURL: "http://localhost:3000",
-    });
-  } catch {
-    toast.error("Google signup failed!");
-  }
-};
 
 export function RegisterForm(props: React.ComponentProps<typeof Card>) {
   const form = useForm({
@@ -166,7 +156,7 @@ export function RegisterForm(props: React.ComponentProps<typeof Card>) {
           variant="outline"
           type="button"
           className="w-full"
-          onClick={handleGoogleSignup}
+          onClick={handleGoogleLogin}
         >
           Continue with Google
         </Button>
