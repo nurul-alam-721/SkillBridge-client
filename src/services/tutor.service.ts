@@ -1,16 +1,17 @@
 import { api } from "@/lib/axios";
-import { UserRole, UserStatus } from "@/types/types";
-export interface User {
+
+
+export type Role = "STUDENT" | "TUTOR" | "ADMIN";
+export type UserStatus = "ACTIVE" | "BANNED";
+export type BookingStatus = "PENDING" | "CONFIRMED" | "COMPLETED" | "CANCELLED";
+
+
+export interface TutorUser {
   id: string;
   name: string | null;
   email: string;
-  emailVerified: boolean;
   image: string | null;
   phone: string | null;
-  role: UserRole;
-  status: UserStatus;
-  createdAt: string;
-  updatedAt: string;
 }
 
 export interface Category {
@@ -30,14 +31,39 @@ export interface AvailabilitySlot {
   isBooked: boolean;
 }
 
+export interface ReviewStudent {
+  id: string;
+  name: string | null;
+  image: string | null;
+}
+
 export interface Review {
   id: string;
-  rating: string; 
+  rating: string;
   comment: string | null;
   studentId: string;
   tutorProfileId: string;
   createdAt: string;
-  student?: Pick<User, "id" | "name" | "image">;
+  student?: ReviewStudent;
+}
+
+export interface BookingStudent {
+  id: string;
+  name: string | null;
+  image: string | null;
+  email: string;
+}
+
+export interface TutorBooking {
+  id: string;
+  studentId: string;
+  tutorProfileId: string;
+  slotId: string;
+  status: BookingStatus;
+  createdAt: string;
+  updatedAt: string;
+  slot: AvailabilitySlot;
+  student: BookingStudent;
 }
 
 export interface TutorProfile {
@@ -51,10 +77,29 @@ export interface TutorProfile {
   totalReviews: number;
   createdAt: string;
   updatedAt: string;
- user: Pick<User, "id" | "name" | "email" | "image" | "phone">;
+  user: TutorUser;
   category: Category;
   availability?: AvailabilitySlot[];
   reviews?: Review[];
+  bookings?: TutorBooking[];
+}
+
+export interface TutorStats {
+  totalSessions: number;
+  upcoming: number;
+  completed: number;
+  cancelled: number;
+  totalEarnings: number;
+  availableSlots: number;
+  rating: number;
+  totalReviews: number;
+}
+
+export interface TutorStatsResponse {
+  stats: TutorStats;
+  tutorProfile: TutorProfile;
+  recentBookings: TutorBooking[];
+  recentReviews: Review[];
 }
 
 
@@ -77,14 +122,14 @@ export interface TutorsResponse {
   };
 }
 
-export interface UpdateProfilePayload {
+export interface UpdateTutorProfilePayload {
   bio?: string;
   hourlyRate?: number;
   experience?: number;
   categoryId?: string;
 }
 
-export interface UpdateAvailabilityPayload {
+export interface CreateAvailabilityPayload {
   date: string;
   startTime: string;
   endTime: string;
@@ -92,9 +137,10 @@ export interface UpdateAvailabilityPayload {
 
 
 export const tutorService = {
+  // Public
   async getAll(query?: TutorsQuery): Promise<TutorsResponse> {
     const { data } = await api.get("/api/tutors", { params: query });
-    return data; 
+    return data;
   },
 
   async getById(id: string): Promise<TutorProfile> {
@@ -110,12 +156,29 @@ export const tutorService = {
     return [];
   },
 
-  async updateProfile(payload: UpdateProfilePayload): Promise<TutorProfile> {
-    const { data } = await api.put("/api/tutor/profile", payload);
-    return data;
+  async getMyStats(): Promise<TutorStatsResponse> {
+    const { data } = await api.get("/api/tutors/me/stats");
+    return data.data;
   },
 
-  async updateAvailability(slots: UpdateAvailabilityPayload[]): Promise<void> {
-    await api.put("/api/tutor/availability", { slots });
+  async updateProfile(payload: UpdateTutorProfilePayload): Promise<TutorProfile> {
+    const { data } = await api.put("/api/tutors/me", payload);
+    return data.data;
+  },
+
+  async getMyAvailability(): Promise<AvailabilitySlot[]> {
+    const { data } = await api.get("/api/tutor/availability");
+    if (Array.isArray(data)) return data;
+    if (Array.isArray(data.data)) return data.data;
+    return [];
+  },
+
+  async createAvailabilitySlot(payload: CreateAvailabilityPayload): Promise<AvailabilitySlot> {
+    const { data } = await api.post("/api/tutor/availability", payload);
+    return data.data;
+  },
+
+  async deleteAvailabilitySlot(slotId: string): Promise<void> {
+    await api.delete(`/api/tutor/availability/${slotId}`);
   },
 };

@@ -1,23 +1,39 @@
-"use client";
-
-import { useEffect, useState } from "react";
+import { cookies } from "next/headers";
+import { redirect } from "next/navigation";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
-import { userService, CurrentUser } from "@/services/user.service";
 import { AppSidebar } from "@/components/layout/AppSidebar";
 import { SiteHeader } from "@/components/layout/SiteHeader";
+import { CurrentUser } from "@/services/user.service";
+import { env } from "@/env";
 
-export default function DashboardLayout({
+async function getUser(): Promise<CurrentUser | null> {
+  try {
+    const cookieStore = await cookies();
+    const cookieHeader = cookieStore.getAll()
+      .map((c) => `${c.name}=${c.value}`)
+      .join("; ");
+
+    const res = await fetch(`${env.NEXT_PUBLIC_API_URL}/api/auth/me`, {
+      headers: { Cookie: cookieHeader },
+      cache: "no-store",
+    });
+
+    if (!res.ok) return null;
+    const data = await res.json();
+    return data.data ?? null;
+  } catch {
+    return null;
+  }
+}
+
+export default async function DashboardLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  const [user, setUser] = useState<CurrentUser | null>(null);
+  const user = await getUser();
 
-  useEffect(() => {
-    userService.getMe().then(setUser).catch(() => setUser(null));
-  }, []);
-
-  if (!user) return null;
+  if (!user) redirect("/login");
 
   return (
     <SidebarProvider
