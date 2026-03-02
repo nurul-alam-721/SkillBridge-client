@@ -1,10 +1,8 @@
 import { api } from "@/lib/axios";
 
-
 export type Role = "STUDENT" | "TUTOR" | "ADMIN";
 export type UserStatus = "ACTIVE" | "BANNED";
 export type BookingStatus = "PENDING" | "CONFIRMED" | "COMPLETED" | "CANCELLED";
-
 
 export interface TutorUser {
   id: string;
@@ -39,7 +37,7 @@ export interface ReviewStudent {
 
 export interface Review {
   id: string;
-  rating: string;
+  rating: string; 
   comment: string | null;
   studentId: string;
   tutorProfileId: string;
@@ -102,7 +100,6 @@ export interface TutorStatsResponse {
   recentReviews: Review[];
 }
 
-
 export interface TutorsQuery {
   search?: string;
   categoryId?: string;
@@ -135,9 +132,9 @@ export interface CreateAvailabilityPayload {
   endTime: string;
 }
 
-
 export const tutorService = {
-  // Public
+  // Public 
+
   async getAll(query?: TutorsQuery): Promise<TutorsResponse> {
     const { data } = await api.get("/api/tutors", { params: query });
     return data;
@@ -156,8 +153,15 @@ export const tutorService = {
     return [];
   },
 
-  async getMyStats(): Promise<TutorStatsResponse> {
-    const { data } = await api.get("/api/tutors/me/stats");
+  //  Tutor — own profile
+
+  async getMyProfile(): Promise<TutorProfile | null> {
+    const { data } = await api.get("/api/tutors/me");
+    return data.data; // null if no profile yet
+  },
+
+  async createProfile(payload: UpdateTutorProfilePayload): Promise<TutorProfile> {
+    const { data } = await api.post("/api/tutors/create-profile", payload);
     return data.data;
   },
 
@@ -166,6 +170,13 @@ export const tutorService = {
     return data.data;
   },
 
+
+  async getMyStats(): Promise<TutorStatsResponse> {
+    const { data } = await api.get("/api/tutors/me/stats");
+    return data.data;
+  },
+
+ 
   async getMyAvailability(): Promise<AvailabilitySlot[]> {
     const { data } = await api.get("/api/tutor/availability");
     if (Array.isArray(data)) return data;

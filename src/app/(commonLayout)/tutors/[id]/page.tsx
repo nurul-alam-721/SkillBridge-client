@@ -189,7 +189,6 @@ export default function TutorProfilePage() {
 
         {/* Main content */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {/* Left: tabs for availability + reviews */}
           <div className="md:col-span-2">
             <Tabs defaultValue="availability">
               <TabsList className="mb-4 w-full">
@@ -297,7 +296,7 @@ export default function TutorProfilePage() {
                 <div className="flex items-center justify-between text-sm">
                   <span className="text-muted-foreground">Hourly rate</span>
                   <span className="font-semibold">
-                    ${tutor.hourlyRate} / hr
+                    BDT {tutor.hourlyRate} / hr
                   </span>
                 </div>
               </CardContent>

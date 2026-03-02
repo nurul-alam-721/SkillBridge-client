@@ -64,7 +64,7 @@ export function BookingsTable({ bookings }: { bookings: Booking[] }) {
                         {" – "}
                         {format(new Date(booking.slot.endTime), "h:mm a")}
                       </TableCell>
-                      <TableCell>${booking.tutorProfile.hourlyRate}/hr</TableCell>
+                      <TableCell>BDT {booking.tutorProfile.hourlyRate}/hr</TableCell>
                       <TableCell>
                         <Badge variant={variant}>{label}</Badge>
                       </TableCell>

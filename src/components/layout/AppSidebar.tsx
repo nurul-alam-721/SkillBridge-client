@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useSyncExternalStore } from "react";
 import {
   BookOpen,
   CalendarDays,
@@ -40,34 +41,47 @@ import {
 import { authClient } from "@/lib/auth-client";
 import { CurrentUser } from "@/services/user.service";
 
-const NAV: Record<string, { title: string; href: string; icon: React.ElementType }[]> = {
+const NAV: Record<
+  string,
+  { title: string; href: string; icon: React.ElementType }[]
+> = {
   STUDENT: [
-    { title: "Overview",  href: "/dashboard",          icon: LayoutDashboard },
-    { title: "Bookings",  href: "/dashboard/bookings", icon: CalendarDays    },
-    { title: "Profile",   href: "/dashboard/profile",  icon: UserCircle      },
+    { title: "Overview", href: "/dashboard", icon: LayoutDashboard },
+    { title: "Bookings", href: "/dashboard/bookings", icon: CalendarDays },
+    { title: "Profile", href: "/dashboard/profile", icon: UserCircle },
   ],
   TUTOR: [
-    { title: "Overview",     href: "/tutor/dashboard",    icon: LayoutDashboard },
-    { title: "Availability", href: "/tutor/availability", icon: Clock           },
-    { title: "Profile",      href: "/tutor/profile",      icon: UserCircle      },
+    { title: "Overview", href: "/tutor/dashboard", icon: LayoutDashboard },
+    { title: "Availability", href: "/tutor/availability", icon: Clock },
+    { title: "Profile", href: "/tutor/profile", icon: UserCircle },
   ],
   ADMIN: [
-    { title: "Overview",   href: "/admin",             icon: LayoutDashboard },
-    { title: "Users",      href: "/admin/users",       icon: Users           },
-    { title: "Bookings",   href: "/admin/bookings",    icon: BookMarked      },
-    { title: "Categories", href: "/admin/categories",  icon: Tag             },
+    { title: "Overview", href: "/admin", icon: LayoutDashboard },
+    { title: "Users", href: "/admin/users", icon: Users },
+    { title: "Bookings", href: "/admin/bookings", icon: BookMarked },
+    { title: "Categories", href: "/admin/categories", icon: Tag },
   ],
 };
+
+function useIsMounted() {
+  return useSyncExternalStore(
+    () => () => {},
+    () => true,
+    () => false,
+  );
+}
 
 export function AppSidebar({
   user,
   ...props
 }: React.ComponentProps<typeof Sidebar> & { user: CurrentUser }) {
   const pathname = usePathname();
+  const mounted = useIsMounted();
   const navItems = NAV[user.role] ?? NAV.STUDENT;
 
   const handleLogout = async () => {
     await authClient.signOut();
+    document.cookie = "user-role=; path=/; max-age=0";
     window.location.href = "/";
   };
 
@@ -104,7 +118,7 @@ export function AppSidebar({
                 <SidebarMenuItem key={item.href}>
                   <SidebarMenuButton
                     asChild
-                    isActive={pathname === item.href}
+                    isActive={mounted && pathname === item.href}
                     tooltip={item.title}
                   >
                     <Link href={item.href}>
@@ -145,14 +159,19 @@ export function AppSidebar({
                   className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
                 >
                   <Avatar className="h-8 w-8 rounded-lg">
-                    <AvatarImage src={user.image ?? undefined} alt={user.name ?? "User"} />
+                    <AvatarImage
+                      src={user.image ?? undefined}
+                      alt={user.name ?? "User"}
+                    />
                     <AvatarFallback className="rounded-lg">
                       {(user.name ?? "U").charAt(0).toUpperCase()}
                     </AvatarFallback>
                   </Avatar>
                   <div className="grid flex-1 text-left text-sm leading-tight">
                     <span className="truncate font-semibold">{user.name}</span>
-                    <span className="truncate text-xs text-muted-foreground">{user.email}</span>
+                    <span className="truncate text-xs text-muted-foreground">
+                      {user.email}
+                    </span>
                   </div>
                   <ChevronsUpDown className="ml-auto size-4" />
                 </SidebarMenuButton>
@@ -173,8 +192,12 @@ export function AppSidebar({
                       </AvatarFallback>
                     </Avatar>
                     <div className="grid flex-1 text-left text-sm leading-tight">
-                      <span className="truncate font-semibold">{user.name}</span>
-                      <span className="truncate text-xs text-muted-foreground">{user.email}</span>
+                      <span className="truncate font-semibold">
+                        {user.name}
+                      </span>
+                      <span className="truncate text-xs text-muted-foreground">
+                        {user.email}
+                      </span>
                     </div>
                   </div>
                 </DropdownMenuLabel>
@@ -185,8 +208,8 @@ export function AppSidebar({
                       user.role === "TUTOR"
                         ? "/tutor/profile"
                         : user.role === "ADMIN"
-                        ? "/admin"
-                        : "/dashboard/profile"
+                          ? "/admin"
+                          : "/dashboard/profile"
                     }
                   >
                     <UserCircle className="mr-2 h-4 w-4" />

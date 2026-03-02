@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { format } from "date-fns";
-import { AlertCircle, Clock, Star, Plus, CalendarDays } from "lucide-react";
+import { Clock, Star, CalendarDays } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Card, CardContent, CardDescription,
@@ -13,23 +13,22 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
-import { useTutorDashboard } from "@/hooks/useTutorDashboard";
 import { TutorSectionCards } from "@/components/modules/tutorDashboard/tutorSectionCards";
 import { TutorSessionsTable } from "@/components/modules/tutorDashboard/TutorSessionsTable";
+import { CreateProfileDialog } from "@/components/modules/tutor/CreateProfileDialog";
+import { useTutorDashboard } from "@/hooks/useTutorDashboard";
 
 function DashboardSkeleton() {
   return (
     <div className="flex flex-col gap-4 py-4 md:gap-6 md:py-6">
       <div className="px-4 lg:px-6">
         <Card>
-          <CardContent className="pt-5">
-            <div className="flex items-center gap-4">
-              <Skeleton className="h-16 w-16 rounded-full" />
-              <div className="space-y-2">
-                <Skeleton className="h-5 w-36" />
-                <Skeleton className="h-4 w-24" />
-                <Skeleton className="h-4 w-48" />
-              </div>
+          <CardContent className="pt-5 flex items-center gap-4">
+            <Skeleton className="h-16 w-16 rounded-full shrink-0" />
+            <div className="space-y-2 flex-1">
+              <Skeleton className="h-5 w-36" />
+              <Skeleton className="h-4 w-48" />
+              <Skeleton className="h-4 w-32" />
             </div>
           </CardContent>
         </Card>
@@ -41,17 +40,13 @@ function DashboardSkeleton() {
               <Skeleton className="h-4 w-24" />
               <Skeleton className="h-8 w-16 mt-1" />
             </CardHeader>
-            <CardContent>
-              <Skeleton className="h-3 w-32" />
-            </CardContent>
+            <CardContent><Skeleton className="h-3 w-32" /></CardContent>
           </Card>
         ))}
       </div>
       <div className="px-4 lg:px-6">
         <Card>
-          <CardHeader>
-            <Skeleton className="h-5 w-32" />
-          </CardHeader>
+          <CardHeader><Skeleton className="h-5 w-32" /></CardHeader>
           <CardContent className="space-y-3">
             {Array.from({ length: 3 }).map((_, i) => (
               <Skeleton key={i} className="h-12 w-full" />
@@ -64,25 +59,16 @@ function DashboardSkeleton() {
 }
 
 export default function TutorDashboardPage() {
-  const { data, loading, error, refresh } = useTutorDashboard();
+  const { data, loading, refresh } = useTutorDashboard();
 
   if (loading) return <DashboardSkeleton />;
 
-  if (error || !data) {
+  if (!data) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-[60vh] gap-3 text-center px-4">
-        <AlertCircle className="h-10 w-10 text-muted-foreground" />
-        <p className="font-semibold text-lg">No tutor profile found</p>
-        <p className="text-sm text-muted-foreground max-w-sm">
-          Create your tutor profile to start accepting sessions.
-        </p>
-        <Button asChild className="rounded-xl mt-2">
-          <Link href="/tutor/profile">
-            <Plus className="h-4 w-4 mr-2" />
-            Create Profile
-          </Link>
-        </Button>
-      </div>
+      <CreateProfileDialog
+        open={true}
+        onCreated={() => window.location.reload()}
+      />
     );
   }
 
@@ -91,11 +77,10 @@ export default function TutorDashboardPage() {
   return (
     <div className="flex flex-col gap-4 py-4 md:gap-6 md:py-6">
 
-      {/* Profile header card */}
       <div className="px-4 lg:px-6">
         <Card>
           <CardContent className="flex flex-col sm:flex-row items-start sm:items-center gap-4 pt-5">
-            <Avatar className="h-16 w-16 text-2xl">
+            <Avatar className="h-16 w-16 text-2xl shrink-0">
               <AvatarImage src={tutorProfile.user.image ?? undefined} />
               <AvatarFallback>
                 {(tutorProfile.user.name ?? "T").charAt(0).toUpperCase()}
@@ -117,7 +102,7 @@ export default function TutorDashboardPage() {
                   {tutorProfile.experience} yr{tutorProfile.experience !== 1 ? "s" : ""} exp
                 </span>
                 <span className="font-medium text-foreground">
-                  ${tutorProfile.hourlyRate}/hr
+                  BDT {tutorProfile.hourlyRate}/hr
                 </span>
                 <span className="flex items-center gap-1">
                   <CalendarDays className="h-3.5 w-3.5" />
@@ -171,7 +156,6 @@ export default function TutorDashboardPage() {
             <TutorSessionsTable bookings={recentBookings} onRefresh={refresh} />
           </TabsContent>
 
-          {/* Reviews */}
           <TabsContent value="reviews">
             <Card>
               <CardHeader>
@@ -180,7 +164,7 @@ export default function TutorDashboardPage() {
                   {stats.totalReviews} review{stats.totalReviews !== 1 ? "s" : ""} · {stats.rating.toFixed(1)} avg rating
                 </CardDescription>
               </CardHeader>
-              <CardContent className="space-y-3">
+              <CardContent className="space-y-0">
                 {recentReviews.length === 0 ? (
                   <p className="text-sm text-muted-foreground py-8 text-center">
                     No reviews yet. Complete sessions to receive reviews.
@@ -188,7 +172,7 @@ export default function TutorDashboardPage() {
                 ) : (
                   recentReviews.map((review, i) => (
                     <div key={review.id}>
-                      <div className="flex items-start justify-between gap-3 py-3">
+                      <div className="flex items-start justify-between gap-3 py-4">
                         <div className="flex items-center gap-2">
                           <Avatar className="h-8 w-8">
                             <AvatarImage src={review.student?.image ?? undefined} />

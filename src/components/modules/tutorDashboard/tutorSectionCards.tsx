@@ -24,7 +24,7 @@ export function TutorSectionCards({ stats }: { stats: TutorStats }) {
     },
     {
       title: "Total Earnings",
-      value: `$${stats.totalEarnings}`,
+      value: `BDT ${stats.totalEarnings}`,
       badge: `${stats.completed} completed`,
       description: "From completed sessions",
     },
