@@ -168,7 +168,7 @@ export default function TutorProfilePage() {
 
                 <div className="mt-3">
                   <span className="text-2xl font-bold">
-                    ${tutor.hourlyRate}
+                    BDT {tutor.hourlyRate}
                   </span>
                   <span className="text-sm text-muted-foreground"> / hr</span>
                 </div>

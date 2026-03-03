@@ -1,15 +1,32 @@
-import { useState, useEffect, useCallback } from "react";
-import { tutorService, TutorProfile, TutorsQuery, Category } from "@/services/tutor.service";
+"use client";
 
-const DEFAULT_FILTERS: TutorsQuery = { page: 1, limit: 12 };
+import { useState, useEffect, useCallback } from "react";
+import { useSearchParams } from "next/navigation";
+import {
+  tutorService,
+  TutorProfile,
+  TutorsQuery,
+  Category,
+} from "@/services/tutor.service";
+
+const defautFilters: TutorsQuery = { page: 1, limit: 9 };
 
 export function useTutors() {
+  const searchParams = useSearchParams();
+
+  const [filters, setFilters] = useState<TutorsQuery>(() => {
+    const categoryId = searchParams.get("categoryId");
+    return {
+      ...defautFilters,
+      ...(categoryId && { categoryId }),
+    };
+  });
+
   const [tutors, setTutors] = useState<TutorProfile[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [totalPages, setTotalPages] = useState(0);
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(true);
-  const [filters, setFilters] = useState<TutorsQuery>(DEFAULT_FILTERS);
   const [search, setSearch] = useState("");
   const [sort, setSort] = useState("rating");
 
@@ -17,10 +34,10 @@ export function useTutors() {
     setLoading(true);
     try {
       const res = await tutorService.getAll(query);
-      setTutors(res.tutors);                          
-      setTotal(res.pagination.totalTutors);         
-      setTotalPages(res.pagination.totalPages);    
-    } catch (error) {
+      setTutors(res.tutors);
+      setTotal(res.pagination.totalTutors);
+      setTotalPages(res.pagination.totalPages);
+    } catch {
       setTutors([]);
       setTotal(0);
       setTotalPages(0);
@@ -30,7 +47,10 @@ export function useTutors() {
   }, []);
 
   useEffect(() => {
-    tutorService.getCategories().then(setCategories).catch(() => {});
+    tutorService
+      .getCategories()
+      .then(setCategories)
+      .catch(() => {});
   }, []);
 
   useEffect(() => {
@@ -44,7 +64,7 @@ export function useTutors() {
     setFilters((prev) => ({ ...prev, ...partial, page: 1 }));
 
   const resetFilters = () => {
-    setFilters(DEFAULT_FILTERS);
+    setFilters(defautFilters);
     setSearch("");
     setSort("rating");
   };

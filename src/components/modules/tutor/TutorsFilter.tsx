@@ -1,14 +1,15 @@
-import { X } from "lucide-react";
+"use client";
+
+import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Separator } from "@/components/ui/separator";
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
+  Select, SelectContent, SelectItem,
+  SelectTrigger, SelectValue,
 } from "@/components/ui/select";
-import { Slider } from "@/components/ui/slider";
 import { Category, TutorsQuery } from "@/services/tutor.service";
+import { cn } from "@/lib/utils";
 
 interface TutorsFilterProps {
   categories: Category[];
@@ -17,23 +18,37 @@ interface TutorsFilterProps {
   onReset: () => void;
 }
 
+const PRICE_PRESETS = [
+  { label: "Any",        min: undefined, max: undefined },
+  { label: "< 300",      min: undefined, max: 300       },
+  { label: "300–600",    min: 300,       max: 600       },
+  { label: "600–1000",   min: 600,       max: 1000      },
+  { label: "1000+",      min: 1000,      max: undefined },
+];
+
 export function TutorsFilter({ categories, filters, onChange, onReset }: TutorsFilterProps) {
-  const hasActive = !!(filters.categoryId || filters.minPrice || filters.maxPrice);
+  const activePreset = PRICE_PRESETS.findIndex(
+    (p) => p.min === filters.minPrice && p.max === filters.maxPrice
+  );
 
   return (
-    <div className="space-y-6">
-      {/* Category */}
+    <div className="space-y-5">
+
       <div className="space-y-2">
-        <p className="text-sm font-medium">Category</p>
+        <Label className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+          Subject
+        </Label>
         <Select
           value={filters.categoryId ?? "all"}
-          onValueChange={(v) => onChange({ categoryId: v === "all" ? undefined : v })}
+          onValueChange={(val) =>
+            onChange({ categoryId: val === "all" ? undefined : val })
+          }
         >
-          <SelectTrigger className="rounded-xl">
-            <SelectValue placeholder="All categories" />
+          <SelectTrigger className="h-9 rounded-xl text-sm">
+            <SelectValue placeholder="All subjects" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">All categories</SelectItem>
+            <SelectItem value="all">All subjects</SelectItem>
             {categories.map((cat) => (
               <SelectItem key={cat.id} value={cat.id}>
                 {cat.name}
@@ -43,30 +58,67 @@ export function TutorsFilter({ categories, filters, onChange, onReset }: TutorsF
         </Select>
       </div>
 
-      {/* Price */}
-      <div className="space-y-3">
-        <div className="flex items-center justify-between">
-          <p className="text-sm font-medium">Price range</p>
-          <span className="text-xs text-muted-foreground">
-            ${filters.minPrice ?? 0} – ${filters.maxPrice ?? 200}+
-          </span>
+      <Separator />
+
+      <div className="space-y-2.5">
+        <Label className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+          Price / hr (BDT)
+        </Label>
+
+        {/* Preset chips */}
+        <div className="flex flex-wrap gap-1.5">
+          {PRICE_PRESETS.map((preset, i) => (
+            <button
+              key={i}
+              onClick={() => onChange({ minPrice: preset.min, maxPrice: preset.max })}
+              className={cn(
+                "rounded-lg border px-2.5 py-1 text-xs font-medium transition-colors",
+                activePreset === i
+                  ? "border-primary bg-primary/10 text-primary"
+                  : "border-border bg-background text-muted-foreground hover:border-muted-foreground/40 hover:text-foreground"
+              )}
+            >
+              {preset.label}
+            </button>
+          ))}
         </div>
-        <Slider
-          min={0}
-          max={200}
-          step={5}
-          value={[filters.minPrice ?? 0, filters.maxPrice ?? 200]}
-          onValueChange={([min, max]) => onChange({ minPrice: min, maxPrice: max })}
-        />
+
+        {/* Custom min/max */}
+        <div className="flex items-center gap-2 pt-0.5">
+          <Input
+            type="number"
+            min={0}
+            placeholder="Min"
+            value={filters.minPrice ?? ""}
+            onChange={(e) =>
+              onChange({ minPrice: e.target.value ? Number(e.target.value) : undefined })
+            }
+            className="h-8 rounded-lg text-xs"
+          />
+          <span className="text-muted-foreground text-xs shrink-0">–</span>
+          <Input
+            type="number"
+            min={0}
+            placeholder="Max"
+            value={filters.maxPrice ?? ""}
+            onChange={(e) =>
+              onChange({ maxPrice: e.target.value ? Number(e.target.value) : undefined })
+            }
+            className="h-8 rounded-lg text-xs"
+          />
+        </div>
       </div>
 
-      {/* Reset */}
-      {hasActive && (
-        <Button variant="ghost" size="sm" onClick={onReset} className="w-full rounded-xl">
-          <X className="h-3.5 w-3.5 mr-1.5" />
-          Reset filters
-        </Button>
-      )}
+      <Separator />
+
+      <Button
+        variant="outline"
+        size="sm"
+        onClick={onReset}
+        className="w-full rounded-lg h-8 text-xs"
+      >
+        Reset all filters
+      </Button>
     </div>
   );
 }
