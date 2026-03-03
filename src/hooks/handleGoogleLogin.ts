@@ -3,7 +3,7 @@
 import { authClient } from "@/lib/auth-client";
 import { toast } from "sonner";
 
-export   const handleGoogleLogin = async () => {
+export const handleGoogleLogin = async () => {
     const toastId = toast.loading("Logging in with Google...");
     try {
     

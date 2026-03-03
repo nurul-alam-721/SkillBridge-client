@@ -1,10 +1,12 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { GraduationCap } from "lucide-react";
 import {
   Dialog, DialogContent,
   DialogDescription, DialogHeader, DialogTitle,
 } from "@/components/ui/dialog";
+import { Separator } from "@/components/ui/separator";
 import { tutorService, TutorProfile, Category } from "@/services/tutor.service";
 import { TutorProfileForm } from "./TutorProfileForm";
 
@@ -23,16 +25,27 @@ export function CreateProfileDialog({ open, onCreated }: CreateProfileDialogProp
   return (
     <Dialog open={open}>
       <DialogContent
-        className="sm:max-w-lg"
+        className="sm:max-w-md"
         onInteractOutside={(e) => e.preventDefault()}
       >
-        <DialogHeader>
-          <DialogTitle>Complete Your Tutor Profile</DialogTitle>
-          <DialogDescription>
-            You need a tutor profile before you can accept students.
-            Fill in your details below to get started.
-          </DialogDescription>
+        {/* Header */}
+        <DialogHeader className="space-y-3">
+          <div className="flex items-center gap-3">
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10">
+              <GraduationCap className="h-5 w-5 text-primary" />
+            </div>
+            <div>
+              <DialogTitle className="text-base font-semibold leading-tight">
+                Complete Your Tutor Profile
+              </DialogTitle>
+              <DialogDescription className="text-xs text-muted-foreground mt-0.5">
+                Required before you can accept students
+              </DialogDescription>
+            </div>
+          </div>
         </DialogHeader>
+
+        <Separator />
 
         <TutorProfileForm
           profile={null}

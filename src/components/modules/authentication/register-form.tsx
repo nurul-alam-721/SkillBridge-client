@@ -1,14 +1,22 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
-import { Field, FieldError, FieldGroup, FieldLabel } from "@/components/ui/field";
+import {
+  Field,
+  FieldError,
+  FieldGroup,
+  FieldLabel,
+} from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
 import { useForm } from "@tanstack/react-form";
 import * as z from "zod";
 import { authClient } from "@/lib/auth-client";
 import { handleGoogleLogin } from "@/hooks/handleGoogleLogin";
+import { GraduationCap, BookOpen } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 const formSchema = z
   .object({
@@ -16,6 +24,7 @@ const formSchema = z
     email: z.string().email("Invalid email"),
     password: z.string().min(8, "Minimum 8 characters"),
     confirmPassword: z.string(),
+    role: z.enum(["STUDENT", "TUTOR"]),
   })
   .refine((data) => data.password === data.confirmPassword, {
     message: "Passwords do not match",
@@ -44,16 +53,28 @@ const fadedShadow = {
 };
 
 export function RegisterForm() {
+  const router = useRouter();
+
   const form = useForm({
-    defaultValues: { name: "", email: "", password: "", confirmPassword: "" },
+    defaultValues: {
+      name: "",
+      email: "",
+      password: "",
+      confirmPassword: "",
+      role: "STUDENT" as "STUDENT" | "TUTOR",
+    },
     validators: { onSubmit: formSchema },
     onSubmit: async ({ value }) => {
       const toastId = toast.loading("Creating account...");
       try {
+        
+        const extraFields = { role: value.role } as Record<string, unknown>;
+
         const { error } = await authClient.signUp.email({
           name: value.name,
           email: value.email,
           password: value.password,
+          ...extraFields,
         });
 
         if (error) {
@@ -61,7 +82,8 @@ export function RegisterForm() {
           return;
         }
 
-        toast.success("Account created! Please verify your email.", { id: toastId });
+        toast.success("Account created successfully!", { id: toastId });
+        router.push("/login");
       } catch {
         toast.error("Something went wrong", { id: toastId });
       }
@@ -70,14 +92,15 @@ export function RegisterForm() {
 
   return (
     <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-background px-4 py-12">
-
-      <div className="relative w-full max-w-md">
+      <div className="relative w-full max-w-lg">
         {/* Brand */}
         <div className="mb-8 text-center">
           <Link href="/" className="inline-block text-2xl font-bold tracking-tight">
             Skill<span className="text-primary">Bridge</span>
           </Link>
-          <p className="mt-1 text-sm text-muted-foreground">Create your account to get started</p>
+          <p className="mt-1 text-sm text-muted-foreground">
+            Create your account to get started
+          </p>
         </div>
 
         {/* Card */}
@@ -118,7 +141,7 @@ export function RegisterForm() {
                     <Field data-invalid={isInvalid} className="space-y-1.5">
                       <FieldLabel className="text-sm font-medium">Full Name</FieldLabel>
                       <Input
-                        placeholder="John Doe"
+                        placeholder="Your name"
                         value={field.state.value}
                         onChange={(e) => field.handleChange(e.target.value)}
                         onBlur={field.handleBlur}
@@ -188,6 +211,57 @@ export function RegisterForm() {
                     </Field>
                   );
                 }}
+              </form.Field>
+
+              {/* Role selector */}
+              <form.Field name="role">
+                {(field) => (
+                  <div className="space-y-1.5">
+                    <p className="text-sm font-medium">I want to join as : </p>
+                    <div className="flex flex-col gap-2">
+                      {(["STUDENT", "TUTOR"] as const).map((role) => {
+                        const isSelected = field.state.value === role;
+                        return (
+                          <button
+                            key={role}
+                            type="button"
+                            onClick={() => field.handleChange(role)}
+                            className={cn(
+                              "flex items-center gap-3 rounded-xl border px-4 py-3 text-left transition-all",
+                              isSelected
+                                ? "border-primary bg-primary/5"
+                                : "border-border bg-background hover:bg-muted"
+                            )}
+                          >
+                            {/* Radio circle */}
+                            <div className={cn(
+                              "flex h-4 w-4 shrink-0 items-center justify-center rounded-full border-2 transition-colors",
+                              isSelected ? "border-primary" : "border-muted-foreground/40"
+                            )}>
+                              {isSelected && (
+                                <div className="h-2 w-2 rounded-full bg-primary" />
+                              )}
+                            </div>
+                            {/* Icon + label */}
+                            <div className="flex items-center gap-2">
+                              {role === "STUDENT" ? (
+                                <BookOpen className={cn("h-4 w-4", isSelected ? "text-primary" : "text-muted-foreground")} />
+                              ) : (
+                                <GraduationCap className={cn("h-4 w-4", isSelected ? "text-primary" : "text-muted-foreground")} />
+                              )}
+                              <span className={cn(
+                                "text-sm font-medium",
+                                isSelected ? "text-foreground" : "text-muted-foreground"
+                              )}>
+                                {role === "STUDENT" ? "Student" : "Tutor"}
+                              </span>
+                            </div>
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
               </form.Field>
             </FieldGroup>
 
