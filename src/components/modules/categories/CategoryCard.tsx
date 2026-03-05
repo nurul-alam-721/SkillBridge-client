@@ -1,60 +1,50 @@
 import Link from "next/link";
 import { ChevronRight } from "lucide-react";
+import {
+  BookOpen, FlaskConical, Leaf, Zap,
+  Calculator, Monitor, BookMarked, Code2, GraduationCap,
+} from "lucide-react";
 import { Category } from "@/services/tutor.service";
 
-interface CategoryCardProps {
-  category: Category;
-}
-
-import {
-  BookOpen,
-  FlaskConical,
-  Leaf,
-  Zap,
-  Calculator,
-  Monitor,
-  BookMarked,
-  Code2,
-  GraduationCap,
-} from "lucide-react";
 
 export type CategoryConfig = {
   icon: React.FC<{ className?: string }>;
   color: string;
 };
 
+
 export const CATEGORY_MAP: Record<string, CategoryConfig> = {
   english: {
     icon: BookOpen,
-    color: "bg-blue-50 text-blue-600 dark:bg-blue-950/40 dark:text-blue-400",
+    color: "bg-blue-100 text-blue-600 dark:bg-blue-900/40 dark:text-blue-400",
   },
   chemistry: {
     icon: FlaskConical,
-    color: "bg-violet-50 text-violet-600 dark:bg-violet-950/40 dark:text-violet-400",
+    color: "bg-violet-100 text-violet-600 dark:bg-violet-900/40 dark:text-violet-400",
   },
   biology: {
     icon: Leaf,
-    color: "bg-emerald-50 text-emerald-600 dark:bg-emerald-950/40 dark:text-emerald-400",
+    color: "bg-emerald-100 text-emerald-600 dark:bg-emerald-900/40 dark:text-emerald-400",
   },
   physics: {
     icon: Zap,
-    color: "bg-amber-50 text-amber-600 dark:bg-amber-950/40 dark:text-amber-400",
+    color: "bg-amber-100 text-amber-600 dark:bg-amber-900/40 dark:text-amber-400",
   },
   math: {
     icon: Calculator,
-    color: "bg-rose-50 text-rose-600 dark:bg-rose-950/40 dark:text-rose-400",
+    color: "bg-rose-100 text-rose-600 dark:bg-rose-900/40 dark:text-rose-400",
   },
   "computer science": {
     icon: Monitor,
-    color: "bg-cyan-50 text-cyan-600 dark:bg-cyan-950/40 dark:text-cyan-400",
+    color: "bg-cyan-100 text-cyan-600 dark:bg-cyan-900/40 dark:text-cyan-400",
   },
   accounting: {
     icon: BookMarked,
-    color: "bg-indigo-50 text-indigo-600 dark:bg-indigo-950/40 dark:text-indigo-400",
+    color: "bg-indigo-100 text-indigo-600 dark:bg-indigo-900/40 dark:text-indigo-400",
   },
   programming: {
     icon: Code2,
-    color: "bg-orange-50 text-orange-600 dark:bg-orange-950/40 dark:text-orange-400",
+    color: "bg-orange-100 text-orange-600 dark:bg-orange-900/40 dark:text-orange-400",
   },
 };
 
@@ -66,14 +56,16 @@ export const DEFAULT_CATEGORY_CONFIG: CategoryConfig = {
 
 export function getCategoryConfig(name: string): CategoryConfig {
   const key = name.toLowerCase().trim();
-
   if (CATEGORY_MAP[key]) return CATEGORY_MAP[key];
-
   for (const [k, config] of Object.entries(CATEGORY_MAP)) {
     if (key.includes(k) || k.includes(key)) return config;
   }
-
   return DEFAULT_CATEGORY_CONFIG;
+}
+
+
+interface CategoryCardProps {
+  category: Category;
 }
 
 export function CategoryCard({ category }: CategoryCardProps) {

@@ -29,20 +29,26 @@ export function CategoriesSection({ categories }: CategoriesSectionProps) {
         </Link>
       </div>
 
-      {/* Grid */}
-      <div className="grid grid-cols-2 gap-3 sm:grid-cols-4 lg:grid-cols-8">
+      <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4">
         {categories.slice(0, 8).map((cat) => {
           const { icon: Icon, color } = getCategoryConfig(cat.name);
           return (
             <Link
               key={cat.id}
               href={`/tutors?categoryId=${cat.id}`}
-              className="group flex flex-col items-center gap-2.5 rounded-2xl border bg-card p-4 text-center transition-all hover:shadow-md hover:-translate-y-0.5"
+              className="group flex items-center gap-3 rounded-2xl border bg-card px-5 py-5 transition-all hover:shadow-md hover:-translate-y-0.5"
             >
-              <div className={`flex h-10 w-10 items-center justify-center rounded-xl ${color}`}>
-                <Icon className="h-5 w-5" />
+              <div className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-xl ${color}`}>
+                <Icon className="h-4.5 w-4.5" />
               </div>
-              <span className="text-xs font-medium leading-tight">{cat.name}</span>
+              <div className="min-w-0">
+                <p className="text-sm font-semibold truncate">{cat.name}</p>
+                {cat.description && (
+                  <p className="text-xs text-muted-foreground truncate mt-0.5">
+                    {cat.description}
+                  </p>
+                )}
+              </div>
             </Link>
           );
         })}

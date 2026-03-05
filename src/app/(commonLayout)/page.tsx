@@ -5,16 +5,18 @@ import { useRouter } from "next/navigation";
 import { tutorService, TutorProfile, Category } from "@/services/tutor.service";
 import { HeroSection } from "@/components/modules/home/HeroSection";
 import { CategoriesSection } from "@/components/modules/home/CategoriesSection";
+import { FeaturedTutorsSection } from "@/components/modules/home/FeaturedTutorsSectiont";
+import { HowItWorksSection } from "@/components/modules/home/HowItWorks";
+import { CtaSection } from "@/components/modules/home/CtaSection";
 
 export default function HomePage() {
   const router = useRouter();
-  const [search, setSearch]         = useState("");
+  const [search, setSearch] = useState("");
   const [categories, setCategories] = useState<Category[]>([]);
-  const [tutors, setTutors]         = useState<TutorProfile[]>([]);
-  const [loading, setLoading]       = useState(true);
+  const [tutors, setTutors] = useState<TutorProfile[]>([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Fetch categories and top-rated tutors in parallel
     Promise.all([
       tutorService.getCategories(),
       tutorService.getAll({ page: 1, limit: 6 }),
@@ -45,7 +47,11 @@ export default function HomePage() {
 
       <CategoriesSection categories={categories} />
 
+      <FeaturedTutorsSection tutors={tutors} loading={loading} />
 
+      <HowItWorksSection />
+
+      <CtaSection />
     </main>
   );
 }
