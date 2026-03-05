@@ -40,14 +40,14 @@ export function CtaSection() {
             />
 
             <div className="relative flex flex-col flex-1">
-              <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-white/20 ring-1 ring-white/10 mb-5">
-                <BookOpen className="h-5 w-5 text-white" />
+              <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-primary/10 ring-1 ring-white/10 mb-5">
+                <BookOpen className="h-5 w-5 text-primary" />
               </div>
               <div className="flex-1 mb-6">
-                <h3 className="text-xl font-bold text-white mb-2">
+                <h3 className="text-xl font-bold  mb-2">
                   Start Learning
                 </h3>
-                <p className="text-sm text-white/80 leading-relaxed">
+                <p className="text-sm text-muted-foreground leading-relaxed">
                   Browse expert tutors, pick a time that works for you, and book
                   your first session in minutes.
                 </p>
