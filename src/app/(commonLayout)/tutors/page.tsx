@@ -14,7 +14,7 @@ import {
   SheetTitle, SheetTrigger,
 } from "@/components/ui/sheet";
 import { Separator } from "@/components/ui/separator";
-import { useTutors } from "@/hooks/userTutors";
+import { useTutors } from "@/hooks/useTutors";
 import { TutorsFilter } from "@/components/modules/tutor/TutorsFilter";
 import { TutorCardSkeleton } from "@/components/modules/tutor/TutorCardSkeleton";
 import { TutorCard } from "@/components/modules/tutor/TutorCard";

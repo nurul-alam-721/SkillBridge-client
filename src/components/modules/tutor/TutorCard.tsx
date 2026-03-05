@@ -59,7 +59,7 @@ export function TutorCard({ tutor }: { tutor: TutorProfile }) {
       {/* Footer */}
       <div className="flex items-center justify-between mt-auto">
         <p className="text-sm">
-          <span className="font-bold text-base">${tutor.hourlyRate}</span>
+          <span className="font-bold text-base">BDT {tutor.hourlyRate}</span>
           <span className="text-muted-foreground"> / hr</span>
         </p>
         <Button asChild size="sm" className="rounded-xl">
