@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect } from "react";
 import Link from "next/link";
 import { format } from "date-fns";
 import { Clock, Star, CalendarDays } from "lucide-react";
@@ -35,7 +36,7 @@ function DashboardSkeleton() {
       </div>
       <div className="grid grid-cols-1 gap-4 px-4 sm:grid-cols-2 lg:grid-cols-4 lg:px-6">
         {Array.from({ length: 4 }).map((_, i) => (
-          <Card key={i} data-slot="card">
+          <Card key={i}>
             <CardHeader>
               <Skeleton className="h-4 w-24" />
               <Skeleton className="h-8 w-16 mt-1" />
@@ -61,6 +62,12 @@ function DashboardSkeleton() {
 export default function TutorDashboardPage() {
   const { data, loading, refresh } = useTutorDashboard();
 
+  useEffect(() => {
+    const onFocus = () => refresh();
+    window.addEventListener("focus", onFocus);
+    return () => window.removeEventListener("focus", onFocus);
+  }, [refresh]);
+
   if (loading) return <DashboardSkeleton />;
 
   if (!data) {
@@ -77,6 +84,7 @@ export default function TutorDashboardPage() {
   return (
     <div className="flex flex-col gap-4 py-4 md:gap-6 md:py-6">
 
+      {/* Profile header */}
       <div className="px-4 lg:px-6">
         <Card>
           <CardContent className="flex flex-col sm:flex-row items-start sm:items-center gap-4 pt-5">

@@ -1,31 +1,26 @@
-import { Booking, bookingService } from "@/services/booking.service";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
+import { bookingService, Booking } from "@/services/booking.service";
 
 export function useMyBookings() {
   const [bookings, setBookings] = useState<Booking[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [loading,  setLoading]  = useState(true);
 
-  useEffect(() => {
-    const fetch = async () => {
-      setLoading(true);
-      try {
-        const data = await bookingService.getMyBookings();
-        setBookings(data);
-      } catch {
-        setBookings([]);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetch();
+  const load = useCallback(async () => {
+    setLoading(true);
+    try {
+      const data = await bookingService.getMyBookings();
+      setBookings(data);
+    } catch {
+      setBookings([]);
+    } finally {
+      setLoading(false);
+    }
   }, []);
 
-  const upcoming = bookings.filter((b) =>
-    ["PENDING", "CONFIRMED"].includes(b.status)
-  );
-  const past = bookings.filter((b) =>
-    ["COMPLETED", "CANCELLED"].includes(b.status)
-  );
+  useEffect(() => { load(); }, [load]);
 
-  return { bookings, upcoming, past, loading };
+  const upcoming = bookings.filter((b) => ["PENDING", "CONFIRMED"].includes(b.status));
+  const past     = bookings.filter((b) => ["COMPLETED", "CANCELLED"].includes(b.status));
+
+  return { bookings, upcoming, past, loading, refresh: load };
 }

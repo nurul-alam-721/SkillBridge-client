@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Field, FieldError, FieldGroup, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
@@ -28,19 +29,20 @@ function GoogleIcon() {
   );
 }
 
-const redirectByRole = (user: User) => {
-  document.cookie = `user-role=${user.role}; path=/; max-age=604800; SameSite=Lax`;
+function getDefaultRedirect(user: User): string {
+  if (user.role === Roles.admin) return "/admin";
+  if (user.role === Roles.tutor) return "/tutor/dashboard";
+  return "/dashboard";
+}
 
-  if (user.role === Roles.admin) {
-    window.location.href = "/admin";
-  } else if (user.role === Roles.tutor) {
-    window.location.href = "/tutor/dashboard";
-  } else {
-    window.location.href = "/dashboard";
-  }
-};
+function isSafeRedirect(path: string): boolean {
+  return path.startsWith("/") && !path.startsWith("//");
+}
 
 export function LoginForm() {
+  const searchParams = useSearchParams();
+  const redirectTo   = searchParams.get("redirect");
+
   const form = useForm({
     defaultValues: { email: "", password: "" },
     validators: { onSubmit: formSchema },
@@ -62,7 +64,15 @@ export function LoginForm() {
         }
 
         toast.success("Login successful!", { id: toastId });
-        redirectByRole(user);
+
+        document.cookie = `user-role=${user.role}; path=/; max-age=604800; SameSite=Lax`;
+
+
+        if (redirectTo && isSafeRedirect(redirectTo) && user.role === Roles.student) {
+          window.location.href = redirectTo;
+        } else {
+          window.location.href = getDefaultRedirect(user);
+        }
       } catch (err: unknown) {
         const message = err instanceof Error ? err.message : "Something went wrong!";
         toast.error(message, { id: toastId });

@@ -97,7 +97,6 @@ function TutorsContent() {
         </div>
       </div>
 
-      {/* ── Main content ────────────────────────────────────────────────── */}
       <div className="container mx-auto px-4 py-6">
 
         {/* Toolbar */}

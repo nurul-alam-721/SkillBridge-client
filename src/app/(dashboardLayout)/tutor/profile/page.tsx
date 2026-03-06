@@ -3,11 +3,9 @@
 import { useEffect, useState } from "react";
 import {
   Star, Clock, Mail, Phone,
-  Pencil, X, GraduationCap,
+  Pencil, X, GraduationCap, CalendarDays,
 } from "lucide-react";
-import {
-  Card, CardContent, CardHeader, CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -45,7 +43,13 @@ function ProfileSkeleton() {
 }
 
 
-function ProfileView({ profile, onEdit }: { profile: TutorProfile; onEdit: () => void }) {
+function ProfileView({
+  profile,
+  onEdit,
+}: {
+  profile: TutorProfile;
+  onEdit: () => void;
+}) {
   return (
     <Card>
       <CardHeader className="flex flex-row items-center justify-between pb-3">
@@ -56,7 +60,8 @@ function ProfileView({ profile, onEdit }: { profile: TutorProfile; onEdit: () =>
           <CardTitle className="text-sm font-semibold">Tutor Profile</CardTitle>
         </div>
         <Button
-          size="sm" variant="outline"
+          size="sm"
+          variant="outline"
           className="h-8 rounded-lg gap-1.5 text-xs"
           onClick={onEdit}
         >
@@ -147,6 +152,30 @@ function ProfileView({ profile, onEdit }: { profile: TutorProfile; onEdit: () =>
             <p className="text-[11px] text-muted-foreground">BDT/hr</p>
           </div>
         </div>
+
+        {/* Quick actions */}
+        <Separator />
+        <div className="flex gap-2">
+          <Button
+            variant="outline"
+            size="sm"
+            className="rounded-xl gap-1.5 text-xs flex-1"
+            onClick={onEdit}
+          >
+            <Pencil className="h-3.5 w-3.5" />
+            Edit Profile
+          </Button>
+          <Button
+            size="sm"
+            className="rounded-xl gap-1.5 text-xs flex-1"
+            asChild
+          >
+            <a href="/tutor/availability">
+              <CalendarDays className="h-3.5 w-3.5" />
+              Manage Slots
+            </a>
+          </Button>
+        </div>
       </CardContent>
     </Card>
   );
@@ -179,7 +208,8 @@ function EditView({
           </div>
         </div>
         <Button
-          size="sm" variant="ghost"
+          size="sm"
+          variant="ghost"
           className="h-8 rounded-lg gap-1.5 text-xs text-muted-foreground"
           onClick={onCancel}
         >
@@ -230,7 +260,10 @@ export default function TutorProfilePage() {
         <EditView
           profile={profile}
           categories={categories}
-          onSuccess={(updated) => { setProfile(updated); setEditing(false); }}
+          onSuccess={(updated) => {
+            setProfile(updated);
+            setEditing(false);
+          }}
           onCancel={() => setEditing(false)}
         />
       )}
