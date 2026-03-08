@@ -38,7 +38,7 @@ const DASHBOARD_LINKS: Record<string, { label: string; href: string; icon: React
     { label: "Profile",      href: "/tutor/profile",      icon: UserCircle      },
   ],
   [Roles.admin]: [
-    { label: "Dashboard",  href: "/admin",            icon: LayoutDashboard },
+    { label: "Dashboard",  href: "/admin/dashboard",            icon: LayoutDashboard },
     { label: "Users",      href: "/admin/users",      icon: Users           },
     { label: "Bookings",   href: "/admin/bookings",   icon: BookMarked      },
     { label: "Categories", href: "/admin/categories", icon: Tag             },

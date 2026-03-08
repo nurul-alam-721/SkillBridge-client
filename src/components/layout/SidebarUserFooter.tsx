@@ -74,7 +74,7 @@ export function SidebarUserFooter({ user }: { user: CurrentUser }) {
               <Link
                 href={
                   user.role === "TUTOR" ? "/tutor/profile"
-                  : user.role === "ADMIN" ? "/admin"
+                  : user.role === "ADMIN" ? "/admin/dashboard"
                   : "/dashboard/profile"
                 }
               >

@@ -34,7 +34,7 @@ const ROLE_LINKS: Record<string, { title: string; links: { label: string; href: 
   [Roles.admin]: {
     title: "Admin",
     links: [
-      { label: "Dashboard",  href: "/admin"            },
+      { label: "Dashboard",  href: "/admin/dashboard"            },
       { label: "Users",      href: "/admin/users"      },
       { label: "Bookings",   href: "/admin/bookings"   },
       { label: "Categories", href: "/admin/categories" },

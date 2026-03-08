@@ -1,64 +1,184 @@
-import { format } from "date-fns";
-import { CalendarDays, Clock, User } from "lucide-react";
+"use client";
+
+import Link from "next/link";
+import { format, isPast, differenceInHours } from "date-fns";
 import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
+  CalendarDays, Clock, ArrowUpRight,
+  Hourglass, CheckCircle2, XCircle, Star, BookOpen,
+} from "lucide-react";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Button } from "@/components/ui/button";
 import { Booking, BookingStatus } from "@/services/booking.service";
 
-const STATUS_MAP: Record<
+const STATUS_CONFIG: Record<
   BookingStatus,
-  { label: string; variant: "default" | "secondary" | "destructive" | "outline" }
+  {
+    label: string;
+    icon: React.ElementType;
+    pill: string;
+    glow: string;
+    bar: string;
+  }
 > = {
-  PENDING:   { label: "Pending",   variant: "outline"     },
-  CONFIRMED: { label: "Confirmed", variant: "default"     },
-  COMPLETED: { label: "Completed", variant: "secondary"   },
-  CANCELLED: { label: "Cancelled", variant: "destructive" },
+  PENDING: {
+    label: "Pending",
+    icon: Hourglass,
+    pill: "text-amber-600 bg-amber-50 ring-1 ring-amber-200 dark:text-amber-400 dark:bg-amber-900/30 dark:ring-amber-800",
+    glow: "from-amber-500/5 to-transparent",
+    bar:  "bg-gradient-to-r from-amber-400 to-amber-300",
+  },
+  CONFIRMED: {
+    label: "Confirmed",
+    icon: CheckCircle2,
+    pill: "text-sky-600 bg-sky-50 ring-1 ring-sky-200 dark:text-sky-400 dark:bg-sky-900/30 dark:ring-sky-800",
+    glow: "from-sky-500/5 to-transparent",
+    bar:  "bg-gradient-to-r from-sky-500 to-blue-400",
+  },
+  COMPLETED: {
+    label: "Completed",
+    icon: CheckCircle2,
+    pill: "text-emerald-700 bg-emerald-50 ring-1 ring-emerald-200 dark:text-emerald-400 dark:bg-emerald-900/30 dark:ring-emerald-800",
+    glow: "from-emerald-500/5 to-transparent",
+    bar:  "bg-gradient-to-r from-emerald-500 to-teal-400",
+  },
+  CANCELLED: {
+    label: "Cancelled",
+    icon: XCircle,
+    pill: "text-rose-600 bg-rose-50 ring-1 ring-rose-200 dark:text-rose-400 dark:bg-rose-900/30 dark:ring-rose-800",
+    glow: "from-rose-500/5 to-transparent",
+    bar:  "bg-gradient-to-r from-rose-500 to-pink-400",
+  },
 };
 
 export function BookingCard({ booking }: { booking: Booking }) {
-  const { label, variant } = STATUS_MAP[booking.status];
+  const cfg     = STATUS_CONFIG[booking.status];
+  const Icon    = cfg.icon;
+  const startDt = new Date(booking.slot.startTime);
+  const endDt   = new Date(booking.slot.endTime);
+  const hours   = differenceInHours(endDt, startDt);
+  const isOver  = isPast(endDt);
 
   return (
-    <Card>
-      <CardHeader className="pb-2">
-        <div className="flex items-start justify-between gap-2">
-          <div>
-            <CardTitle className="text-sm font-semibold">
-              {booking.tutorProfile.user?.name ?? "Tutor"}
-            </CardTitle>
-            <CardDescription className="text-xs mt-0.5">
-              {booking.tutorProfile.category?.name ?? ""}
-            </CardDescription>
-          </div>
-          <Badge variant={variant}>{label}</Badge>
-        </div>
-      </CardHeader>
+    <div className="relative flex flex-col rounded-2xl border border-border/60 bg-card overflow-hidden shadow-xs hover:shadow-md transition-all duration-300 group">
 
-      <CardContent className="space-y-1.5 text-sm text-muted-foreground">
-        <div className="flex items-center gap-2">
-          <CalendarDays className="h-3.5 w-3.5 shrink-0" />
-          <span>
-            {format(new Date(booking.slot.date), "EEEE, MMM d, yyyy")}
+      <div className={`absolute inset-0 bg-linear-to-br ${cfg.glow} pointer-events-none`} />
+
+      <div className={`h-4px w-full ${cfg.bar}`} />
+
+      <div className="relative p-5 flex flex-col gap-4">
+
+        <div className="flex items-start justify-between gap-3">
+          <div className="flex items-center gap-3 min-w-0">
+            <div className="relative shrink-0">
+              <Avatar className="h-11 w-11 ring-2 ring-border/50">
+                <AvatarImage src={booking.tutorProfile.user?.image ?? undefined} />
+                <AvatarFallback className="text-sm font-bold bg-linear-to-br from-primary/20 to-primary/5 text-primary">
+                  {(booking.tutorProfile.user?.name ?? "T").charAt(0).toUpperCase()}
+                </AvatarFallback>
+              </Avatar>
+              {booking.status === "CONFIRMED" && (
+                <span className="absolute -bottom-0.5 -right-0.5 h-3 w-3 rounded-full bg-sky-500 ring-2 ring-card" />
+              )}
+            </div>
+
+            <div className="min-w-0">
+              <p className="text-sm font-semibold leading-snug truncate text-foreground">
+                {booking.tutorProfile.user?.name ?? "Unknown Tutor"}
+              </p>
+              <p className="text-xs text-muted-foreground truncate mt-0.5">
+                {booking.tutorProfile.category?.name ?? "—"}
+              </p>
+            </div>
+          </div>
+
+          <span className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[11px] font-semibold shrink-0 ${cfg.pill}`}>
+            <Icon className="h-3 w-3" />
+            {cfg.label}
           </span>
         </div>
-        <div className="flex items-center gap-2">
-          <Clock className="h-3.5 w-3.5 shrink-0" />
-          <span>
-            {format(new Date(booking.slot.startTime), "h:mm a")}
-            {" – "}
-            {format(new Date(booking.slot.endTime), "h:mm a")}
-          </span>
+
+        <div className="rounded-xl bg-muted/50 dark:bg-muted/30 border border-border/40 px-4 py-3 space-y-2">
+          <div className="flex items-center gap-2.5 text-xs text-muted-foreground">
+            <CalendarDays className="h-3.5 w-3.5 shrink-0 text-primary/60" />
+            <span className="font-medium text-foreground/80">
+              {format(startDt, "EEEE, MMMM d, yyyy")}
+            </span>
+          </div>
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2.5 text-xs text-muted-foreground">
+              <Clock className="h-3.5 w-3.5 shrink-0 text-primary/60" />
+              <span className="font-medium text-foreground/80 tabular-nums">
+                {format(startDt, "h:mm a")}
+                <span className="mx-1.5 text-muted-foreground/50">→</span>
+                {format(endDt, "h:mm a")}
+              </span>
+            </div>
+            <span className="text-[10px] font-medium text-muted-foreground bg-background rounded-md px-1.5 py-0.5 border border-border/50">
+              {hours}h session
+            </span>
+          </div>
         </div>
-        <div className="flex items-center gap-2">
-          <User className="h-3.5 w-3.5 shrink-0" />
-          <span>${booking.tutorProfile.hourlyRate} / hr</span>
+
+        <div className="flex items-center justify-between">
+          <div className="flex flex-col">
+            <span className="text-[11px] text-muted-foreground uppercase tracking-wide font-medium">Rate</span>
+            <span className="text-base font-bold text-foreground leading-tight">
+              BDT {booking.tutorProfile.hourlyRate}
+              <span className="text-xs font-normal text-muted-foreground ml-0.5">/hr</span>
+            </span>
+          </div>
+
+          <div className="flex items-center gap-2">
+            {booking.status === "COMPLETED" && (
+              <Button
+                asChild
+                variant="outline"
+                size="sm"
+                className="h-8 rounded-xl text-xs gap-1.5 border-amber-200 text-amber-700 hover:bg-amber-50 dark:border-amber-800 dark:text-amber-400 dark:hover:bg-amber-900/30"
+              >
+                <Link href={`/tutors/${booking.tutorProfile.id}`}>
+                  <Star className="h-3.5 w-3.5 fill-amber-400 text-amber-400" />
+                  Leave Review
+                </Link>
+              </Button>
+            )}
+
+            {booking.status !== "CANCELLED" && (
+              <Button
+                asChild
+                size="sm"
+                className="h-8 rounded-xl text-xs gap-1.5"
+                variant={booking.status === "COMPLETED" ? "outline" : "default"}
+              >
+                <Link href={`/tutors/${booking.tutorProfile.id}`}>
+                  {booking.status === "COMPLETED" ? (
+                    <>View Tutor <ArrowUpRight className="h-3.5 w-3.5" /></>
+                  ) : (
+                    <><BookOpen className="h-3.5 w-3.5" /> View Details</>
+                  )}
+                </Link>
+              </Button>
+            )}
+
+            {booking.status === "CANCELLED" && (
+              <Button
+                asChild
+                variant="outline"
+                size="sm"
+                className="h-8 rounded-xl text-xs gap-1.5 text-muted-foreground"
+              >
+                <Link href={`/tutors/${booking.tutorProfile.id}`}>
+                  Book Again <ArrowUpRight className="h-3.5 w-3.5" />
+                </Link>
+              </Button>
+            )}
+          </div>
         </div>
-      </CardContent>
-    </Card>
+
+        <p className="text-[10px] text-muted-foreground/60 -mt-1">
+          Booked {format(new Date(booking.createdAt), "MMM d, yyyy 'at' h:mm a")}
+        </p>
+      </div>
+    </div>
   );
 }

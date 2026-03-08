@@ -53,7 +53,7 @@ const NAV: Record<
     { title: "Profile", href: "/tutor/profile", icon: UserCircle },
   ],
   ADMIN: [
-    { title: "Overview", href: "/admin", icon: LayoutDashboard },
+    { title: "Overview", href: "/admin/dashboard", icon: LayoutDashboard },
     { title: "Users", href: "/admin/users", icon: Users },
     { title: "Bookings", href: "/admin/bookings", icon: BookMarked },
     { title: "Categories", href: "/admin/categories", icon: Tag },

@@ -30,7 +30,7 @@ function GoogleIcon() {
 }
 
 function getDefaultRedirect(user: User): string {
-  if (user.role === Roles.admin) return "/admin";
+  if (user.role === Roles.admin) return "/admin/dashboard";
   if (user.role === Roles.tutor) return "/tutor/dashboard";
   return "/dashboard";
 }

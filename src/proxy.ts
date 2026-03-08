@@ -34,11 +34,11 @@ export async function proxy(request: NextRequest) {
   }
 
   if (role === Roles.admin && pathname.startsWith("/dashboard")) {
-    return NextResponse.redirect(new URL("/admin", request.url));
+    return NextResponse.redirect(new URL("/admin/dashboard", request.url));
   }
 
   if (role === Roles.admin && pathname.startsWith("/tutor")) {
-    return NextResponse.redirect(new URL("/admin", request.url));
+    return NextResponse.redirect(new URL("/admin/dashboard", request.url));
   }
 
   return NextResponse.next();
