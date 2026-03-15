@@ -35,4 +35,9 @@ export const bookingService = {
     const { data } = await api.get(`/api/bookings/${id}`);
     return data.data;
   },
+
+  async updateStatus(id: string, status: BookingStatus): Promise<Booking> {
+    const { data } = await api.put(`/api/bookings/${id}/status`, { status });
+    return data.data;
+  },
 };

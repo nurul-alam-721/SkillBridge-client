@@ -3,29 +3,17 @@
 import Link from "next/link";
 import { LogOut, UserCircle, ChevronsUpDown } from "lucide-react";
 import {
-  SidebarMenu,
-  SidebarMenuButton,
-  SidebarMenuItem,
+  SidebarMenu, SidebarMenuButton, SidebarMenuItem,
 } from "@/components/ui/sidebar";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
+  DropdownMenu, DropdownMenuContent, DropdownMenuItem,
+  DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { authClient } from "@/lib/auth-client";
 import { CurrentUser } from "@/services/user.service";
+import { signOut } from "@/lib/signOut";
 
 export function SidebarUserFooter({ user }: { user: CurrentUser }) {
-  const handleLogout = async () => {
-    await authClient.signOut();
-    document.cookie = "user-role=; path=/; max-age=0";
-    window.location.href = "/";
-  };
-
   return (
     <SidebarMenu>
       <SidebarMenuItem>
@@ -69,7 +57,9 @@ export function SidebarUserFooter({ user }: { user: CurrentUser }) {
                 </div>
               </div>
             </DropdownMenuLabel>
+
             <DropdownMenuSeparator />
+
             <DropdownMenuItem asChild>
               <Link
                 href={
@@ -82,9 +72,11 @@ export function SidebarUserFooter({ user }: { user: CurrentUser }) {
                 Profile
               </Link>
             </DropdownMenuItem>
+
             <DropdownMenuSeparator />
+
             <DropdownMenuItem
-              onClick={handleLogout}
+              onClick={signOut}
               className="text-destructive focus:text-destructive"
             >
               <LogOut className="mr-2 h-4 w-4" />

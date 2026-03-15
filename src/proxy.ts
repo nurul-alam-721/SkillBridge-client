@@ -2,6 +2,16 @@ import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { Roles } from "./constant/Roles";
 
+const protectedRoutes = [
+  "/dashboard",
+  "/tutor/dashboard",
+  "/tutor/profile",
+  "/tutor/availability",
+  "/admin",
+];
+
+const AUTH_ROUTES = ["/login", "/register"];
+
 export async function proxy(request: NextRequest) {
   const pathname = request.nextUrl.pathname;
 
@@ -10,35 +20,44 @@ export async function proxy(request: NextRequest) {
     request.cookies.get("__Secure-better-auth.session_token")?.value;
 
   const isAuthenticated = !!sessionToken;
-
-  if (!isAuthenticated) {
-    return NextResponse.redirect(new URL("/login", request.url));
-  }
-
   const role = request.cookies.get("user-role")?.value;
 
-  if (role === Roles.student && pathname.startsWith("/tutor")) {
+  if (isAuthenticated && AUTH_ROUTES.some((r) => pathname.startsWith(r))) {
+    if (role === Roles.tutor)
+      return NextResponse.redirect(new URL("/tutor/dashboard", request.url));
+    if (role === Roles.admin)
+      return NextResponse.redirect(new URL("/admin/dashboard", request.url));
     return NextResponse.redirect(new URL("/dashboard", request.url));
   }
 
-  if (role === Roles.student && pathname.startsWith("/admin")) {
-    return NextResponse.redirect(new URL("/dashboard", request.url));
+  const isProtected = protectedRoutes.some((p) => pathname.startsWith(p));
+  if (isProtected && !isAuthenticated) {
+    const url = new URL("/login", request.url);
+    url.searchParams.set("redirect", pathname);
+    return NextResponse.redirect(url);
   }
 
-  if (role === Roles.tutor && pathname.startsWith("/dashboard")) {
-    return NextResponse.redirect(new URL("/tutor/dashboard", request.url));
-  }
+  if (isAuthenticated && role) {
+    if (
+      role === Roles.student &&
+      (pathname.startsWith("/tutor") || pathname.startsWith("/admin"))
+    ) {
+      return NextResponse.redirect(new URL("/dashboard", request.url));
+    }
 
-  if (role === Roles.tutor && pathname.startsWith("/admin")) {
-    return NextResponse.redirect(new URL("/tutor/dashboard", request.url));
-  }
+    if (role === Roles.tutor && pathname.startsWith("/dashboard")) {
+      return NextResponse.redirect(new URL("/tutor/dashboard", request.url));
+    }
+    if (role === Roles.tutor && pathname.startsWith("/admin")) {
+      return NextResponse.redirect(new URL("/tutor/dashboard", request.url));
+    }
 
-  if (role === Roles.admin && pathname.startsWith("/dashboard")) {
-    return NextResponse.redirect(new URL("/admin/dashboard", request.url));
-  }
-
-  if (role === Roles.admin && pathname.startsWith("/tutor")) {
-    return NextResponse.redirect(new URL("/admin/dashboard", request.url));
+    if (role === Roles.admin && pathname.startsWith("/dashboard")) {
+      return NextResponse.redirect(new URL("/admin/dashboard", request.url));
+    }
+    if (role === Roles.admin && pathname.startsWith("/tutor")) {
+      return NextResponse.redirect(new URL("/admin/dashboard", request.url));
+    }
   }
 
   return NextResponse.next();
@@ -46,6 +65,8 @@ export async function proxy(request: NextRequest) {
 
 export const config = {
   matcher: [
+    "/login",
+    "/register",
     "/dashboard/:path*",
     "/tutor/dashboard/:path*",
     "/tutor/profile/:path*",

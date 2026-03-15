@@ -1,21 +1,14 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
-import { userService, CurrentUser } from "@/services/user.service";
 import { SectionCards } from "@/components/layout/SectionCards";
 import { BookingsTable } from "@/components/modules/bookings/bookingsTable";
-import { ProfileEditForm } from "@/components/modules/user/profileEditForm";
 import { useMyBookings } from "@/hooks/useMyBookings";
 
 export default function StudentDashboardPage() {
   const { bookings, upcoming, loading, refresh } = useMyBookings();
-  const [user, setUser] = useState<CurrentUser | null>(null);
-
-  useEffect(() => {
-    userService.getMe().then(setUser).catch(() => null);
-  }, []);
 
   useEffect(() => {
     const onFocus = () => refresh();
@@ -38,15 +31,10 @@ export default function StudentDashboardPage() {
                 </Badge>
               )}
             </TabsTrigger>
-            <TabsTrigger value="profile">Edit Profile</TabsTrigger>
           </TabsList>
 
           <TabsContent value="bookings">
             <BookingsTable bookings={loading ? [] : bookings} />
-          </TabsContent>
-
-          <TabsContent value="profile" className="max-w-lg">
-            {user && <ProfileEditForm user={user} onUpdated={setUser} />}
           </TabsContent>
         </Tabs>
       </div>

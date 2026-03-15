@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Field, FieldError, FieldGroup, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
@@ -40,6 +40,7 @@ function isSafeRedirect(path: string): boolean {
 }
 
 export function LoginForm() {
+  const router       = useRouter();
   const searchParams = useSearchParams();
   const redirectTo   = searchParams.get("redirect");
 
@@ -63,16 +64,18 @@ export function LoginForm() {
           return;
         }
 
-        toast.success("Login successful!", { id: toastId });
-
         document.cookie = `user-role=${user.role}; path=/; max-age=604800; SameSite=Lax`;
 
+        toast.success("Login successful!", { id: toastId });
 
+        let destination: string;
         if (redirectTo && isSafeRedirect(redirectTo) && user.role === Roles.student) {
-          window.location.href = redirectTo;
+          destination = redirectTo;
         } else {
-          window.location.href = getDefaultRedirect(user);
+          destination = getDefaultRedirect(user);
         }
+
+        router.replace(destination);
       } catch (err: unknown) {
         const message = err instanceof Error ? err.message : "Something went wrong!";
         toast.error(message, { id: toastId });
@@ -83,7 +86,6 @@ export function LoginForm() {
   return (
     <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-background px-4">
       <div className="relative w-full max-w-md">
-        {/* Brand */}
         <div className="mb-8 text-center">
           <Link href="/" className="inline-block text-2xl font-bold tracking-tight">
             Skill<span className="text-primary">Bridge</span>
@@ -91,7 +93,6 @@ export function LoginForm() {
           <p className="mt-1 text-sm text-muted-foreground">Welcome back — sign in to continue</p>
         </div>
 
-        {/* Card */}
         <div
           className="rounded-2xl border bg-card"
           style={{
@@ -116,14 +117,12 @@ export function LoginForm() {
             </button>
           </div>
 
-          {/* Divider */}
           <div className="flex items-center gap-3 px-6 py-4">
             <div className="h-px flex-1 bg-border" />
             <span className="text-xs text-muted-foreground">or sign in with email</span>
             <div className="h-px flex-1 bg-border" />
           </div>
 
-          {/* Form */}
           <form
             id="login-form"
             className="px-6"
