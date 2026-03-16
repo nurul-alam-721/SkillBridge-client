@@ -119,9 +119,8 @@ export function AddSlotForm({ saving, error, onAdd }: AddSlotFormProps) {
           />
         </div>
 
-        {/* Quick presets */}
         <div className="space-y-1.5">
-          <Label className="text-xs font-medium">Quick Presets</Label>
+          <Label className="text-xs font-medium">Select Time Period</Label>
           <div className="grid grid-cols-2 gap-1.5">
             {TIME_PRESETS.map((p) => (
               <button

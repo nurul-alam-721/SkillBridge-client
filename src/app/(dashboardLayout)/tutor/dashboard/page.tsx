@@ -3,7 +3,7 @@
 import { useEffect } from "react";
 import Link from "next/link";
 import { format } from "date-fns";
-import { Clock, Star, CalendarDays } from "lucide-react";
+import { Clock, Star, CalendarDays, AlertCircle, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Card, CardContent, CardDescription,
@@ -45,22 +45,32 @@ function DashboardSkeleton() {
           </Card>
         ))}
       </div>
-      <div className="px-4 lg:px-6">
-        <Card>
-          <CardHeader><Skeleton className="h-5 w-32" /></CardHeader>
-          <CardContent className="space-y-3">
-            {Array.from({ length: 3 }).map((_, i) => (
-              <Skeleton key={i} className="h-12 w-full" />
-            ))}
-          </CardContent>
-        </Card>
+    </div>
+  );
+}
+
+function ErrorState({ onRetry }: { onRetry: () => void }) {
+  return (
+    <div className="flex flex-col items-center justify-center min-h-[60vh] gap-4 text-center px-4">
+      <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-destructive/10">
+        <AlertCircle className="h-7 w-7 text-destructive" />
       </div>
+      <div>
+        <p className="font-semibold">Failed to load dashboard</p>
+        <p className="text-sm text-muted-foreground mt-1">
+          Something went wrong. Please try again.
+        </p>
+      </div>
+      <Button variant="outline" className="rounded-xl gap-2" onClick={onRetry}>
+        <RefreshCw className="h-4 w-4" />
+        Retry
+      </Button>
     </div>
   );
 }
 
 export default function TutorDashboardPage() {
-  const { data, loading, refresh } = useTutorDashboard();
+  const { state, refresh } = useTutorDashboard();
 
   useEffect(() => {
     const onFocus = () => refresh();
@@ -68,18 +78,20 @@ export default function TutorDashboardPage() {
     return () => window.removeEventListener("focus", onFocus);
   }, [refresh]);
 
-  if (loading) return <DashboardSkeleton />;
+  if (state.status === "loading") return <DashboardSkeleton />;
 
-  if (!data) {
+  if (state.status === "error") return <ErrorState onRetry={refresh} />;
+
+  if (state.status === "no_profile") {
     return (
       <CreateProfileDialog
         open={true}
-        onCreated={() => window.location.reload()}
+        onCreated={refresh} 
       />
     );
   }
 
-  const { stats, tutorProfile, recentBookings, recentReviews } = data;
+  const { stats, tutorProfile, recentBookings, recentReviews } = state.data;
 
   return (
     <div className="flex flex-col gap-4 py-4 md:gap-6 md:py-6">

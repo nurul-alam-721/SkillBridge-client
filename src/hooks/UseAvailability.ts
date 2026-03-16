@@ -38,7 +38,7 @@ export function useAvailability() {
       setSlots((prev) => [...prev, slot]);
       return true;
     } catch {
-      setError("Failed to add slot. Check for conflicts.");
+      setError("Failed to add slot. Slot in this time period already exists.");
       return false;
     } finally {
       setSaving(false);

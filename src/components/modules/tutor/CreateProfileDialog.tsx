@@ -12,7 +12,7 @@ import { TutorProfileForm } from "./TutorProfileForm";
 
 interface CreateProfileDialogProps {
   open: boolean;
-  onCreated: (profile: TutorProfile) => void;
+  onCreated: () => void;
 }
 
 export function CreateProfileDialog({ open, onCreated }: CreateProfileDialogProps) {
@@ -22,13 +22,17 @@ export function CreateProfileDialog({ open, onCreated }: CreateProfileDialogProp
     tutorService.getCategories().then(setCategories).catch(() => {});
   }, []);
 
+  const handleSuccess = (_profile: TutorProfile) => {
+    onCreated();
+  };
+
   return (
     <Dialog open={open}>
       <DialogContent
-        className="sm:max-w-md"
+        className="sm:max-w-md [&>button:last-child]:hidden"
         onInteractOutside={(e) => e.preventDefault()}
+        onEscapeKeyDown={(e) => e.preventDefault()}
       >
-        {/* Header */}
         <DialogHeader className="space-y-3">
           <div className="flex items-center gap-3">
             <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10">
@@ -50,7 +54,7 @@ export function CreateProfileDialog({ open, onCreated }: CreateProfileDialogProp
         <TutorProfileForm
           profile={null}
           categories={categories}
-          onSuccess={onCreated}
+          onSuccess={handleSuccess}
         />
       </DialogContent>
     </Dialog>

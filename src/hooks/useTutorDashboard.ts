@@ -1,25 +1,38 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { tutorService, TutorStatsResponse } from "@/services/tutor.service";
 
+type State =
+  | { status: "loading" }
+  | { status: "no_profile" }
+  | { status: "error" }
+  | { status: "ok"; data: TutorStatsResponse };
+
 export function useTutorDashboard() {
-  const [data, setData] = useState<TutorStatsResponse | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(false);
+  const [state, setState] = useState<State>({ status: "loading" });
+  const mountedRef = useRef(false);
 
   const load = useCallback(async () => {
-    setLoading(true);
-    setError(false);
+    if (mountedRef.current) {
+      setState({ status: "loading" });
+    }
     try {
-      const res = await tutorService.getMyStats();
-      setData(res);
-    } catch {
-      setError(true);
+      const data = await tutorService.getMyStats();
+      setState({ status: "ok", data });
+    } catch (err: unknown) {
+      const httpStatus = (err as { response?: { status?: number } })?.response?.status;
+      if (httpStatus === 404) {
+        setState({ status: "no_profile" });
+      } else {
+        setState({ status: "error" });
+      }
     } finally {
-      setLoading(false);
+      mountedRef.current = true;
     }
   }, []);
 
-  useEffect(() => { load(); }, [load]);
+  useEffect(() => {
+    load();
+  }, [load]);
 
-  return { data, loading, error, refresh: load };
+  return { state, refresh: load };
 }
