@@ -29,7 +29,10 @@ function TutorCardSkeleton() {
   );
 }
 
-export function FeaturedTutorsSection({ tutors, loading }: FeaturedTutorsSectionProps) {
+export function FeaturedTutorsSection({
+  tutors,
+  loading,
+}: FeaturedTutorsSectionProps) {
   return (
     <section className="border-t bg-muted/30">
       <div className="mx-auto max-w-6xl px-4 py-14">
@@ -39,7 +42,9 @@ export function FeaturedTutorsSection({ tutors, loading }: FeaturedTutorsSection
             <p className="text-xs font-semibold uppercase tracking-widest text-primary mb-1">
               Top Picks
             </p>
-            <h2 className="text-2xl font-bold tracking-tight">Featured Tutors</h2>
+            <h2 className="text-2xl font-bold tracking-tight">
+              Featured Tutors
+            </h2>
           </div>
           <Link
             href="/tutors"
@@ -63,9 +68,12 @@ export function FeaturedTutorsSection({ tutors, loading }: FeaturedTutorsSection
           </p>
         ) : (
           <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
-            {tutors.slice(0, 6).map((tutor) => (
-              <TutorCard key={tutor.id} tutor={tutor} />
-            ))}
+            {[...tutors]
+              .sort((a, b) => (b.rating ?? 0) - (a.rating ?? 0))
+              .slice(0, 6)
+              .map((tutor) => (
+                <TutorCard key={tutor.id} tutor={tutor} />
+              ))}
           </div>
         )}
       </div>

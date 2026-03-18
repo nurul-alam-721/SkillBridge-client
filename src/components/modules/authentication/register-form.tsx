@@ -14,7 +14,7 @@ import { toast } from "sonner";
 import { useForm } from "@tanstack/react-form";
 import * as z from "zod";
 import { authClient } from "@/lib/auth-client";
-import { handleGoogleLogin } from "@/hooks/handleGoogleLogin";
+import { handleGoogleLogin } from "@/lib/handleGoogleLogin";
 import { GraduationCap, BookOpen } from "lucide-react";
 import { cn } from "@/lib/utils";
 

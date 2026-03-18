@@ -5,8 +5,11 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
 import {
-  Select, SelectContent, SelectItem,
-  SelectTrigger, SelectValue,
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
 } from "@/components/ui/select";
 import { Category, TutorsQuery } from "@/services/tutor.service";
 import { cn } from "@/lib/utils";
@@ -19,21 +22,25 @@ interface TutorsFilterProps {
 }
 
 const PRICE_PRESETS = [
-  { label: "Any",        min: undefined, max: undefined },
-  { label: "< 300",      min: undefined, max: 300       },
-  { label: "300–600",    min: 300,       max: 600       },
-  { label: "600–1000",   min: 600,       max: 1000      },
-  { label: "1000+",      min: 1000,      max: undefined },
+  { label: "Any", min: undefined, max: undefined },
+  { label: "< 300", min: undefined, max: 300 },
+  { label: "300–600", min: 300, max: 600 },
+  { label: "600–1000", min: 600, max: 1000 },
+  { label: "1000+", min: 1000, max: undefined },
 ];
 
-export function TutorsFilter({ categories, filters, onChange, onReset }: TutorsFilterProps) {
+export function TutorsFilter({
+  categories,
+  filters,
+  onChange,
+  onReset,
+}: TutorsFilterProps) {
   const activePreset = PRICE_PRESETS.findIndex(
-    (p) => p.min === filters.minPrice && p.max === filters.maxPrice
+    (p) => p.min === filters.minRate && p.max === filters.maxRate,
   );
 
   return (
     <div className="space-y-5">
-
       <div className="space-y-2">
         <Label className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
           Subject
@@ -70,12 +77,14 @@ export function TutorsFilter({ categories, filters, onChange, onReset }: TutorsF
           {PRICE_PRESETS.map((preset, i) => (
             <button
               key={i}
-              onClick={() => onChange({ minPrice: preset.min, maxPrice: preset.max })}
+              onClick={() =>
+                onChange({ minRate: preset.min, maxRate: preset.max })
+              }
               className={cn(
                 "rounded-lg border px-2.5 py-1 text-xs font-medium transition-colors",
                 activePreset === i
                   ? "border-primary bg-primary/10 text-primary"
-                  : "border-border bg-background text-muted-foreground hover:border-muted-foreground/40 hover:text-foreground"
+                  : "border-border bg-background text-muted-foreground hover:border-muted-foreground/40 hover:text-foreground",
               )}
             >
               {preset.label}
@@ -89,9 +98,11 @@ export function TutorsFilter({ categories, filters, onChange, onReset }: TutorsF
             type="number"
             min={0}
             placeholder="Min"
-            value={filters.minPrice ?? ""}
+            value={filters.minRate ?? ""}
             onChange={(e) =>
-              onChange({ minPrice: e.target.value ? Number(e.target.value) : undefined })
+              onChange({
+                minRate: e.target.value ? Number(e.target.value) : undefined,
+              })
             }
             className="h-8 rounded-lg text-xs"
           />
@@ -100,9 +111,11 @@ export function TutorsFilter({ categories, filters, onChange, onReset }: TutorsF
             type="number"
             min={0}
             placeholder="Max"
-            value={filters.maxPrice ?? ""}
+            value={filters.maxRate ?? ""}
             onChange={(e) =>
-              onChange({ maxPrice: e.target.value ? Number(e.target.value) : undefined })
+              onChange({
+                maxRate: e.target.value ? Number(e.target.value) : undefined,
+              })
             }
             className="h-8 rounded-lg text-xs"
           />

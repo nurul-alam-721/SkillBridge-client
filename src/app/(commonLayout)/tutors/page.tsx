@@ -14,10 +14,10 @@ import {
   SheetTitle, SheetTrigger,
 } from "@/components/ui/sheet";
 import { Separator } from "@/components/ui/separator";
-import { useTutors } from "@/hooks/useTutors";
 import { TutorsFilter } from "@/components/modules/tutor/TutorsFilter";
 import { TutorCardSkeleton } from "@/components/modules/tutor/TutorCardSkeleton";
 import { TutorCard } from "@/components/modules/tutor/TutorCard";
+import { useTutors } from "@/hooks/useTutors";
 
 const SORT_OPTIONS = [
   { label: "Top rated",          value: "rating"     },
@@ -31,14 +31,14 @@ function TutorsContent() {
   const {
     tutors, categories, total, loading,
     filters, search, sort, totalPages,
-    setSearch, setSort, updateFilters, resetFilters,
+    setSearch, setSort, setPage, updateFilters, resetFilters,
   } = useTutors();
 
   // Active filter count for badge
   const activeFilterCount = [
     filters.categoryId,
-    filters.minPrice,
-    filters.maxPrice,
+    filters.minRate,
+    filters.maxRate,
   ].filter(Boolean).length;
 
   const selectedCategory = categories.find((c) => c.id === filters.categoryId);
@@ -97,6 +97,7 @@ function TutorsContent() {
         </div>
       </div>
 
+      {/* ── Main content ────────────────────────────────────────────────── */}
       <div className="container mx-auto px-4 py-6">
 
         {/* Toolbar */}
@@ -132,6 +133,7 @@ function TutorsContent() {
             </SelectContent>
           </Select>
 
+          {/* Mobile filter trigger */}
           <Sheet>
             <SheetTrigger asChild>
               <Button variant="outline" className="sm:hidden h-10 rounded-xl gap-2">
@@ -234,7 +236,7 @@ function TutorsContent() {
                       variant="outline" size="sm"
                       className="rounded-xl h-9"
                       disabled={filters.page === 1}
-                      onClick={() => updateFilters({ page: (filters.page ?? 1) - 1 })}
+                      onClick={() => setPage((filters.page ?? 1) - 1)}
                     >
                       Previous
                     </Button>
@@ -245,7 +247,7 @@ function TutorsContent() {
                       variant="outline" size="sm"
                       className="rounded-xl h-9"
                       disabled={filters.page === totalPages}
-                      onClick={() => updateFilters({ page: (filters.page ?? 1) + 1 })}
+                      onClick={() => setPage((filters.page ?? 1) + 1)}
                     >
                       Next
                     </Button>

@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import {
   Menu,
@@ -35,6 +36,7 @@ import { User } from "@/types/types";
 import { Roles } from "@/constant/Roles";
 import { usePathname } from "next/navigation";
 import { signOut } from "@/lib/signOut";
+import { useMounted } from "@/hooks/userMounted";
 
 const PUBLIC_LINKS = [
   { title: "Home", href: "/" },
@@ -82,17 +84,24 @@ const ROLE_BADGE_COLORS: Record<string, string> = {
 export function NavbarActions() {
   const pathname = usePathname();
   const { data: session, isPending } = authClient.useSession();
+
+  const mounted = useMounted();
+
   const user = session?.user as User | undefined;
   const role = user?.role as string | undefined;
   const dashLinks = role ? (DASHBOARD_LINKS[role] ?? []) : [];
 
+  if (!mounted || isPending) {
+    return (
+      <div className="flex items-center gap-2">
+        <div className="h-8 w-24 animate-pulse rounded-lg bg-muted" />
+      </div>
+    );
+  }
+
   return (
     <div className="flex items-center gap-2">
-      {isPending && (
-        <div className="h-8 w-24 animate-pulse rounded-lg bg-muted" />
-      )}
-
-      {!isPending && !user && (
+      {!user && (
         <div className="hidden md:flex items-center gap-2">
           <Button variant="ghost" size="sm" asChild className="rounded-lg">
             <Link href="/login">Login</Link>
@@ -103,10 +112,11 @@ export function NavbarActions() {
         </div>
       )}
 
-      {!isPending && user && (
+      {/* User Dropdown */}
+      {user && (
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <button className="hidden md:flex items-center gap-2 rounded-xl border bg-card px-2 py-1.5 text-sm transition-colors hover:bg-muted focus:outline-none">
+            <button className="hidden md:flex items-center gap-2 rounded-xl border bg-card px-2 py-1.5 text-sm hover:bg-muted">
               <Avatar className="h-6 w-6">
                 <AvatarImage src={user.image ?? undefined} />
                 <AvatarFallback className="text-[10px] font-semibold bg-primary/10 text-primary">
@@ -119,7 +129,7 @@ export function NavbarActions() {
               {role && (
                 <span
                   className={cn(
-                    "hidden lg:inline-flex items-center rounded-md px-1.5 py-0.5 text-[10px] font-semibold",
+                    "hidden lg:inline-flex rounded-md px-1.5 py-0.5 text-[10px] font-semibold",
                     ROLE_BADGE_COLORS[role],
                   )}
                 >
@@ -128,26 +138,31 @@ export function NavbarActions() {
               )}
             </button>
           </DropdownMenuTrigger>
+
           <DropdownMenuContent align="end" className="w-52 rounded-xl">
-            <DropdownMenuLabel className="font-normal">
+            <DropdownMenuLabel>
               <p className="text-sm font-semibold truncate">{user.name}</p>
               <p className="text-xs text-muted-foreground truncate">
                 {user.email}
               </p>
             </DropdownMenuLabel>
+
             <DropdownMenuSeparator />
+
             {dashLinks.map(({ label, href, icon: Icon }) => (
               <DropdownMenuItem key={href} asChild>
-                <Link href={href} className="gap-2 cursor-pointer">
+                <Link href={href} className="flex items-center gap-2">
                   <Icon className="h-3.5 w-3.5 text-muted-foreground" />
                   {label}
                 </Link>
               </DropdownMenuItem>
             ))}
+
             <DropdownMenuSeparator />
+
             <DropdownMenuItem
               onClick={signOut}
-              className="gap-2 text-destructive focus:text-destructive cursor-pointer"
+              className="flex items-center gap-2 text-destructive cursor-pointer"
             >
               <LogOut className="h-3.5 w-3.5" />
               Log out
@@ -156,30 +171,26 @@ export function NavbarActions() {
         </DropdownMenu>
       )}
 
+      {/* Mobile Menu */}
       <Sheet>
         <SheetTrigger asChild>
-          <Button
-            variant="ghost"
-            size="icon"
-            className="md:hidden h-9 w-9 rounded-lg"
-          >
+          <Button variant="ghost" size="icon" className="md:hidden h-9 w-9">
             <Menu className="h-4 w-4" />
           </Button>
         </SheetTrigger>
+
         <SheetContent side="right" className="w-72 flex flex-col">
-          <SheetHeader className="text-left">
+          <SheetHeader>
             <SheetTitle>SkillBridge</SheetTitle>
           </SheetHeader>
+
           <div className="mt-6 flex flex-col gap-1 flex-1">
-            <p className="px-2 mb-1 text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">
-              Navigation
-            </p>
             {PUBLIC_LINKS.map((item) => (
               <Link
                 key={item.title}
                 href={item.href}
                 className={cn(
-                  "flex items-center rounded-lg px-3 py-2 text-sm font-medium transition-colors hover:bg-muted",
+                  "px-3 py-2 rounded-lg text-sm",
                   pathname === item.href
                     ? "bg-muted text-foreground"
                     : "text-muted-foreground",
@@ -188,79 +199,16 @@ export function NavbarActions() {
                 {item.title}
               </Link>
             ))}
-            {user && dashLinks.length > 0 && (
-              <>
-                <div className="my-3 h-px bg-border" />
-                <p className="px-2 mb-1 text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">
-                  {ROLE_LABELS[role!]} Menu
-                </p>
-                {dashLinks.map(({ label, href, icon: Icon }) => (
-                  <Link
-                    key={href}
-                    href={href}
-                    className={cn(
-                      "flex items-center gap-2.5 rounded-lg px-3 py-2 text-sm font-medium transition-colors hover:bg-muted",
-                      pathname === href
-                        ? "bg-muted text-foreground"
-                        : "text-muted-foreground",
-                    )}
-                  >
-                    <Icon className="h-4 w-4 shrink-0" />
-                    {label}
-                  </Link>
-                ))}
-              </>
-            )}
-            <div className="mt-auto pt-4 flex flex-col gap-2 border-t">
+
+            <div className="mt-auto pt-4 border-t flex flex-col gap-2">
               {user ? (
-                <>
-                  <div className="flex items-center gap-2.5 rounded-lg bg-muted px-3 py-2.5">
-                    <Avatar className="h-8 w-8">
-                      <AvatarImage src={user.image ?? undefined} />
-                      <AvatarFallback className="text-xs bg-primary/10 text-primary">
-                        {(user.name ?? "U").charAt(0).toUpperCase()}
-                      </AvatarFallback>
-                    </Avatar>
-                    <div className="min-w-0 flex-1">
-                      <p className="text-xs font-semibold truncate">
-                        {user.name}
-                      </p>
-                      <p className="text-[10px] text-muted-foreground truncate">
-                        {user.email}
-                      </p>
-                    </div>
-                    {role && (
-                      <span
-                        className={cn(
-                          "shrink-0 rounded-md px-1.5 py-0.5 text-[10px] font-semibold",
-                          ROLE_BADGE_COLORS[role],
-                        )}
-                      >
-                        {ROLE_LABELS[role]}
-                      </span>
-                    )}
-                  </div>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={signOut}
-                    className="rounded-lg gap-2 text-destructive border-destructive/30 hover:bg-destructive/5 hover:text-destructive"
-                  >
-                    <LogOut className="h-3.5 w-3.5" />
-                    Log out
-                  </Button>
-                </>
+                <Button onClick={signOut}>Logout</Button>
               ) : (
                 <>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    asChild
-                    className="rounded-lg"
-                  >
+                  <Button asChild variant="outline">
                     <Link href="/login">Login</Link>
                   </Button>
-                  <Button size="sm" asChild className="rounded-lg">
+                  <Button asChild>
                     <Link href="/register">Get Started</Link>
                   </Button>
                 </>

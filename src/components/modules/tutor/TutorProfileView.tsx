@@ -27,15 +27,6 @@ export function TutorProfileView({
           </div>
           <CardTitle className="text-sm font-semibold">Tutor Profile</CardTitle>
         </div>
-        <Button
-          size="sm"
-          variant="outline"
-          className="h-8 rounded-lg gap-1.5 text-xs"
-          onClick={onEdit}
-        >
-          <Pencil className="h-3 w-3" />
-          Edit Profile
-        </Button>
       </CardHeader>
 
       <CardContent className="space-y-4 pt-0">

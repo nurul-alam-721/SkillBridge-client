@@ -24,12 +24,15 @@ const LABELS: Record<string, string> = {
   categories: "Categories",
 };
 
+const NON_LINKABLE = new Set(["tutor", "admin"]);
+
 function getBreadcrumbs(pathname: string) {
   const segments = pathname.split("/").filter(Boolean);
   return segments.map((seg, i) => ({
     label: LABELS[seg] ?? seg,
     href: "/" + segments.slice(0, i + 1).join("/"),
     isLast: i === segments.length - 1,
+    isLinkable: !NON_LINKABLE.has(seg),
   }));
 }
 
@@ -55,7 +58,7 @@ export function SiteHeader() {
                     i < breadcrumbs.length - 1 ? "hidden md:block" : ""
                   }
                 >
-                  {crumb.isLast ? (
+                  {crumb.isLast || !crumb.isLinkable ? (
                     <BreadcrumbPage>{crumb.label}</BreadcrumbPage>
                   ) : (
                     <BreadcrumbLink href={crumb.href}>

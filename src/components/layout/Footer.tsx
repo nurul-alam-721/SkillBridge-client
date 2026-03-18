@@ -6,74 +6,78 @@ import { Separator } from "@/components/ui/separator";
 import { authClient } from "@/lib/auth-client";
 import { User } from "@/types/types";
 import { Roles } from "@/constant/Roles";
-
+import { useMounted } from "@/hooks/userMounted";
 
 const PUBLIC_LINKS = [
-  { label: "Browse Tutors", href: "/tutors"     },
-  { label: "Categories",    href: "/categories" },
+  { label: "Browse Tutors", href: "/tutors" },
+  { label: "Categories", href: "/categories" },
 ];
 
-
-const ROLE_LINKS: Record<string, { title: string; links: { label: string; href: string }[] }> = {
+const ROLE_LINKS: Record<
+  string,
+  { title: string; links: { label: string; href: string }[] }
+> = {
   [Roles.student]: {
     title: "My Account",
     links: [
-      { label: "Dashboard",   href: "/dashboard"          },
+      { label: "Dashboard", href: "/dashboard" },
       { label: "My Bookings", href: "/dashboard/bookings" },
-      { label: "Profile",     href: "/dashboard/profile"  },
+      { label: "Profile", href: "/dashboard/profile" },
     ],
   },
   [Roles.tutor]: {
     title: "Tutor Portal",
     links: [
-      { label: "Dashboard",    href: "/tutor/dashboard"    },
+      { label: "Dashboard", href: "/tutor/dashboard" },
       { label: "Availability", href: "/tutor/availability" },
-      { label: "Profile",      href: "/tutor/profile"      },
+      { label: "Profile", href: "/tutor/profile" },
     ],
   },
   [Roles.admin]: {
     title: "Admin",
     links: [
-      { label: "Dashboard",  href: "/admin/dashboard"            },
-      { label: "Users",      href: "/admin/users"      },
-      { label: "Bookings",   href: "/admin/bookings"   },
+      { label: "Dashboard", href: "/admin/dashboard" },
+      { label: "Users", href: "/admin/users" },
+      { label: "Bookings", href: "/admin/bookings" },
       { label: "Categories", href: "/admin/categories" },
     ],
   },
 };
 
-// ── Guest links (shown when not logged in)
-
 const GUEST_LINKS = {
   title: "Account",
   links: [
-    { label: "Login",             href: "/login"    },
-    { label: "Register",          href: "/register" },
+    { label: "Login", href: "/login" },
+    { label: "Register", href: "/register" },
     { label: "Register as Tutor", href: "/register" },
   ],
 };
 
 const SOCIAL_LINKS = [
-  { icon: Twitter,  href: "#", label: "Twitter"  },
-  { icon: Github,   href: "#", label: "GitHub"   },
+  { icon: Twitter, href: "#", label: "Twitter" },
+  { icon: Github, href: "#", label: "GitHub" },
   { icon: Linkedin, href: "#", label: "LinkedIn" },
-  { icon: Mail,     href: "#", label: "Email"    },
+  { icon: Mail, href: "#", label: "Email" },
 ];
-
 
 export function Footer() {
   const { data: session } = authClient.useSession();
   const user = session?.user as User | undefined;
   const role = user?.role as string | undefined;
 
-  const accountColumn = role ? ROLE_LINKS[role] : GUEST_LINKS;
+
+  const mounted = useMounted();
+
+  const accountColumn = !mounted
+    ? GUEST_LINKS
+    : role
+      ? ROLE_LINKS[role]
+      : GUEST_LINKS;
 
   return (
     <footer className="border-t bg-card">
       <div className="mx-auto max-w-6xl px-4 py-12">
-
         <div className="grid grid-cols-2 gap-8 sm:grid-cols-4 lg:grid-cols-5">
-
           {/* Brand */}
           <div className="col-span-2 sm:col-span-4 lg:col-span-2 space-y-4">
             <Link href="/" className="inline-flex items-center gap-2">
@@ -86,8 +90,8 @@ export function Footer() {
             </Link>
 
             <p className="text-sm text-muted-foreground leading-relaxed max-w-xs">
-              Connecting learners with expert tutors. Find the perfect match
-              for any subject and start learning today.
+              Connecting learners with expert tutors. Find the perfect match for
+              any subject and start learning today.
             </p>
 
             {/* Socials */}
@@ -151,9 +155,9 @@ export function Footer() {
             </p>
             <ul className="space-y-2">
               {[
-                { label: "Contact Us",    href: "#" },
-                { label: "Privacy Policy",href: "#" },
-                { label: "Terms of Use",  href: "#" },
+                { label: "Contact Us", href: "#" },
+                { label: "Privacy Policy", href: "#" },
+                { label: "Terms of Use", href: "#" },
               ].map(({ label, href }) => (
                 <li key={label}>
                   <Link
@@ -166,7 +170,6 @@ export function Footer() {
               ))}
             </ul>
           </div>
-
         </div>
 
         <Separator className="my-8" />
@@ -175,12 +178,17 @@ export function Footer() {
         <div className="flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-muted-foreground">
           <p>© {new Date().getFullYear()} SkillBridge. All rights reserved.</p>
           <div className="flex items-center gap-4">
-            <Link href="#" className="hover:text-primary transition-colors">Privacy</Link>
-            <Link href="#" className="hover:text-primary transition-colors">Terms</Link>
-            <Link href="#" className="hover:text-primary transition-colors">Contact</Link>
+            <Link href="#" className="hover:text-primary transition-colors">
+              Privacy
+            </Link>
+            <Link href="#" className="hover:text-primary transition-colors">
+              Terms
+            </Link>
+            <Link href="#" className="hover:text-primary transition-colors">
+              Contact
+            </Link>
           </div>
         </div>
-
       </div>
     </footer>
   );

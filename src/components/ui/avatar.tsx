@@ -27,15 +27,33 @@ function Avatar({
 
 function AvatarImage({
   className,
+  src,
+  alt = "",
   ...props
-}: React.ComponentProps<typeof AvatarPrimitive.Image>) {
+}: React.ComponentProps<"img"> & { asChild?: boolean }) {
+  const [status, setStatus] = React.useState<"loading" | "loaded" | "error">("loading");
+
+  React.useEffect(() => {
+    if (!src) { setStatus("error"); return; }
+    setStatus("loading");
+    const img = new Image();
+    img.onload  = () => setStatus("loaded");
+    img.onerror = () => setStatus("error");
+    img.src = src as string;
+  }, [src]);
+
+  if (status !== "loaded") return null;
+
   return (
-    <AvatarPrimitive.Image
+    // eslint-disable-next-line @next/next/no-img-element
+    <img
       data-slot="avatar-image"
-      className={cn("aspect-square size-full", className)}
+      src={src as string}
+      alt={alt}
+      className={cn("aspect-square size-full object-cover object-center", className)}
       {...props}
     />
-  )
+  );
 }
 
 function AvatarFallback({

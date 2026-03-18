@@ -1,35 +1,40 @@
 "use client";
 
-import { X, GraduationCap, User } from "lucide-react";
+import { X, GraduationCap, User, Loader2 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Separator } from "@/components/ui/separator";
-import { Loader2 } from "lucide-react";
 import { useForm } from "@tanstack/react-form";
 import { toast } from "sonner";
 import { TutorProfile, Category } from "@/services/tutor.service";
 import { userService, CurrentUser } from "@/services/user.service";
 import { TutorProfileForm } from "@/components/modules/tutor/TutorProfileForm";
+import { ImageUpload } from "@/app/utils/ImageUpload";
 
-
-function PersonalInfoForm({ user }: { user: CurrentUser }) {
+function PersonalInfoForm({
+  user,
+  onSaved,
+}: {
+  user: CurrentUser;
+  onSaved: (updated: CurrentUser) => void;
+}) {
   const form = useForm({
     defaultValues: {
-      name:  user.name  ?? "",
+      name: user.name ?? "",
       phone: user.phone ?? "",
       image: user.image ?? "",
     },
     onSubmit: async ({ value }) => {
       const toastId = toast.loading("Saving...");
       try {
-        await userService.updateMyProfile({
-          name:  value.name  || undefined,
+        const updated = await userService.updateMyProfile({
+          name: value.name || undefined,
           phone: value.phone || undefined,
           image: value.image || undefined,
         });
+        onSaved(updated);
         toast.success("Personal info updated!", { id: toastId });
       } catch {
         toast.error("Failed to update personal info.", { id: toastId });
@@ -42,17 +47,17 @@ function PersonalInfoForm({ user }: { user: CurrentUser }) {
   return (
     <form
       className="space-y-4"
-      onSubmit={(e) => { e.preventDefault(); form.handleSubmit(); }}
+      onSubmit={(e) => {
+        e.preventDefault();
+        form.handleSubmit();
+      }}
     >
-      <div className="flex items-center gap-3">
-        <Avatar className="h-12 w-12 shrink-0">
-          <AvatarImage src={form.state.values.image || undefined} />
-          <AvatarFallback className="font-bold">
-            {(form.state.values.name || "T").charAt(0).toUpperCase()}
-          </AvatarFallback>
-        </Avatar>
-        
-      </div>
+      <ImageUpload
+        value={form.state.values.image}
+        onChange={(url) => form.setFieldValue("image", url)}
+        fallback={form.state.values.name || "T"}
+        disabled={submitting}
+      />
 
       <div className="grid gap-4 sm:grid-cols-2">
         <form.Field name="name">
@@ -88,23 +93,12 @@ function PersonalInfoForm({ user }: { user: CurrentUser }) {
         </form.Field>
       </div>
 
-      <form.Field name="image">
-        {(field) => (
-          <div className="space-y-1.5">
-            <Label htmlFor="p-image">Avatar URL</Label>
-            <Input
-              id="p-image"
-              value={field.state.value}
-              onChange={(e) => field.handleChange(e.target.value)}
-              placeholder="https://example.com/photo.jpg"
-              className="rounded-xl"
-              disabled={submitting}
-            />
-          </div>
-        )}
-      </form.Field>
-
-      <Button type="submit" size="sm" className="rounded-xl gap-2" disabled={submitting}>
+      <Button
+        type="submit"
+        size="sm"
+        className="rounded-xl gap-2"
+        disabled={submitting}
+      >
         {submitting && <Loader2 className="h-3.5 w-3.5 animate-spin" />}
         Save Personal Info
       </Button>
@@ -112,19 +106,20 @@ function PersonalInfoForm({ user }: { user: CurrentUser }) {
   );
 }
 
-
 export function TutorProfileEditView({
   profile,
   categories,
   user,
+  onPersonalInfoSaved,
   onSuccess,
   onCancel,
 }: {
-  profile:    TutorProfile;
+  profile: TutorProfile;
   categories: Category[];
-  user:       CurrentUser;
-  onSuccess:  (p: TutorProfile) => void;
-  onCancel:   () => void;
+  user: CurrentUser;
+  onPersonalInfoSaved: (updated: CurrentUser) => void;
+  onSuccess: (p: TutorProfile) => void;
+  onCancel: () => void;
 }) {
   return (
     <div className="space-y-4">
@@ -136,8 +131,12 @@ export function TutorProfileEditView({
               <User className="h-4 w-4 text-primary" />
             </div>
             <div>
-              <CardTitle className="text-sm font-semibold">Personal Info</CardTitle>
-              <p className="text-xs text-muted-foreground mt-0.5">Name, phone and avatar</p>
+              <CardTitle className="text-sm font-semibold">
+                Personal Info
+              </CardTitle>
+              <p className="text-xs text-muted-foreground mt-0.5">
+                Name, phone and avatar
+              </p>
             </div>
           </div>
           <Button
@@ -152,7 +151,7 @@ export function TutorProfileEditView({
         </CardHeader>
         <Separator />
         <CardContent className="pt-5">
-          <PersonalInfoForm user={user} />
+          <PersonalInfoForm user={user} onSaved={onPersonalInfoSaved} />
         </CardContent>
       </Card>
 
@@ -164,7 +163,9 @@ export function TutorProfileEditView({
               <GraduationCap className="h-4 w-4 text-primary" />
             </div>
             <div>
-              <CardTitle className="text-sm font-semibold">Tutor Details</CardTitle>
+              <CardTitle className="text-sm font-semibold">
+                Tutor Details
+              </CardTitle>
               <p className="text-xs text-muted-foreground mt-0.5">
                 Bio, rate, experience and subject
               </p>

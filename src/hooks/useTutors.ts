@@ -9,7 +9,7 @@ import {
   Category,
 } from "@/services/tutor.service";
 
-const defautFilters: TutorsQuery = { page: 1, limit: 9 };
+const defaut_filters: TutorsQuery = { page: 1, limit: 9 };
 
 export function useTutors() {
   const searchParams = useSearchParams();
@@ -17,7 +17,7 @@ export function useTutors() {
   const [filters, setFilters] = useState<TutorsQuery>(() => {
     const categoryId = searchParams.get("categoryId");
     return {
-      ...defautFilters,
+      ...defaut_filters,
       ...(categoryId && { categoryId }),
     };
   });
@@ -54,8 +54,25 @@ export function useTutors() {
   }, []);
 
   useEffect(() => {
+    const sortMap: Record<
+      string,
+      { sortBy: string; sortOrder: "asc" | "desc" }
+    > = {
+      rating: { sortBy: "rating", sortOrder: "desc" },
+      price_asc: { sortBy: "hourlyRate", sortOrder: "asc" },
+      price_desc: { sortBy: "hourlyRate", sortOrder: "desc" },
+      reviews: { sortBy: "totalReviews", sortOrder: "desc" },
+      experience: { sortBy: "experience", sortOrder: "desc" },
+    };
+    const { sortBy, sortOrder } = sortMap[sort] ?? sortMap["rating"];
+
     const timeout = setTimeout(() => {
-      fetchTutors({ ...filters, search: search || undefined });
+      fetchTutors({
+        ...filters,
+        search: search || undefined,
+        sortBy,
+        sortOrder,
+      });
     }, 300);
     return () => clearTimeout(timeout);
   }, [filters, search, sort, fetchTutors]);
@@ -63,8 +80,10 @@ export function useTutors() {
   const updateFilters = (partial: Partial<TutorsQuery>) =>
     setFilters((prev) => ({ ...prev, ...partial, page: 1 }));
 
+  const setPage = (page: number) => setFilters((prev) => ({ ...prev, page }));
+
   const resetFilters = () => {
-    setFilters(defautFilters);
+    setFilters(defaut_filters);
     setSearch("");
     setSort("rating");
   };
@@ -80,6 +99,7 @@ export function useTutors() {
     sort,
     setSearch,
     setSort,
+    setPage,
     updateFilters,
     resetFilters,
   };

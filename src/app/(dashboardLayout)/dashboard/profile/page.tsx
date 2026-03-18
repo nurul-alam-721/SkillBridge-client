@@ -6,14 +6,138 @@ import {
   Pencil, User, BadgeCheck, Clock,
 } from "lucide-react";
 import { format } from "date-fns";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Badge } from "@/components/ui/badge";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Separator } from "@/components/ui/separator";
-import { EditProfileDialog } from "@/components/modules/student/ProfileEditDialog";
-
+import {
+  Dialog, DialogContent, DialogHeader,
+  DialogTitle, DialogDescription,
+} from "@/components/ui/dialog";
+import { useForm } from "@tanstack/react-form";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { toast } from "sonner";
+import { Loader2 } from "lucide-react";
 import { userService, CurrentUser } from "@/services/user.service";
+import { ImageUpload } from "@/app/utils/ImageUpload";
+
+
+function EditProfileDialog({
+  open,
+  user,
+  onClose,
+  onUpdated,
+}: {
+  open: boolean;
+  user: CurrentUser;
+  onClose: () => void;
+  onUpdated: (u: CurrentUser) => void;
+}) {
+  const form = useForm({
+    defaultValues: {
+      name:  user.name  ?? "",
+      phone: user.phone ?? "",
+      image: user.image ?? "",
+    },
+    onSubmit: async ({ value }) => {
+      const toastId = toast.loading("Saving...");
+      try {
+        const updated = await userService.updateMyProfile({
+          name:  value.name  || undefined,
+          phone: value.phone || undefined,
+          image: value.image || undefined,
+        });
+        onUpdated(updated);
+        toast.success("Profile updated!", { id: toastId });
+        onClose();
+      } catch {
+        toast.error("Failed to update profile.", { id: toastId });
+      }
+    },
+  });
+
+  const submitting = form.state.isSubmitting;
+
+  return (
+    <Dialog open={open} onOpenChange={(v) => !v && onClose()}>
+      <DialogContent className="sm:max-w-md rounded-2xl p-4">
+        <DialogHeader>
+          <DialogTitle>Edit Profile</DialogTitle>
+          <DialogDescription>
+            Update your name, phone number, and avatar.
+          </DialogDescription>
+        </DialogHeader>
+
+        <ImageUpload
+          value={form.state.values.image}
+          onChange={(url) => form.setFieldValue("image", url)}
+          fallback={form.state.values.name || "U"}
+          disabled={submitting}
+        />
+
+        <Separator />
+
+        <form
+          className="space-y-4"
+          onSubmit={(e) => { e.preventDefault(); form.handleSubmit(); }}
+        >
+          {/* Name */}
+          <form.Field name="name">
+            {(field) => (
+              <div className="space-y-1.5">
+                <Label htmlFor="edit-name">Full Name</Label>
+                <Input
+                  id="edit-name"
+                  value={field.state.value}
+                  onChange={(e) => field.handleChange(e.target.value)}
+                  onBlur={field.handleBlur}
+                  placeholder="Your full name"
+                  className="rounded-xl"
+                  disabled={submitting}
+                />
+              </div>
+            )}
+          </form.Field>
+
+          {/* Phone */}
+          <form.Field name="phone">
+            {(field) => (
+              <div className="space-y-1.5">
+                <Label htmlFor="edit-phone">Phone</Label>
+                <Input
+                  id="edit-phone"
+                  value={field.state.value}
+                  onChange={(e) => field.handleChange(e.target.value)}
+                  onBlur={field.handleBlur}
+                  placeholder="+8801XXXXXXXXX"
+                  className="rounded-xl"
+                  disabled={submitting}
+                />
+              </div>
+            )}
+          </form.Field>
+
+          <div className="flex justify-end gap-2 pt-1">
+            <Button
+              type="button"
+              variant="outline"
+              className="rounded-xl"
+              onClick={onClose}
+              disabled={submitting}
+            >
+              Cancel
+            </Button>
+            <Button type="submit" className="rounded-xl gap-2" disabled={submitting}>
+              {submitting && <Loader2 className="h-3.5 w-3.5 animate-spin" />}
+              Save Changes
+            </Button>
+          </div>
+        </form>
+      </DialogContent>
+    </Dialog>
+  );
+}
 
 
 function DetailRow({
@@ -83,7 +207,6 @@ export default function StudentProfilePage() {
   return (
     <div className="px-4 lg:px-6 py-6 max-w-2xl space-y-6">
 
-      {/* Header — avatar + name + edit button */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center gap-5">
         <Avatar className="h-24 w-24 text-3xl shrink-0 ring-4 ring-background shadow-md">
           <AvatarImage src={user.image ?? undefined} />
@@ -125,7 +248,6 @@ export default function StudentProfilePage() {
 
       <Separator />
 
-      {/* Detail rows */}
       <div className="divide-y divide-border/60">
         <DetailRow icon={User}         label="Full Name"   value={user.name ?? "—"} />
         <DetailRow icon={Mail}         label="Email"       value={user.email} />
@@ -151,7 +273,6 @@ export default function StudentProfilePage() {
         />
       </div>
 
-      {/* Edit dialog */}
       {editing && (
         <EditProfileDialog
           open={editing}
@@ -165,5 +286,4 @@ export default function StudentProfilePage() {
       )}
 
     </div>
-  );
-}
+  )};

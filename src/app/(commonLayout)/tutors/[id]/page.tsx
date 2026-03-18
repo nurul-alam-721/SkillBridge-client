@@ -3,21 +3,35 @@
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import {
-  Star, BriefcaseBusiness, Mail, Phone,
-  AlertCircle, ChevronLeft, LogIn, Loader2, Users,
+  Star,
+  BriefcaseBusiness,
+  Mail,
+  Phone,
+  AlertCircle,
+  ChevronLeft,
+  LogIn,
+  Users,
 } from "lucide-react";
 import { format } from "date-fns";
 import { Button } from "@/components/ui/button";
 import {
-  Card, CardContent, CardDescription,
-  CardFooter, CardHeader, CardTitle,
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
 } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
-import { AvailabilitySlot, TutorProfile, tutorService } from "@/services/tutor.service";
+import {
+  AvailabilitySlot,
+  TutorProfile,
+  tutorService,
+} from "@/services/tutor.service";
 import { bookingService, Booking } from "@/services/booking.service";
 import { authClient } from "@/lib/auth-client";
 import { User } from "@/types/types";
@@ -25,21 +39,24 @@ import { Roles } from "@/constant/Roles";
 import { TutorDetailsSkeleton } from "@/components/modules/tutorDetails/TutorDetailsSkeleton";
 import { AvailabilitySlots } from "@/components/modules/tutorDetails/AvailabilitySlots";
 import { ReviewsList } from "@/components/modules/tutorDetails/ReviewsList";
+import { BookingConfirmDialog } from "@/components/modules/tutorDetails/BookingConfirmDialog";
 
-
-function getErrorMessage(err: unknown, fallback = "Something went wrong."): string {
+function getErrorMessage(
+  err: unknown,
+  fallback = "Something went wrong.",
+): string {
   if (err && typeof err === "object" && "response" in err) {
-    const res = (err as { response?: { data?: { message?: string } } }).response;
+    const res = (err as { response?: { data?: { message?: string } } })
+      .response;
     if (res?.data?.message) return res.data.message;
   }
   return fallback;
 }
 
-
 function useTutor(id: string) {
-  const [tutor,   setTutor]   = useState<TutorProfile | null>(null);
+  const [tutor, setTutor] = useState<TutorProfile | null>(null);
   const [loading, setLoading] = useState(true);
-  const [error,   setError]   = useState(false);
+  const [error, setError] = useState(false);
 
   useEffect(() => {
     if (!id) return;
@@ -47,8 +64,7 @@ function useTutor(id: string) {
       setLoading(true);
       setError(false);
       try {
-        const data = await tutorService.getById(id);
-        setTutor(data);
+        setTutor(await tutorService.getById(id));
       } catch {
         setError(true);
       } finally {
@@ -63,16 +79,21 @@ function useTutor(id: string) {
       prev
         ? {
             ...prev,
-            availability: prev.availability?.map((s) =>
-              s.id === slotId ? { ...s, isBooked: true } : s
-            ),
+            availability: prev.availability?.map((s) => {
+              if (s.id !== slotId) return s;
+              const newTotal = (s.totalBookings ?? 0) + 1;
+              return {
+                ...s,
+                totalBookings: newTotal,
+                isBooked: newTotal >= (s.maxCapacity ?? 50),
+              };
+            }),
           }
-        : prev
+        : prev,
     );
 
   return { tutor, loading, error, markSlotBooked };
 }
-
 
 export default function TutorDetailsPage() {
   const { id } = useParams<{ id: string }>();
@@ -82,33 +103,60 @@ export default function TutorDetailsPage() {
   const { data: session, isPending: sessionPending } = authClient.useSession();
   const user = session?.user as User | undefined;
 
-  const [selectedSlot,   setSelectedSlot]   = useState<AvailabilitySlot | null>(null);
-  const [booking,        setBooking]        = useState(false);
-  const [myBookedSlots,  setMyBookedSlots]  = useState<Set<string>>(new Set());
-  const [bookingsLoading,setBookingsLoading]= useState(false);
+  const [selectedSlot, setSelectedSlot] = useState<AvailabilitySlot | null>(
+    null,
+  );
+  const [confirmOpen, setConfirmOpen] = useState(false);
+  const [booking, setBooking] = useState(false);
+  const [myBookedSlots, setMyBookedSlots] = useState<Set<string>>(new Set());
+  const [bookingsLoading, setBookingsLoading] = useState(false);
 
   const isStudent = user?.role === Roles.student;
-  const isGuest   = !user && !sessionPending;
+  const isGuest = !user && !sessionPending;
 
   useEffect(() => {
     if (!isStudent) return;
     setBookingsLoading(true);
-    bookingService.getMyBookings()
+    bookingService
+      .getMyBookings()
       .then((bookings: Booking[]) => {
-        const bookedSlotIds = new Set(
+        const ids = new Set(
           bookings
-            .filter((b) => b.tutorProfile?.id === tutor?.id && b.status !== "CANCELLED")
-            .map((b) => b.slotId)
+            .filter(
+              (b) =>
+                b.tutorProfile?.id === tutor?.id && b.status !== "CANCELLED",
+            )
+            .map((b) => b.slotId),
         );
-        setMyBookedSlots(bookedSlotIds);
+        setMyBookedSlots(ids);
       })
       .catch(() => {})
       .finally(() => setBookingsLoading(false));
   }, [isStudent, tutor?.id]);
 
-  const handleBook = async () => {
+  // Called from confirm dialog
+  const handleConfirmBooking = async () => {
     if (!selectedSlot || !tutor) return;
+    setBooking(true);
+    try {
+      await bookingService.create({
+        tutorProfileId: tutor.id,
+        slotId: selectedSlot.id,
+      });
+      markSlotBooked(selectedSlot.id);
+      setMyBookedSlots((prev) => new Set(prev).add(selectedSlot.id));
+      setSelectedSlot(null);
+      setConfirmOpen(false);
+      toast.success("Session booked! Check your dashboard for details.");
+    } catch (err) {
+      toast.error(getErrorMessage(err, "Failed to book. Please try again."));
+    } finally {
+      setBooking(false);
+    }
+  };
 
+  const handleBookClick = () => {
+    if (!selectedSlot || !tutor) return;
     if (isGuest) {
       router.push(`/login?redirect=/tutors/${id}`);
       return;
@@ -121,139 +169,175 @@ export default function TutorDetailsPage() {
       toast.error("You have already booked this slot.");
       return;
     }
-
-    setBooking(true);
-    try {
-      await bookingService.create({
-        tutorProfileId: tutor.id,
-        slotId: selectedSlot.id,
-      });
-
-      markSlotBooked(selectedSlot.id);
-      setMyBookedSlots((prev) => new Set(prev).add(selectedSlot.id));
-      setSelectedSlot(null);
-
-      toast.success("Session booked! Check your dashboard for details.");
-    } catch (err) {
-      toast.error(getErrorMessage(err, "Failed to book. Please try again."));
-    } finally {
-      setBooking(false);
-    }
+    setConfirmOpen(true);
   };
 
   if (loading || sessionPending) return <TutorDetailsSkeleton />;
 
   if (error || !tutor) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-[60vh] gap-3 text-center">
-        <AlertCircle className="h-10 w-10 text-muted-foreground" />
-        <p className="font-semibold">Tutor not found</p>
-        <p className="text-sm text-muted-foreground">This tutor may no longer be available.</p>
-        <Button variant="outline" className="rounded-xl mt-1" onClick={() => router.push("/tutors")}>
+      <div className="flex flex-col items-center justify-center min-h-[60vh] gap-4 text-center px-4">
+        <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-muted">
+          <AlertCircle className="h-8 w-8 text-muted-foreground" />
+        </div>
+        <div>
+          <p className="font-semibold text-lg">Tutor not found</p>
+          <p className="text-sm text-muted-foreground mt-1">
+            This tutor may no longer be available.
+          </p>
+        </div>
+        <Button
+          variant="outline"
+          className="rounded-xl"
+          onClick={() => router.push("/tutors")}
+        >
           Browse tutors
         </Button>
       </div>
     );
   }
 
-  const availableCount = tutor.availability?.filter((s) => !s.isBooked).length ?? 0;
-
-  const selectedAlreadyBooked = selectedSlot ? myBookedSlots.has(selectedSlot.id) : false;
-  const canBook = isStudent && selectedSlot && !selectedAlreadyBooked && !booking && !bookingsLoading;
+  const availableCount =
+    tutor.availability?.filter((s) => !s.isBooked).length ?? 0;
+  const selectedAlreadyBooked = selectedSlot
+    ? myBookedSlots.has(selectedSlot.id)
+    : false;
+  const canBook =
+    isStudent &&
+    selectedSlot &&
+    !selectedAlreadyBooked &&
+    !booking &&
+    !bookingsLoading;
 
   return (
     <div className="min-h-screen bg-background">
       <div className="container mx-auto px-4 py-8 max-w-4xl">
-
+        {/* Back */}
         <button
           onClick={() => router.push("/tutors")}
-          className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors mb-6"
+          className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors mb-8 group"
         >
-          <ChevronLeft className="h-4 w-4" />
+          <ChevronLeft className="h-4 w-4 group-hover:-translate-x-0.5 transition-transform" />
           Back to tutors
         </button>
 
-        <Card className="mb-6">
-          <CardHeader>
+        {/* ── Profile header ── */}
+        <div className="mb-6 rounded-2xl border border-border/50 bg-card overflow-hidden shadow-sm">
+          {/* Subtle header band */}
+          <div className="h-24 bg-linear-to-br from-primary/8 via-primary/4 to-transparent" />
+
+          <div className="px-6 pb-6 -mt-12">
             <div className="flex flex-col sm:flex-row items-start gap-5">
-              <Avatar className="h-20 w-20 text-2xl">
-                <AvatarImage src={tutor.user.image ?? undefined} alt={tutor.user.name ?? "Tutor"} />
-                <AvatarFallback>{(tutor.user.name ?? "T").charAt(0).toUpperCase()}</AvatarFallback>
+              {/* Avatar — overlaps the band */}
+              <Avatar className="h-20 w-20 text-2xl ring-4 ring-background shadow-lg shrink-0">
+                <AvatarImage
+                  src={tutor.user.image ?? undefined}
+                  alt={tutor.user.name ?? "Tutor"}
+                />
+                <AvatarFallback className="text-2xl font-bold bg-linear-to-br from-primary/30 to-primary/10 text-primary">
+                  {(tutor.user.name ?? "T").charAt(0).toUpperCase()}
+                </AvatarFallback>
               </Avatar>
 
-              <div className="flex-1 min-w-0">
-                <div className="flex flex-wrap items-center gap-2 mb-1">
-                  <CardTitle className="text-2xl">{tutor.user.name ?? "Unknown"}</CardTitle>
-                  <Badge variant="secondary">{tutor.category.name}</Badge>
+              <div className="flex-1 min-w-0 pt-3 sm:pt-0 sm:mt-12">
+                <div className="flex flex-wrap items-center gap-2 mb-2">
+                  <h1 className="text-2xl font-bold tracking-tight">
+                    {tutor.user.name ?? "Unknown"}
+                  </h1>
+                  <Badge variant="secondary" className="rounded-full">
+                    {tutor.category.name}
+                  </Badge>
                 </div>
 
-                <CardDescription className="flex flex-wrap gap-3 mt-1">
-                  <span className="flex items-center gap-1">
+                <div className="flex flex-wrap gap-x-4 gap-y-1.5 text-sm text-muted-foreground">
+                  <span className="flex items-center gap-1.5">
                     <BriefcaseBusiness className="h-3.5 w-3.5" />
-                    {tutor.experience} yr{tutor.experience !== 1 ? "s" : ""} experience
+                    {tutor.experience} yr{tutor.experience !== 1 ? "s" : ""}{" "}
+                    experience
                   </span>
-                  <span className="flex items-center gap-1">
+                  <span className="flex items-center gap-1.5">
                     <Star className="h-3.5 w-3.5 fill-amber-400 text-amber-400" />
-                    {tutor.rating.toFixed(1)} ({tutor.totalReviews} review{tutor.totalReviews !== 1 ? "s" : ""})
+                    <span className="font-medium text-foreground">
+                      {tutor.rating.toFixed(1)}
+                    </span>
+                    <span className="text-muted-foreground">
+                      ({tutor.totalReviews} review
+                      {tutor.totalReviews !== 1 ? "s" : ""})
+                    </span>
                   </span>
                   {tutor.user.email && (
-                    <span className="flex items-center gap-1">
-                      <Mail className="h-3.5 w-3.5" />{tutor.user.email}
+                    <span className="flex items-center gap-1.5">
+                      <Mail className="h-3.5 w-3.5" />
+                      {tutor.user.email}
                     </span>
                   )}
                   {tutor.user.phone && (
-                    <span className="flex items-center gap-1">
-                      <Phone className="h-3.5 w-3.5" />{tutor.user.phone}
+                    <span className="flex items-center gap-1.5">
+                      <Phone className="h-3.5 w-3.5" />
+                      {tutor.user.phone}
                     </span>
                   )}
-                </CardDescription>
+                </div>
 
-                <div className="mt-3">
-                  <span className="text-2xl font-bold">BDT {tutor.hourlyRate}</span>
-                  <span className="text-sm text-muted-foreground"> / hr</span>
+                <div className="mt-3 flex items-baseline gap-1">
+                  <span className="text-3xl font-bold tracking-tight">
+                    BDT {tutor.hourlyRate}
+                  </span>
+                  <span className="text-sm text-muted-foreground">/hr</span>
                 </div>
               </div>
             </div>
-          </CardHeader>
 
-          {tutor.bio && (
-            <CardContent>
-              <Separator className="mb-4" />
-              <p className="text-sm font-semibold mb-1">About</p>
-              <p className="text-sm text-muted-foreground leading-relaxed">{tutor.bio}</p>
-            </CardContent>
-          )}
-        </Card>
+            {tutor.bio && (
+              <>
+                <Separator className="my-5" />
+                <div>
+                  <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground mb-2">
+                    About
+                  </p>
+                  <p className="text-sm text-muted-foreground leading-relaxed">
+                    {tutor.bio}
+                  </p>
+                </div>
+              </>
+            )}
+          </div>
+        </div>
 
+        {/* ── Main grid ── */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-
+          {/* Left */}
           <div className="md:col-span-2">
             <Tabs defaultValue="availability">
-              <TabsList className="mb-4 w-full">
-                <TabsTrigger value="availability" className="flex-1">
+              <TabsList className="mb-5 w-full rounded-xl">
+                <TabsTrigger value="availability" className="flex-1 rounded-lg">
                   Availability
                   {availableCount > 0 && (
-                    <Badge variant="secondary" className="ml-2 text-xs">{availableCount}</Badge>
+                    <Badge variant="secondary" className="ml-2 text-xs">
+                      {availableCount}
+                    </Badge>
                   )}
                 </TabsTrigger>
-                <TabsTrigger value="reviews" className="flex-1">
+                <TabsTrigger value="reviews" className="flex-1 rounded-lg">
                   Reviews
                   {(tutor.reviews?.length ?? 0) > 0 && (
-                    <Badge variant="secondary" className="ml-2 text-xs">{tutor.reviews?.length}</Badge>
+                    <Badge variant="secondary" className="ml-2 text-xs">
+                      {tutor.reviews?.length}
+                    </Badge>
                   )}
                 </TabsTrigger>
               </TabsList>
 
               <TabsContent value="availability">
-                <Card>
-                  <CardHeader>
+                <Card className="rounded-2xl border-border/50 shadow-sm">
+                  <CardHeader className="pb-3">
                     <CardTitle className="text-base">Available Slots</CardTitle>
                     <CardDescription>
                       {isStudent
                         ? `Select a slot to book a session with ${tutor.user.name?.split(" ")[0]}.`
                         : isGuest
-                        ? "Log in as a student to book a session."
-                        : "Only students can book sessions."}
+                          ? "Log in as a student to book a session."
+                          : "Only students can book sessions."}
                     </CardDescription>
                   </CardHeader>
                   <CardContent>
@@ -268,11 +352,13 @@ export default function TutorDetailsPage() {
               </TabsContent>
 
               <TabsContent value="reviews">
-                <Card>
-                  <CardHeader>
+                <Card className="rounded-2xl border-border/50 shadow-sm">
+                  <CardHeader className="pb-3">
                     <CardTitle className="text-base">Student Reviews</CardTitle>
                     <CardDescription>
-                      {tutor.totalReviews} review{tutor.totalReviews !== 1 ? "s" : ""} · {tutor.rating.toFixed(1)} avg rating
+                      {tutor.totalReviews} review
+                      {tutor.totalReviews !== 1 ? "s" : ""} ·{" "}
+                      {tutor.rating.toFixed(1)} avg
                     </CardDescription>
                   </CardHeader>
                   <CardContent>
@@ -283,66 +369,85 @@ export default function TutorDetailsPage() {
             </Tabs>
           </div>
 
+          {/* Right: booking card */}
           <div className="md:col-span-1">
-            <Card className="sticky top-6">
-              <CardHeader>
+            <Card className="sticky top-6 rounded-2xl border-border/50 shadow-sm overflow-hidden">
+              <div className="h-1.5 bg-linear-to-r from-primary/60 to-primary" />
+              <CardHeader className="pb-3">
                 <CardTitle className="text-base">Book a Session</CardTitle>
                 <CardDescription>
                   {isGuest
                     ? "Sign in as a student to book."
                     : !isStudent
-                    ? "Only students can make bookings."
-                    : selectedAlreadyBooked
-                    ? "You've already booked this slot."
-                    : selectedSlot
-                    ? "Review your selected slot below."
-                    : "Pick a slot from the availability tab."}
+                      ? "Only students can make bookings."
+                      : selectedAlreadyBooked
+                        ? "You've already booked this slot."
+                        : selectedSlot
+                          ? "Review your selected slot below."
+                          : "Pick a slot from the availability tab."}
                 </CardDescription>
               </CardHeader>
 
-              <CardContent className="space-y-4">
+              <CardContent className="space-y-3.5">
                 {/* Selected slot preview */}
                 {selectedSlot && isStudent && (
-                  <div className={`rounded-xl border p-3 text-sm space-y-0.5 ${
-                    selectedAlreadyBooked
-                      ? "bg-amber-50 border-amber-200 dark:bg-amber-900/20 dark:border-amber-800"
-                      : "bg-primary/5 border-primary/20"
-                  }`}>
-                    <p className={`font-medium ${selectedAlreadyBooked ? "text-amber-600 dark:text-amber-400" : "text-primary"}`}>
-                      {selectedAlreadyBooked ? "Already booked by you" : "Selected slot"}
+                  <div
+                    className={`rounded-xl border p-3.5 text-sm space-y-1 ${
+                      selectedAlreadyBooked
+                        ? "bg-amber-50 border-amber-200 dark:bg-amber-900/20 dark:border-amber-700"
+                        : "bg-primary/5 border-primary/20"
+                    }`}
+                  >
+                    <p
+                      className={`text-xs font-semibold uppercase tracking-wide ${
+                        selectedAlreadyBooked
+                          ? "text-amber-600 dark:text-amber-400"
+                          : "text-primary"
+                      }`}
+                    >
+                      {selectedAlreadyBooked
+                        ? "Already booked"
+                        : "Selected slot"}
                     </p>
-                    <p className="text-muted-foreground">
-                      {format(new Date(selectedSlot.startTime), "EEEE, MMM d, yyyy")}
+                    <p className="font-medium">
+                      {format(
+                        new Date(selectedSlot.startTime),
+                        "EEEE, MMM d, yyyy",
+                      )}
                     </p>
-                    <p className="text-muted-foreground">
-                      {format(new Date(selectedSlot.startTime), "hh:mm a")}
-                      {" – "}
-                      {format(new Date(selectedSlot.endTime), "hh:mm a")}
+                    <p className="text-muted-foreground tabular-nums text-xs">
+                      {format(new Date(selectedSlot.startTime), "h:mm a")} →{" "}
+                      {format(new Date(selectedSlot.endTime), "h:mm a")}
                     </p>
                   </div>
                 )}
 
                 {!isGuest && !isStudent && (
-                  <div className="rounded-xl bg-muted px-3 py-2.5 text-xs text-muted-foreground">
+                  <div className="rounded-xl bg-amber-50 border border-amber-200 dark:bg-amber-900/10 dark:border-amber-700 px-3 py-2.5 text-xs text-amber-700 dark:text-amber-400 font-medium text-center">
                     Only students can book tutoring sessions.
                   </div>
                 )}
 
                 <Separator />
 
-                <div className="flex items-center justify-between text-sm">
-                  <span className="text-muted-foreground">Hourly rate</span>
-                  <span className="font-semibold">BDT {tutor.hourlyRate} / hr</span>
-                </div>
-
-                <div className="flex items-center justify-between text-sm">
-                  <span className="text-muted-foreground flex items-center gap-1.5">
-                    <Users className="h-3.5 w-3.5" />
-                    Available slots
-                  </span>
-                  <span className={`font-semibold ${availableCount === 0 ? "text-destructive" : "text-emerald-600 dark:text-emerald-400"}`}>
-                    {availableCount}
-                  </span>
+                <div className="space-y-2.5">
+                  <div className="flex items-center justify-between text-sm">
+                    <span className="text-muted-foreground">Hourly rate</span>
+                    <span className="font-semibold">
+                      BDT {tutor.hourlyRate}
+                    </span>
+                  </div>
+                  <div className="flex items-center justify-between text-sm">
+                    <span className="text-muted-foreground flex items-center gap-1.5">
+                      <Users className="h-3.5 w-3.5" />
+                      Available slots
+                    </span>
+                    <span
+                      className={`font-semibold ${availableCount === 0 ? "text-destructive" : "text-emerald-600 dark:text-emerald-400"}`}
+                    >
+                      {availableCount}
+                    </span>
+                  </div>
                 </div>
               </CardContent>
 
@@ -357,14 +462,11 @@ export default function TutorDetailsPage() {
                   </Button>
                 ) : (
                   <Button
-                    className="w-full rounded-xl gap-2"
+                    className="w-full rounded-xl"
                     disabled={!canBook}
-                    onClick={handleBook}
+                    onClick={handleBookClick}
                   >
-                    {booking && <Loader2 className="h-4 w-4 animate-spin" />}
-                    {booking
-                      ? "Booking..."
-                      : selectedAlreadyBooked
+                    {selectedAlreadyBooked
                       ? "Already Booked"
                       : "Confirm Booking"}
                   </Button>
@@ -373,14 +475,26 @@ export default function TutorDetailsPage() {
                   {isStudent
                     ? "You won't be charged until the session is confirmed."
                     : isGuest
-                    ? "Create a free account to get started."
-                    : ""}
+                      ? "Create a free account to get started."
+                      : ""}
                 </p>
               </CardFooter>
             </Card>
           </div>
         </div>
       </div>
+
+      {/* Booking confirmation dialog */}
+      {confirmOpen && selectedSlot && (
+        <BookingConfirmDialog
+          open={confirmOpen}
+          tutor={tutor}
+          slot={selectedSlot}
+          onConfirm={handleConfirmBooking}
+          onCancel={() => setConfirmOpen(false)}
+          confirming={booking}
+        />
+      )}
     </div>
   );
 }

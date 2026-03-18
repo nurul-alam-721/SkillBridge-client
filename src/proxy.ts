@@ -67,10 +67,15 @@ export const config = {
   matcher: [
     "/login",
     "/register",
+    "/dashboard",
     "/dashboard/:path*",
+    "/tutor/dashboard",
     "/tutor/dashboard/:path*",
+    "/tutor/profile",
     "/tutor/profile/:path*",
+    "/tutor/availability",
     "/tutor/availability/:path*",
+    "/admin",
     "/admin/:path*",
   ],
 };

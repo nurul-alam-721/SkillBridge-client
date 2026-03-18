@@ -21,12 +21,14 @@ export interface Category {
 }
 
 export interface AvailabilitySlot {
-  id: string;
+  id:             string;
   tutorProfileId: string;
-  date: string;
-  startTime: string;
-  endTime: string;
-  isBooked: boolean;
+  date:           string;
+  startTime:      string;
+  endTime:        string;
+  isBooked:       boolean;
+  totalBookings:  number;
+  maxCapacity:    number;
 }
 
 export interface ReviewStudent {
@@ -37,7 +39,7 @@ export interface ReviewStudent {
 
 export interface Review {
   id: string;
-  rating: string; 
+  rating: string; // Prisma Decimal → string e.g. "4.5"
   comment: string | null;
   studentId: string;
   tutorProfileId: string;
@@ -103,10 +105,14 @@ export interface TutorStatsResponse {
 export interface TutorsQuery {
   search?: string;
   categoryId?: string;
-  minPrice?: number;
-  maxPrice?: number;
+  minRate?: number;
+  maxRate?: number;
+  minRating?: number;
+  minExperience?: number;
   page?: number;
   limit?: number;
+  sortBy?: string;
+  sortOrder?: "asc" | "desc";
 }
 
 export interface TutorsResponse {
@@ -133,11 +139,12 @@ export interface CreateAvailabilityPayload {
 }
 
 export const tutorService = {
-  // Public 
 
   async getAll(query?: TutorsQuery): Promise<TutorsResponse> {
     const { data } = await api.get("/api/tutors", { params: query });
-    return data;
+    if (data.tutors && data.pagination) return { tutors: data.tutors, pagination: data.pagination };
+    if (data.data?.tutors) return data.data;
+    return data.data ?? data;
   },
 
   async getById(id: string): Promise<TutorProfile> {
@@ -153,12 +160,11 @@ export const tutorService = {
     return [];
   },
 
-  //  Tutor — own profile
 
-  async getMyProfile(): Promise<TutorProfile | null> {
-    const { data } = await api.get("/api/tutors/me");
-    return data.data; // null if no profile yet
-  },
+async getMyProfile(): Promise<TutorProfile | null> {
+  const { data } = await api.get("/api/tutors/me");
+  return data.data ?? null;
+},
 
   async createProfile(payload: UpdateTutorProfilePayload): Promise<TutorProfile> {
     const { data } = await api.post("/api/tutors/create-profile", payload);
@@ -176,7 +182,7 @@ export const tutorService = {
     return data.data;
   },
 
- 
+
   async getMyAvailability(): Promise<AvailabilitySlot[]> {
     const { data } = await api.get("/api/tutor/availability");
     if (Array.isArray(data)) return data;

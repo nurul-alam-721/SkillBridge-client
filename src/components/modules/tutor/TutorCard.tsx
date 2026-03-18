@@ -1,71 +1,106 @@
-import Image from "next/image";
 import Link from "next/link";
-import { Star, BriefcaseBusiness } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Star, BriefcaseBusiness, CalendarCheck, ArrowRight } from "lucide-react";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { TutorProfile } from "@/services/tutor.service";
 
-const fadedShadow = {
-  boxShadow: [
-    "0 1px 2px rgba(0,0,0,0.04)",
-    "0 4px 8px rgba(0,0,0,0.04)",
-    "0 10px 20px rgba(0,0,0,0.04)",
-    "0 20px 40px rgba(0,0,0,0.04)",
-  ].join(", "),
-};
-
 export function TutorCard({ tutor }: { tutor: TutorProfile }) {
+  const availableSlots = tutor.availability?.filter((s) => !s.isBooked).length ?? 0;
   const initial = (tutor.user.name ?? "T").charAt(0).toUpperCase();
 
   return (
-    <div
-      className="rounded-2xl border bg-card p-5 flex flex-col gap-4 transition-transform hover:-translate-y-0.5"
-      style={fadedShadow}
+    <Link
+      href={`/tutors/${tutor.id}`}
+      className="group relative flex flex-col bg-card border border-border/50 rounded-3xl overflow-hidden hover:border-primary/30 hover:shadow-xl hover:shadow-primary/5 transition-all duration-500 cursor-pointer"
     >
-      {/* Header */}
-      <div className="flex items-start gap-3">
-        <div className="relative h-12 w-12 shrink-0 rounded-full overflow-hidden bg-muted">
-          {tutor.user.image ? (
-            <Image src={tutor.user.image} alt={tutor.user.name ?? "Tutor"} fill className="object-cover" />
-          ) : (
-            <div className="h-full w-full flex items-center justify-center font-semibold text-muted-foreground">
-              {initial}
-            </div>
-          )}
-        </div>
+      {/* Ambient glow on hover */}
+      <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none">
+        <div className="absolute -top-12 -right-12 h-40 w-40 rounded-full bg-primary/8 blur-3xl" />
+      </div>
 
-        <div className="flex-1 min-w-0">
-          <p className="font-semibold leading-tight truncate">{tutor.user.name ?? "Unknown"}</p>
-          <p className="text-xs text-muted-foreground mt-0.5">{tutor.category.name}</p>
-          <div className="flex items-center gap-1 mt-1">
-            <BriefcaseBusiness className="h-3 w-3 text-muted-foreground" />
-            <span className="text-xs text-muted-foreground">
-              {tutor.experience} yr{tutor.experience !== 1 ? "s" : ""} exp
+      <div className="relative flex flex-col h-full p-6 gap-5">
+
+        {/* ── Top: Avatar + name + rating ── */}
+        <div className="flex items-start justify-between gap-3">
+          <div className="flex items-center gap-3.5">
+            <div className="relative">
+              <Avatar className="h-[52px] w-[52px] ring-2 ring-border/40 group-hover:ring-primary/30 transition-all duration-300">
+                <AvatarImage src={tutor.user.image ?? undefined} alt={tutor.user.name ?? "Tutor"} />
+                <AvatarFallback className="text-lg font-bold bg-gradient-to-br from-primary/20 to-primary/5 text-primary">
+                  {initial}
+                </AvatarFallback>
+              </Avatar>
+              {availableSlots > 0 && (
+                <span className="absolute -bottom-0.5 -right-0.5 h-3.5 w-3.5 rounded-full bg-emerald-500 ring-2 ring-card" />
+              )}
+            </div>
+
+            <div className="min-w-0">
+              <p className="font-semibold text-[15px] leading-snug text-foreground truncate group-hover:text-primary transition-colors duration-200">
+                {tutor.user.name ?? "Unknown"}
+              </p>
+              <p className="text-xs text-muted-foreground mt-0.5 font-medium">
+                {tutor.category.name}
+              </p>
+            </div>
+          </div>
+
+          {/* Rating */}
+          <div className="flex flex-col items-end shrink-0">
+            <div className="flex items-center gap-1">
+              <Star className="h-3.5 w-3.5 fill-amber-400 text-amber-400" />
+              <span className="text-sm font-bold text-foreground tabular-nums">
+                {tutor.rating.toFixed(1)}
+              </span>
+            </div>
+            <span className="text-[10px] text-muted-foreground">
+              {tutor.totalReviews} review{tutor.totalReviews !== 1 ? "s" : ""}
             </span>
           </div>
         </div>
 
-        <div className="flex items-center gap-1 text-sm shrink-0">
-          <Star className="h-3.5 w-3.5 fill-amber-400 text-amber-400" />
-          <span className="font-medium">{tutor.rating.toFixed(1)}</span>
-          <span className="text-muted-foreground text-xs">({tutor.totalReviews})</span>
-        </div>
-      </div>
-
-      {/* Bio */}
-      <p className="text-sm text-muted-foreground line-clamp-2 leading-relaxed">
-        {tutor.bio ?? "No bio provided."}
-      </p>
-
-      {/* Footer */}
-      <div className="flex items-center justify-between mt-auto">
-        <p className="text-sm">
-          <span className="font-bold text-base">BDT {tutor.hourlyRate}</span>
-          <span className="text-muted-foreground"> / hr</span>
+        {/* ── Bio ── */}
+        <p className="text-sm text-muted-foreground leading-relaxed line-clamp-2 flex-1">
+          {tutor.bio && tutor.bio !== "No bio provided"
+            ? tutor.bio
+            : "No bio provided yet."}
         </p>
-        <Button asChild size="sm" className="rounded-xl">
-          <Link href={`/tutors/${tutor.id}`}>View Profile</Link>
-        </Button>
+
+        {/* ── Stats row ── */}
+        <div className="flex items-center gap-4 py-3 px-3.5 rounded-2xl bg-muted/40 border border-border/30">
+          <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+            <BriefcaseBusiness className="h-3.5 w-3.5 shrink-0" />
+            <span className="font-medium">{tutor.experience} yr{tutor.experience !== 1 ? "s" : ""}</span>
+          </div>
+          <div className="h-3 w-px bg-border/60" />
+          <div className="flex items-center gap-1.5 text-xs">
+            <CalendarCheck className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
+            {availableSlots > 0 ? (
+              <span className="font-semibold text-emerald-600 dark:text-emerald-400">
+                {availableSlots} slot{availableSlots !== 1 ? "s" : ""} free
+              </span>
+            ) : (
+              <span className="text-muted-foreground font-medium">No slots</span>
+            )}
+          </div>
+          <div className="ml-auto text-xs text-muted-foreground font-medium">
+            <span className="text-base font-bold text-foreground tabular-nums">
+              ৳{tutor.hourlyRate}
+            </span>
+            <span className="ml-0.5">/hr</span>
+          </div>
+        </div>
+
+        <div className="flex items-center justify-between">
+          <span className="text-xs text-muted-foreground">
+            {availableSlots > 0 ? "Available to book" : "Check back later"}
+          </span>
+          <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-primary group-hover:gap-3 transition-all duration-300">
+            View Profile
+            <ArrowRight className="h-3.5 w-3.5 group-hover:translate-x-0.5 transition-transform duration-300" />
+          </span>
+        </div>
+
       </div>
-    </div>
+    </Link>
   );
 }
