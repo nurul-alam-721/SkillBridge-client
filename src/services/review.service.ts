@@ -1,18 +1,20 @@
-import {api} from "@/lib/axios";
+import { api } from "@/lib/axios";
 
 export interface CreateReviewPayload {
   tutorProfileId: string;
-  rating:         number;
-  comment?:       string;
+  bookingId: string;
+  rating: number;
+  comment?: string;
 }
 
 export interface Review {
-  id:             string;
-  rating:         string;
-  comment:        string | null;
-  studentId:      string;
+  id: string;
+  rating: string;
+  comment: string | null;
+  studentId: string;
   tutorProfileId: string;
-  createdAt:      string;
+  bookingId: string | null;
+  createdAt: string;
 }
 
 const create = async (payload: CreateReviewPayload): Promise<Review> => {

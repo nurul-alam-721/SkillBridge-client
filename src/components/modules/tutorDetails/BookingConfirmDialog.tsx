@@ -130,7 +130,7 @@ export function BookingConfirmDialog({
           </div>
 
           <p className="text-[11px] text-muted-foreground text-center leading-relaxed">
-            You won`&apos;`t be charged until the session is confirmed by the
+            You won&apos;t be charged until the session is confirmed by the
             tutor.
           </p>
 

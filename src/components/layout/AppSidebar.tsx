@@ -29,6 +29,7 @@ import {
   SidebarRail,
 } from "@/components/ui/sidebar";
 import { CurrentUser } from "@/services/user.service";
+import { Separator } from "../ui/separator";
 
 const SidebarUserFooter = dynamic(
   () =>
@@ -122,8 +123,10 @@ export function AppSidebar({
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
-
-        <SidebarGroup className="mt-auto">
+        
+        <Separator />
+        
+        <SidebarGroup>
           <SidebarGroupContent>
             <SidebarMenu>
               <SidebarMenuItem>
@@ -139,7 +142,6 @@ export function AppSidebar({
         </SidebarGroup>
       </SidebarContent>
 
-      {/* Footer — client-only to avoid Radix ID hydration mismatch */}
       <SidebarFooter>
         <SidebarUserFooter user={user} />
       </SidebarFooter>

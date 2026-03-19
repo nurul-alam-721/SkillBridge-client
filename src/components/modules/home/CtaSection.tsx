@@ -6,7 +6,7 @@ export function CtaSection() {
   return (
     <section className="relative overflow-hidden border-t bg-background">
       {/* Background */}
-      <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-background to-background dark:from-primary/10" />
+      <div className="absolute inset-0 bg-linear-to-br from-primary/5 via-background to-background dark:from-primary/10" />
       <div className="absolute -top-40 left-1/2 -translate-x-1/2 h-[500px] w-[700px] rounded-full bg-primary/8 blur-3xl dark:bg-primary/12" />
 
       <div className="relative mx-auto max-w-6xl px-4 py-16">
@@ -34,7 +34,7 @@ export function CtaSection() {
               className="absolute inset-0 opacity-[0.06] pointer-events-none"
               style={{
                 backgroundImage:
-                  "radial-gradient(circle, white 1px, transparent 1px)",
+                  "radial-linear(circle, white 1px, transparent 1px)",
                 backgroundSize: "22px 22px",
               }}
             />

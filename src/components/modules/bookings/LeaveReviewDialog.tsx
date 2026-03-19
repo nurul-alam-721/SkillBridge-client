@@ -7,8 +7,11 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import {
-  Dialog, DialogContent, DialogHeader,
-  DialogTitle, DialogDescription,
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
 } from "@/components/ui/dialog";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { reviewService } from "@/services/review.service";
@@ -66,28 +69,32 @@ export function LeaveReviewDialog({
   onClose,
   onSubmitted,
 }: {
-  open:        boolean;
-  booking:     Booking;
-  onClose:     () => void;
+  open: boolean;
+  booking: Booking;
+  onClose: () => void;
   onSubmitted: () => void;
 }) {
-  const [rating,  setRating]  = useState(0);
+  const [rating, setRating] = useState(0);
   const [comment, setComment] = useState("");
-  const [busy,    setBusy]    = useState(false);
-  const [error,   setError]   = useState<string | null>(null);
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const tutorName = booking.tutorProfile.user?.name ?? "the tutor";
-  const category  = booking.tutorProfile.category?.name ?? "";
+  const category = booking.tutorProfile.category?.name ?? "";
 
   const handleSubmit = async () => {
-    if (rating === 0) { setError("Please select a star rating."); return; }
+    if (rating === 0) {
+      setError("Please select a star rating.");
+      return;
+    }
     setBusy(true);
     setError(null);
     try {
       await reviewService.create({
         tutorProfileId: booking.tutorProfile.id,
+        bookingId: booking.id,
         rating,
-        comment:        comment.trim() || undefined,
+        comment: comment.trim() || undefined,
       });
       toast.success("Review submitted — thank you!");
       onSubmitted();
@@ -129,14 +136,24 @@ export function LeaveReviewDialog({
         <div className="space-y-4">
           {/* Star rating */}
           <div className="space-y-1.5">
-            <Label>Rating <span className="text-destructive">*</span></Label>
-            <StarRating value={rating} onChange={(v) => { setRating(v); setError(null); }} disabled={busy} />
+            <Label>
+              Rating <span className="text-destructive">*</span>
+            </Label>
+            <StarRating
+              value={rating}
+              onChange={(v) => {
+                setRating(v);
+                setError(null);
+              }}
+              disabled={busy}
+            />
           </div>
 
           {/* Comment */}
           <div className="space-y-1.5">
             <Label htmlFor="review-comment">
-              Comment <span className="text-muted-foreground text-xs">(optional)</span>
+              Comment{" "}
+              <span className="text-muted-foreground text-xs">(optional)</span>
             </Label>
             <Textarea
               id="review-comment"
@@ -149,9 +166,7 @@ export function LeaveReviewDialog({
             />
           </div>
 
-          {error && (
-            <p className="text-xs text-destructive">{error}</p>
-          )}
+          {error && <p className="text-xs text-destructive">{error}</p>}
         </div>
 
         <div className="flex justify-end gap-2 pt-1">

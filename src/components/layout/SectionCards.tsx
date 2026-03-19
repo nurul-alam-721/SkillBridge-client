@@ -9,8 +9,10 @@ import { Badge } from "@/components/ui/badge";
 import { Booking } from "@/services/booking.service";
 
 export function SectionCards({ bookings }: { bookings: Booking[] }) {
-  const total     = bookings.length;
-  const upcoming  = bookings.filter((b) => ["PENDING", "CONFIRMED"].includes(b.status)).length;
+  const total = bookings.length;
+  const upcoming = bookings.filter((b) =>
+    ["PENDING", "CONFIRMED"].includes(b.status),
+  ).length;
   const completed = bookings.filter((b) => b.status === "COMPLETED").length;
   const cancelled = bookings.filter((b) => b.status === "CANCELLED").length;
 
@@ -31,7 +33,10 @@ export function SectionCards({ bookings }: { bookings: Booking[] }) {
       title: "Completed",
       value: completed,
       description: "Sessions attended",
-      badge: completed > 0 ? `${Math.round((completed / (total || 1)) * 100)}%` : "0%",
+      badge:
+        completed > 0
+          ? `${Math.round((completed / (total || 1)) * 100)}%`
+          : "0%",
     },
     {
       title: "Cancelled",
@@ -42,7 +47,7 @@ export function SectionCards({ bookings }: { bookings: Booking[] }) {
   ];
 
   return (
-    <div className="*:data-[slot=card]:from-primary/5 *:data-[slot=card]:to-card dark:*:data-[slot=card]:from-primary/10 grid grid-cols-1 gap-4 px-4 *:data-[slot=card]:bg-gradient-to-t *:data-[slot=card]:shadow-xs sm:grid-cols-2 lg:grid-cols-4 lg:px-6">
+    <div className="*:data-[slot=card]:from-primary/5 *:data-[slot=card]:to-card dark:*:data-[slot=card]:from-primary/10 grid grid-cols-1 gap-4 px-4 *:data-[slot=card]:bg-linear-to-t *:data-[slot=card]:shadow-xs sm:grid-cols-2 lg:grid-cols-4 lg:px-6">
       {cards.map((card) => (
         <Card key={card.title} data-slot="card">
           <CardHeader className="relative">

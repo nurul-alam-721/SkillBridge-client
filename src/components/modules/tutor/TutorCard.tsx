@@ -25,7 +25,7 @@ export function TutorCard({ tutor }: { tutor: TutorProfile }) {
             <div className="relative">
               <Avatar className="h-[52px] w-[52px] ring-2 ring-border/40 group-hover:ring-primary/30 transition-all duration-300">
                 <AvatarImage src={tutor.user.image ?? undefined} alt={tutor.user.name ?? "Tutor"} />
-                <AvatarFallback className="text-lg font-bold bg-gradient-to-br from-primary/20 to-primary/5 text-primary">
+                <AvatarFallback className="text-lg font-bold bg-linear-to-br from-primary/20 to-primary/5 text-primary">
                   {initial}
                 </AvatarFallback>
               </Avatar>

@@ -54,20 +54,13 @@ export function HeroSection({
       <div
         className="absolute inset-0 opacity-[0.025] dark:opacity-[0.04]"
         style={{
-          backgroundImage: `linear-gradient(var(--border) 1px, transparent 1px), linear-gradient(90deg, var(--border) 1px, transparent 1px)`,
+          backgroundImage: `linear-linear(var(--border) 1px, transparent 1px), linear-linear(90deg, var(--border) 1px, transparent 1px)`,
           backgroundSize: "64px 64px",
         }}
       />
       <div className="absolute top-0 left-1/2 -translate-x-1/2 h-64 w-150 rounded-full bg-primary/8 blur-3xl" />
 
       <div className="relative mx-auto max-w-3xl px-6 py-24 text-center">
-        <div className="inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/5 px-3.5 py-1 mb-8">
-          <span className="h-1.5 w-1.5 rounded-full bg-primary animate-pulse" />
-          <span className="text-xs font-medium text-primary tracking-wide">
-            Personalized 1-on-1 Learning
-          </span>
-        </div>
-
         <h1 className="text-[2.75rem] sm:text-5xl font-bold tracking-tight leading-[1.15] mb-5 text-foreground">
           Browse Tutors. Book a Session.
           <br />

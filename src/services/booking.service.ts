@@ -3,6 +3,13 @@ import { TutorProfile, AvailabilitySlot } from "./tutor.service";
 
 export type BookingStatus = "PENDING" | "CONFIRMED" | "COMPLETED" | "CANCELLED";
 
+export interface BookingReview {
+  id: string;
+  rating: string;
+  comment: string | null;
+  createdAt: string;
+}
+
 export interface Booking {
   id: string;
   studentId: string;
@@ -13,6 +20,7 @@ export interface Booking {
   updatedAt: string;
   tutorProfile: TutorProfile;
   slot: AvailabilitySlot;
+  review?: BookingReview | null;
 }
 
 export interface CreateBookingPayload {

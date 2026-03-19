@@ -2,17 +2,27 @@
 
 import { useEffect, useState } from "react";
 import {
-  Mail, Phone, ShieldCheck, CalendarDays,
-  Pencil, User, BadgeCheck, Clock,
+  Mail,
+  Phone,
+  ShieldCheck,
+  CalendarDays,
+  Pencil,
+  User,
+  BadgeCheck,
+  Clock,
 } from "lucide-react";
 import { format } from "date-fns";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";import { Badge } from "@/components/ui/badge";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Separator } from "@/components/ui/separator";
 import {
-  Dialog, DialogContent, DialogHeader,
-  DialogTitle, DialogDescription,
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
 } from "@/components/ui/dialog";
 import { useForm } from "@tanstack/react-form";
 import { Input } from "@/components/ui/input";
@@ -21,7 +31,6 @@ import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
 import { userService, CurrentUser } from "@/services/user.service";
 import { ImageUpload } from "@/app/utils/ImageUpload";
-
 
 function EditProfileDialog({
   open,
@@ -36,7 +45,7 @@ function EditProfileDialog({
 }) {
   const form = useForm({
     defaultValues: {
-      name:  user.name  ?? "",
+      name: user.name ?? "",
       phone: user.phone ?? "",
       image: user.image ?? "",
     },
@@ -44,7 +53,7 @@ function EditProfileDialog({
       const toastId = toast.loading("Saving...");
       try {
         const updated = await userService.updateMyProfile({
-          name:  value.name  || undefined,
+          name: value.name || undefined,
           phone: value.phone || undefined,
           image: value.image || undefined,
         });
@@ -80,7 +89,10 @@ function EditProfileDialog({
 
         <form
           className="space-y-4"
-          onSubmit={(e) => { e.preventDefault(); form.handleSubmit(); }}
+          onSubmit={(e) => {
+            e.preventDefault();
+            form.handleSubmit();
+          }}
         >
           {/* Name */}
           <form.Field name="name">
@@ -128,7 +140,11 @@ function EditProfileDialog({
             >
               Cancel
             </Button>
-            <Button type="submit" className="rounded-xl gap-2" disabled={submitting}>
+            <Button
+              type="submit"
+              className="rounded-xl gap-2"
+              disabled={submitting}
+            >
               {submitting && <Loader2 className="h-3.5 w-3.5 animate-spin" />}
               Save Changes
             </Button>
@@ -138,7 +154,6 @@ function EditProfileDialog({
     </Dialog>
   );
 }
-
 
 function DetailRow({
   icon: Icon,
@@ -161,7 +176,6 @@ function DetailRow({
     </div>
   );
 }
-
 
 function ProfileSkeleton() {
   return (
@@ -188,25 +202,24 @@ function ProfileSkeleton() {
   );
 }
 
-
 export default function StudentProfilePage() {
-  const [user,    setUser]    = useState<CurrentUser | null>(null);
+  const [user, setUser] = useState<CurrentUser | null>(null);
   const [loading, setLoading] = useState(true);
   const [editing, setEditing] = useState(false);
 
   useEffect(() => {
-    userService.getMe()
+    userService
+      .getMe()
       .then(setUser)
       .catch(() => null)
       .finally(() => setLoading(false));
   }, []);
 
   if (loading) return <ProfileSkeleton />;
-  if (!user)   return null;
+  if (!user) return null;
 
   return (
-    <div className="px-4 lg:px-6 py-6 max-w-2xl space-y-6">
-
+    <div className="px-4 lg:px-6 py-6 max-w-2xl space-y-6 p-4">
       <div className="flex flex-col sm:flex-row items-start sm:items-center gap-5">
         <Avatar className="h-24 w-24 text-3xl shrink-0 ring-4 ring-background shadow-md">
           <AvatarImage src={user.image ?? undefined} />
@@ -216,7 +229,9 @@ export default function StudentProfilePage() {
         </Avatar>
 
         <div className="flex-1 min-w-0 space-y-1.5">
-          <h1 className="text-2xl font-bold tracking-tight">{user.name ?? "—"}</h1>
+          <h1 className="text-2xl font-bold tracking-tight">
+            {user.name ?? "—"}
+          </h1>
           <div className="flex flex-wrap items-center gap-2">
             <Badge variant="secondary" className="capitalize">
               {user.role.toLowerCase()}
@@ -249,12 +264,16 @@ export default function StudentProfilePage() {
       <Separator />
 
       <div className="divide-y divide-border/60">
-        <DetailRow icon={User}         label="Full Name"   value={user.name ?? "—"} />
-        <DetailRow icon={Mail}         label="Email"       value={user.email} />
+        <DetailRow icon={User} label="Full Name" value={user.name ?? "—"} />
+        <DetailRow icon={Mail} label="Email" value={user.email} />
         <DetailRow
           icon={Phone}
           label="Phone"
-          value={user.phone ?? <span className="text-muted-foreground italic">Not provided</span>}
+          value={
+            user.phone ?? (
+              <span className="text-muted-foreground italic">Not provided</span>
+            )
+          }
         />
         <DetailRow
           icon={ShieldCheck}
@@ -264,12 +283,20 @@ export default function StudentProfilePage() {
         <DetailRow
           icon={Clock}
           label="Member Since"
-          value={user.createdAt ? format(new Date(user.createdAt), "MMMM d, yyyy") : "—"}
+          value={
+            user.createdAt
+              ? format(new Date(user.createdAt), "MMMM d, yyyy")
+              : "—"
+          }
         />
         <DetailRow
           icon={CalendarDays}
           label="Last Updated"
-          value={user.updatedAt ? format(new Date(user.updatedAt), "MMMM d, yyyy") : "—"}
+          value={
+            user.updatedAt
+              ? format(new Date(user.updatedAt), "MMMM d, yyyy")
+              : "—"
+          }
         />
       </div>
 
@@ -284,6 +311,6 @@ export default function StudentProfilePage() {
           }}
         />
       )}
-
     </div>
-  )};
+  );
+}

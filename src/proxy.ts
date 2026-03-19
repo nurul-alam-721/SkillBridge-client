@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { Roles } from "./constant/Roles";
 
-const protectedRoutes = [
+const PROTECTED = [
   "/dashboard",
   "/tutor/dashboard",
   "/tutor/profile",
@@ -10,7 +10,8 @@ const protectedRoutes = [
   "/admin",
 ];
 
-const AUTH_ROUTES = ["/login", "/register"];
+const AUTH_ROUTES = ["/login", "/register", "/verify-email", "/forgot-password", "/reset-password"];
+const CALLBACK_ROUTES = ["/auth/callback"];
 
 export async function proxy(request: NextRequest) {
   const pathname = request.nextUrl.pathname;
@@ -22,15 +23,17 @@ export async function proxy(request: NextRequest) {
   const isAuthenticated = !!sessionToken;
   const role = request.cookies.get("user-role")?.value;
 
+  if (CALLBACK_ROUTES.some((r) => pathname.startsWith(r))) {
+    return NextResponse.next();
+  }
+
   if (isAuthenticated && AUTH_ROUTES.some((r) => pathname.startsWith(r))) {
-    if (role === Roles.tutor)
-      return NextResponse.redirect(new URL("/tutor/dashboard", request.url));
-    if (role === Roles.admin)
-      return NextResponse.redirect(new URL("/admin/dashboard", request.url));
+    if (role === Roles.tutor) return NextResponse.redirect(new URL("/tutor/dashboard", request.url));
+    if (role === Roles.admin) return NextResponse.redirect(new URL("/admin/dashboard", request.url));
     return NextResponse.redirect(new URL("/dashboard", request.url));
   }
 
-  const isProtected = protectedRoutes.some((p) => pathname.startsWith(p));
+  const isProtected = PROTECTED.some((p) => pathname.startsWith(p));
   if (isProtected && !isAuthenticated) {
     const url = new URL("/login", request.url);
     url.searchParams.set("redirect", pathname);
@@ -38,24 +41,19 @@ export async function proxy(request: NextRequest) {
   }
 
   if (isAuthenticated && role) {
-    if (
-      role === Roles.student &&
-      (pathname.startsWith("/tutor") || pathname.startsWith("/admin"))
-    ) {
+    if (role === Roles.student && (pathname.startsWith("/tutor/") || pathname.startsWith("/admin"))) {
       return NextResponse.redirect(new URL("/dashboard", request.url));
     }
-
     if (role === Roles.tutor && pathname.startsWith("/dashboard")) {
       return NextResponse.redirect(new URL("/tutor/dashboard", request.url));
     }
     if (role === Roles.tutor && pathname.startsWith("/admin")) {
       return NextResponse.redirect(new URL("/tutor/dashboard", request.url));
     }
-
     if (role === Roles.admin && pathname.startsWith("/dashboard")) {
       return NextResponse.redirect(new URL("/admin/dashboard", request.url));
     }
-    if (role === Roles.admin && pathname.startsWith("/tutor")) {
+    if (role === Roles.admin && pathname.startsWith("/tutor/")) {
       return NextResponse.redirect(new URL("/admin/dashboard", request.url));
     }
   }
@@ -65,9 +63,12 @@ export async function proxy(request: NextRequest) {
 
 export const config = {
   matcher: [
+    "/auth/callback",
     "/login",
     "/register",
-    "/dashboard",
+    "/verify-email",
+    "/forgot-password",
+    "/reset-password",
     "/dashboard/:path*",
     "/tutor/dashboard",
     "/tutor/dashboard/:path*",
@@ -75,7 +76,6 @@ export const config = {
     "/tutor/profile/:path*",
     "/tutor/availability",
     "/tutor/availability/:path*",
-    "/admin",
     "/admin/:path*",
   ],
 };
