@@ -51,7 +51,12 @@ function EmptyState({ message, showAction }: { message: string; showAction?: boo
 }
 
 export default function BookingsPage() {
-  const { bookings, upcoming, past, loading, refresh } = useMyBookings();
+  const { bookings, upcoming, past, loading, refresh, patchReview } = useMyBookings();
+
+  const reviewed   = bookings.filter((b) => !!b.review);
+  const unreviewed = bookings.filter(
+    (b) => !b.review && (b.status === "COMPLETED" || b.status === "CONFIRMED")
+  );
 
   return (
     <div className="flex flex-col gap-4 py-4 md:gap-6 md:py-6">
@@ -61,7 +66,7 @@ export default function BookingsPage() {
         <div>
           <h1 className="text-lg font-bold leading-tight">My Bookings</h1>
           <p className="text-xs text-muted-foreground mt-0.5">
-            {loading ? "Loading..." : `${bookings.length} total · ${upcoming.length} upcoming`}
+            {loading ? "Loading..." : `${bookings.length} total · ${upcoming.length} upcoming · ${reviewed.length} reviewed`}
           </p>
         </div>
         <Button
@@ -86,9 +91,15 @@ export default function BookingsPage() {
               )}
             </TabsTrigger>
             <TabsTrigger value="past">
-              Previous
+              Past
               {past.length > 0 && (
                 <Badge variant="secondary" className="ml-2 text-xs">{past.length}</Badge>
+              )}
+            </TabsTrigger>
+            <TabsTrigger value="reviews">
+              Reviews
+              {reviewed.length > 0 && (
+                <Badge variant="secondary" className="ml-2 text-xs">{reviewed.length}</Badge>
               )}
             </TabsTrigger>
             <TabsTrigger value="all">
@@ -99,6 +110,7 @@ export default function BookingsPage() {
             </TabsTrigger>
           </TabsList>
 
+          {/* Upcoming */}
           <TabsContent value="upcoming">
             <Card>
               <CardHeader className="pb-2">
@@ -107,20 +119,21 @@ export default function BookingsPage() {
               </CardHeader>
               <CardContent>
                 {loading ? (
-                  <div className="grid gap-5">
+                  <div className="grid gap-3 sm:grid-cols-2">
                     {Array.from({ length: 4 }).map((_, i) => <BookingCardSkeleton key={i} />)}
                   </div>
                 ) : upcoming.length === 0 ? (
                   <EmptyState message="No upcoming sessions" showAction />
                 ) : (
-                  <div className="grid gap-5 ">
-                    {upcoming.map((b) => <BookingCard key={b.id} booking={b} />)}
+                  <div className="grid gap-3 sm:grid-cols-2">
+                    {upcoming.map((b) => <BookingCard key={b.id} booking={b} onReviewed={refresh} patchReview={patchReview} />)}
                   </div>
                 )}
               </CardContent>
             </Card>
           </TabsContent>
 
+          {/* Past */}
           <TabsContent value="past">
             <Card>
               <CardHeader className="pb-2">
@@ -129,20 +142,69 @@ export default function BookingsPage() {
               </CardHeader>
               <CardContent>
                 {loading ? (
-                  <div className="grid gap-5">
+                  <div className="grid gap-3 sm:grid-cols-2">
                     {Array.from({ length: 4 }).map((_, i) => <BookingCardSkeleton key={i} />)}
                   </div>
                 ) : past.length === 0 ? (
                   <EmptyState message="No past sessions yet" />
                 ) : (
-                  <div className="grid gap-5">
-                    {past.map((b) => <BookingCard key={b.id} booking={b} />)}
+                  <div className="grid gap-3 sm:grid-cols-2">
+                    {past.map((b) => <BookingCard key={b.id} booking={b} onReviewed={refresh} patchReview={patchReview} />)}
                   </div>
                 )}
               </CardContent>
             </Card>
           </TabsContent>
 
+          {/* Reviews tab */}
+          <TabsContent value="reviews">
+            <Card>
+              <CardHeader className="pb-2">
+                <CardTitle className="text-sm font-semibold">My Reviews</CardTitle>
+                <CardDescription className="text-xs">
+                  {reviewed.length} review{reviewed.length !== 1 ? "s" : ""} submitted
+                  {unreviewed.length > 0 && ` · ${unreviewed.length} pending`}
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                {/* Pending reviews */}
+                {unreviewed.length > 0 && (
+                  <div>
+                    <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground mb-3">
+                      Awaiting your review
+                    </p>
+                    <div className="grid gap-3 sm:grid-cols-2">
+                      {unreviewed.map((b) => (
+                        <BookingCard key={b.id} booking={b} onReviewed={refresh} patchReview={patchReview} />
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Submitted reviews */}
+                {reviewed.length > 0 && (
+                  <div>
+                    {unreviewed.length > 0 && (
+                      <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground mb-3">
+                        Submitted reviews
+                      </p>
+                    )}
+                    <div className="grid gap-3 sm:grid-cols-2">
+                      {reviewed.map((b) => (
+                        <BookingCard key={b.id} booking={b} onReviewed={refresh} patchReview={patchReview} />
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {reviewed.length === 0 && unreviewed.length === 0 && (
+                  <EmptyState message="No reviews yet" />
+                )}
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* All */}
           <TabsContent value="all">
             <Card>
               <CardHeader className="pb-2">
@@ -157,8 +219,8 @@ export default function BookingsPage() {
                 ) : bookings.length === 0 ? (
                   <EmptyState message="No bookings yet" showAction />
                 ) : (
-                  <div className="grid gap-5">
-                    {bookings.map((b) => <BookingCard key={b.id} booking={b} />)}
+                  <div className="grid gap-3 sm:grid-cols-2">
+                    {bookings.map((b) => <BookingCard key={b.id} booking={b} onReviewed={refresh} patchReview={patchReview} />)}
                   </div>
                 )}
               </CardContent>

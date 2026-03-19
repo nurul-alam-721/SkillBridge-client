@@ -8,7 +8,7 @@ import { BookingsTable } from "@/components/modules/bookings/bookingsTable";
 import { useMyBookings } from "@/hooks/useMyBookings";
 
 export default function StudentDashboardPage() {
-  const { bookings, upcoming, loading, refresh } = useMyBookings();
+  const { bookings, upcoming, loading, refresh, patchReview } = useMyBookings();
 
   useEffect(() => {
     const onFocus = () => refresh();
@@ -34,7 +34,11 @@ export default function StudentDashboardPage() {
           </TabsList>
 
           <TabsContent value="bookings">
-            <BookingsTable bookings={loading ? [] : bookings} />
+            <BookingsTable
+              bookings={loading ? [] : bookings}
+              onReviewed={refresh}
+              patchReview={patchReview}
+            />
           </TabsContent>
         </Tabs>
       </div>

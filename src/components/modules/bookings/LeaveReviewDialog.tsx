@@ -15,7 +15,7 @@ import {
 } from "@/components/ui/dialog";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { reviewService } from "@/services/review.service";
-import { Booking } from "@/services/booking.service";
+import { Booking, BookingReview } from "@/services/booking.service";
 
 function StarRating({
   value,
@@ -72,7 +72,7 @@ export function LeaveReviewDialog({
   open: boolean;
   booking: Booking;
   onClose: () => void;
-  onSubmitted: () => void;
+  onSubmitted: (review: BookingReview) => void;
 }) {
   const [rating, setRating] = useState(0);
   const [comment, setComment] = useState("");
@@ -90,14 +90,14 @@ export function LeaveReviewDialog({
     setBusy(true);
     setError(null);
     try {
-      await reviewService.create({
+      const review = await reviewService.create({
         tutorProfileId: booking.tutorProfile.id,
         bookingId: booking.id,
         rating,
         comment: comment.trim() || undefined,
       });
       toast.success("Review submitted — thank you!");
-      onSubmitted();
+      onSubmitted(review);
       onClose();
     } catch (err: unknown) {
       const e = err as { response?: { data?: { message?: string } } };

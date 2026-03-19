@@ -22,4 +22,16 @@ const create = async (payload: CreateReviewPayload): Promise<Review> => {
   return res.data.data;
 };
 
-export const reviewService = { create };
+const update = async (
+  id: string,
+  payload: { rating: number; comment?: string },
+): Promise<Review> => {
+  const res = await api.patch(`/api/reviews/${id}`, payload);
+  return res.data.data;
+};
+
+const remove = async (id: string): Promise<void> => {
+  await api.delete(`/api/reviews/${id}`);
+};
+
+export const reviewService = { create, update, remove };

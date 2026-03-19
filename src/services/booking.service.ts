@@ -8,6 +8,9 @@ export interface BookingReview {
   rating: string;
   comment: string | null;
   createdAt: string;
+  studentId?: string;
+  tutorProfileId?: string;
+  bookingId?: string | null;
 }
 
 export interface Booking {

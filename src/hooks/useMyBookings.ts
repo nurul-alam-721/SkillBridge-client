@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
-import { bookingService, Booking } from "@/services/booking.service";
+import { bookingService, Booking, BookingReview } from "@/services/booking.service";
 
 export function useMyBookings() {
   const [bookings, setBookings] = useState<Booking[]>([]);
@@ -19,8 +19,14 @@ export function useMyBookings() {
 
   useEffect(() => { load(); }, [load]);
 
+  const patchReview = useCallback((bookingId: string, review: BookingReview | null) => {
+    setBookings((prev) =>
+      prev.map((b) => b.id === bookingId ? { ...b, review } : b)
+    );
+  }, []);
+
   const upcoming = bookings.filter((b) => ["PENDING", "CONFIRMED"].includes(b.status));
   const past     = bookings.filter((b) => ["COMPLETED", "CANCELLED"].includes(b.status));
 
-  return { bookings, upcoming, past, loading, refresh: load };
+  return { bookings, upcoming, past, loading, refresh: load, patchReview };
 }
