@@ -1,29 +1,15 @@
-import { cookies } from "next/headers";
+import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/layout/AppSidebar";
 import { SiteHeader } from "@/components/layout/SiteHeader";
 import { CurrentUser } from "@/services/user.service";
-import { env } from "@/env";
 
-async function getUser(): Promise<CurrentUser | null> {
-  try {
-    const cookieStore = await cookies();
-    const cookieHeader = cookieStore.getAll()
-      .map((c) => `${c.name}=${c.value}`)
-      .join("; ");
+const BACKEND_URL =
+  process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:5000";
 
-    const res = await fetch(`${env.NEXT_PUBLIC_API_URL}/api/auth/me`, {
-      headers: { Cookie: cookieHeader },
-      cache: "no-store",
-    });
-
-    if (!res.ok) return null;
-    const data = await res.json();
-    return data.data ?? null;
-  } catch {
-    return null;
-  }
+interface SessionResponse {
+  user: CurrentUser | null;
 }
 
 export default async function DashboardLayout({
@@ -31,9 +17,30 @@ export default async function DashboardLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const user = await getUser();
+  const cookieHeader = (await headers()).get("cookie") ?? "";
 
-  if (!user) redirect("/login");
+  let sessionData: SessionResponse | null = null;
+
+  try {
+    const res = await fetch(`${BACKEND_URL}/api/auth/get-session`, {
+      method: "GET",
+      headers: {
+        Cookie: cookieHeader,
+        "Content-Type": "application/json",
+      },
+      cache: "no-store",
+    });
+
+    if (res.ok) {
+      sessionData = (await res.json()) as SessionResponse;
+    }
+  } catch {}
+
+  if (!sessionData?.user) {
+    redirect("/login");
+  }
+
+  const user: CurrentUser = sessionData.user;
 
   return (
     <SidebarProvider

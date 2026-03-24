@@ -6,12 +6,18 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import {
-  Select, SelectContent, SelectItem,
-  SelectTrigger, SelectValue,
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
 } from "@/components/ui/select";
 import {
-  Sheet, SheetContent, SheetHeader,
-  SheetTitle, SheetTrigger,
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
 } from "@/components/ui/sheet";
 import { Separator } from "@/components/ui/separator";
 import { TutorsFilter } from "@/components/modules/tutor/TutorsFilter";
@@ -20,18 +26,28 @@ import { TutorCard } from "@/components/modules/tutor/TutorCard";
 import { useTutors } from "@/hooks/useTutors";
 
 const SORT_OPTIONS = [
-  { label: "Top rated",          value: "rating"     },
-  { label: "Price: Low to high", value: "price_asc"  },
+  { label: "Top rated", value: "rating" },
+  { label: "Price: Low to high", value: "price_asc" },
   { label: "Price: High to low", value: "price_desc" },
-  { label: "Most reviews",       value: "reviews"    },
-  { label: "Most experienced",   value: "experience" },
+  { label: "Most reviews", value: "reviews" },
+  { label: "Most experienced", value: "experience" },
 ];
 
 function TutorsContent() {
   const {
-    tutors, categories, total, loading,
-    filters, search, sort, totalPages,
-    setSearch, setSort, setPage, updateFilters, resetFilters,
+    tutors,
+    categories,
+    total,
+    loading,
+    filters,
+    search,
+    sort,
+    totalPages,
+    setSearch,
+    setSort,
+    setPage,
+    updateFilters,
+    resetFilters,
   } = useTutors();
 
   // Active filter count for badge
@@ -45,7 +61,6 @@ function TutorsContent() {
 
   return (
     <div className="min-h-screen bg-background">
-
       <div className="border-b bg-card">
         <div className="container mx-auto px-4 py-8">
           <div className="flex items-center gap-1.5 mb-2">
@@ -99,7 +114,6 @@ function TutorsContent() {
 
       {/* ── Main content ────────────────────────────────────────────────── */}
       <div className="container mx-auto px-4 py-6">
-
         {/* Toolbar */}
         <div className="flex flex-col sm:flex-row gap-3 mb-6">
           <div className="relative flex-1">
@@ -136,7 +150,10 @@ function TutorsContent() {
           {/* Mobile filter trigger */}
           <Sheet>
             <SheetTrigger asChild>
-              <Button variant="outline" className="sm:hidden h-10 rounded-xl gap-2">
+              <Button
+                variant="outline"
+                className="sm:hidden h-10 rounded-xl gap-2"
+              >
                 <SlidersHorizontal className="h-4 w-4" />
                 Filters
                 {activeFilterCount > 0 && (
@@ -162,7 +179,6 @@ function TutorsContent() {
 
         {/* Layout */}
         <div className="flex gap-6">
-
           {/* Desktop sidebar */}
           <aside className="hidden sm:block w-60 shrink-0">
             <div className="sticky top-6 rounded-2xl border bg-card">
@@ -233,7 +249,8 @@ function TutorsContent() {
                 {totalPages > 1 && (
                   <div className="flex items-center justify-center gap-3 mt-8 pt-8 border-t">
                     <Button
-                      variant="outline" size="sm"
+                      variant="outline"
+                      size="sm"
                       className="rounded-xl h-9"
                       disabled={filters.page === 1}
                       onClick={() => setPage((filters.page ?? 1) - 1)}
@@ -244,7 +261,8 @@ function TutorsContent() {
                       Page {filters.page} of {totalPages}
                     </span>
                     <Button
-                      variant="outline" size="sm"
+                      variant="outline"
+                      size="sm"
                       className="rounded-xl h-9"
                       disabled={filters.page === totalPages}
                       onClick={() => setPage((filters.page ?? 1) + 1)}

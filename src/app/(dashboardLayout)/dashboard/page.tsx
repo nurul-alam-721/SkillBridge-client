@@ -6,15 +6,20 @@ import { Badge } from "@/components/ui/badge";
 import { SectionCards } from "@/components/layout/SectionCards";
 import { BookingsTable } from "@/components/modules/bookings/bookingsTable";
 import { useMyBookings } from "@/hooks/useMyBookings";
+import { useMounted } from "@/hooks/userMounted";
 
 export default function StudentDashboardPage() {
   const { bookings, upcoming, loading, refresh, patchReview } = useMyBookings();
+
+  const mounted = useMounted();
 
   useEffect(() => {
     const onFocus = () => refresh();
     window.addEventListener("focus", onFocus);
     return () => window.removeEventListener("focus", onFocus);
   }, [refresh]);
+
+  if (!mounted) return null;
 
   return (
     <div className="flex flex-col gap-4 py-4 md:gap-6 md:py-6">

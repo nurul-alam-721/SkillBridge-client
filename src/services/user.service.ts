@@ -1,4 +1,4 @@
-import { api } from "@/lib/axios";
+import { apiClient } from "@/lib/axios";
 import { UserRole, UserStatus } from "@/types/types";
 
 export interface CurrentUser {
@@ -22,21 +22,17 @@ export interface UpdateProfilePayload {
 
 export const userService = {
   async getMe(): Promise<CurrentUser> {
-    const { data } = await api.get("/api/auth/me");
+    const { data } = await apiClient.get("/api/auth/me");
     return data.data;
   },
 
   async updateMyProfile(payload: UpdateProfilePayload): Promise<CurrentUser> {
-    const { data } = await api.put("/api/users/me", payload);
+    const { data } = await apiClient.put("/api/users/me", payload);
     return data.data;
   },
 
-  // Admin only
-  async updateStatus(
-    userId: string,
-    status: UserStatus
-  ): Promise<CurrentUser> {
-    const { data } = await api.patch(`/api/users/${userId}`, { status });
+  async updateStatus(userId: string, status: UserStatus): Promise<CurrentUser> {
+    const { data } = await apiClient.patch(`/api/users/${userId}`, { status });
     return data.data;
   },
 };

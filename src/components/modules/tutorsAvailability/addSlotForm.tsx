@@ -5,7 +5,13 @@ import { Plus, Loader2, Info } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+} from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { CreateAvailabilityPayload } from "@/services/tutor.service";
 
@@ -16,35 +22,36 @@ interface AddSlotFormProps {
 }
 
 const TIME_PRESETS = [
-  { label: "9–10 AM",  start: "09:00", end: "10:00" },
+  { label: "9–10 AM", start: "09:00", end: "10:00" },
   { label: "10–11 AM", start: "10:00", end: "11:00" },
   { label: "11–12 PM", start: "11:00", end: "12:00" },
-  { label: "12–1 PM",  start: "12:00", end: "13:00" },
-  { label: "1–2 PM",   start: "13:00", end: "14:00" },
-  { label: "2–3 PM",   start: "14:00", end: "15:00" },
-  { label: "3–4 PM",   start: "15:00", end: "16:00" },
+  { label: "12–1 PM", start: "12:00", end: "13:00" },
+  { label: "1–2 PM", start: "13:00", end: "14:00" },
+  { label: "2–3 PM", start: "14:00", end: "15:00" },
+  { label: "3–4 PM", start: "15:00", end: "16:00" },
 ];
 
-function getValidationError(date: string, start: string, end: string): string | null {
+function getValidationError(
+  date: string,
+  start: string,
+  end: string,
+): string | null {
   if (!date || !start || !end) return null;
 
   const now = new Date();
   const startDt = new Date(`${date}T${start}`);
-  const endDt   = new Date(`${date}T${end}`);
+  const endDt = new Date(`${date}T${end}`);
 
-  if (startDt <= now)
-    return "Start time must be in the future.";
-  if (endDt <= startDt)
-    return "End time must be after start time.";
+  if (startDt <= now) return "Start time must be in the future.";
+  if (endDt <= startDt) return "End time must be after start time.";
 
   const hours = (endDt.getTime() - startDt.getTime()) / (1000 * 60 * 60);
-  if (hours < 1)
-    return "Slot must be at least 1 hour.";
+  if (hours < 1) return "Slot must be at least 1 hour.";
 
   const [startH] = start.split(":").map(Number);
-  const [endH]   = end.split(":").map(Number);
+  const [endH] = end.split(":").map(Number);
   if ((startH as number) < 9 || (endH as number) > 16)
-    return "Slots must be between 09:00 and 16:00.";
+    return "Slots must be between 09:00 am and 04:00 pm.";
 
   return null;
 }
@@ -52,12 +59,12 @@ function getValidationError(date: string, start: string, end: string): string | 
 export function AddSlotForm({ saving, error, onAdd }: AddSlotFormProps) {
   const today = new Date().toISOString().split("T")[0] as string;
 
-  const [date,      setDate]      = useState("");
+  const [date, setDate] = useState("");
   const [startTime, setStartTime] = useState("");
-  const [endTime,   setEndTime]   = useState("");
+  const [endTime, setEndTime] = useState("");
 
   const clientError = getValidationError(date, startTime, endTime);
-  const isValid     = date && startTime && endTime && !clientError;
+  const isValid = date && startTime && endTime && !clientError;
 
   const applyPreset = (start: string, end: string) => {
     setStartTime(start);
@@ -84,14 +91,13 @@ export function AddSlotForm({ saving, error, onAdd }: AddSlotFormProps) {
           <div>
             <CardTitle className="text-base">Add Slot</CardTitle>
             <CardDescription className="text-xs mt-0.5">
-              09:00 – 16:00 · minimum 1 hour
+              09:00 am – 04:00 pm· minimum 1 hour
             </CardDescription>
           </div>
         </div>
       </CardHeader>
 
       <CardContent className="space-y-4">
-
         {/* Backend error */}
         {error && (
           <Alert variant="destructive" className="py-2">
@@ -103,7 +109,9 @@ export function AddSlotForm({ saving, error, onAdd }: AddSlotFormProps) {
         <div className="flex items-start gap-2 rounded-xl bg-muted/60 px-3 py-2.5">
           <Info className="h-3.5 w-3.5 text-muted-foreground mt-0.5 shrink-0" />
           <p className="text-xs text-muted-foreground leading-relaxed">
-            Slots must be between <strong>09:00</strong> and <strong>16:00</strong>, at least <strong>1 hour</strong> long, and in the future.
+            Slots must be between <strong>09:00 am</strong> and{" "}
+            <strong>04:00 pm</strong>, at least <strong>1 hour</strong> long, and
+            in the future.
           </p>
         </div>
 
@@ -128,9 +136,11 @@ export function AddSlotForm({ saving, error, onAdd }: AddSlotFormProps) {
                 type="button"
                 onClick={() => applyPreset(p.start, p.end)}
                 className={`rounded-lg border px-2.5 py-1.5 text-xs font-medium text-left transition-colors hover:border-primary hover:text-primary hover:bg-primary/5
-                  ${startTime === p.start && endTime === p.end
-                    ? "border-primary bg-primary/10 text-primary"
-                    : "text-muted-foreground"}`}
+                  ${
+                    startTime === p.start && endTime === p.end
+                      ? "border-primary bg-primary/10 text-primary"
+                      : "text-muted-foreground"
+                  }`}
               >
                 {p.label}
               </button>
@@ -174,10 +184,15 @@ export function AddSlotForm({ saving, error, onAdd }: AddSlotFormProps) {
           disabled={!isValid || saving}
           className="w-full rounded-xl h-9 text-sm font-medium gap-2"
         >
-          {saving
-            ? <><Loader2 className="h-3.5 w-3.5 animate-spin" /> Adding...</>
-            : <><Plus className="h-3.5 w-3.5" /> Add Slot</>
-          }
+          {saving ? (
+            <>
+              <Loader2 className="h-3.5 w-3.5 animate-spin" /> Adding...
+            </>
+          ) : (
+            <>
+              <Plus className="h-3.5 w-3.5" /> Add Slot
+            </>
+          )}
         </Button>
       </CardContent>
     </Card>

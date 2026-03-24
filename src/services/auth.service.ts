@@ -1,36 +1,21 @@
-import { api } from "@/lib/axios";
-import { User } from "@/types/ypes";
+import { createServerApi } from "@/lib/axios";
+import { User } from "@/types/types";
 
 export interface SessionResponse {
   user: User;
 }
 
 export const authService = {
-  async login(payload: { email: string; password: string }) {
-    const { data } = await api.post("/api/auth/login", payload);
-    return data;
-  },
-
-  async register(payload: {
-    name: string;
-    email: string;
-    password: string;
-    role: "STUDENT" | "TUTOR";
-  }) {
-    const { data } = await api.post("/api/auth/register", payload);
-    return data;
-  },
-
   async getSession(): Promise<SessionResponse | null> {
     try {
-      const { data } = await api.get("/api/auth/me");
-      return data;
+      const api = await createServerApi();
+      const { data } = await api.get("/api/me");
+      if (data?.success && data?.data) {
+        return { user: data.data as User };
+      }
+      return null;
     } catch {
       return null;
     }
-  },
-
-  async logout() {
-    await api.post("/auth/logout");
   },
 };

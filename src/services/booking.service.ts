@@ -1,4 +1,4 @@
-import { api } from "@/lib/axios";
+import { apiClient } from "@/lib/axios";
 import { TutorProfile, AvailabilitySlot } from "./tutor.service";
 
 export type BookingStatus = "PENDING" | "CONFIRMED" | "COMPLETED" | "CANCELLED";
@@ -33,22 +33,22 @@ export interface CreateBookingPayload {
 
 export const bookingService = {
   async create(payload: CreateBookingPayload): Promise<Booking> {
-    const { data } = await api.post("/api/bookings", payload);
+    const { data } = await apiClient.post("/api/bookings", payload);
     return data.data;
   },
 
   async getMyBookings(): Promise<Booking[]> {
-    const { data } = await api.get("/api/bookings/me");
+    const { data } = await apiClient.get("/api/bookings/me");
     return data.data;
   },
 
   async getById(id: string): Promise<Booking> {
-    const { data } = await api.get(`/api/bookings/${id}`);
+    const { data } = await apiClient.get(`/api/bookings/${id}`);
     return data.data;
   },
 
   async updateStatus(id: string, status: BookingStatus): Promise<Booking> {
-    const { data } = await api.put(`/api/bookings/${id}/status`, { status });
+    const { data } = await apiClient.put(`/api/bookings/${id}/status`, { status });
     return data.data;
   },
 };

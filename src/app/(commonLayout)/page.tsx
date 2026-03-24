@@ -66,7 +66,10 @@ export default function HomePage() {
         avgRating={avgRating}
         loading={loading}
       />
-      <CategoriesSection categories={categories} />
+     <CategoriesSection 
+        categories={categories} 
+        loading={loading}       
+      />
       <FeaturedTutorsSection tutors={tutors} loading={loading} />
       <HowItWorksSection />
       <CtaSection />

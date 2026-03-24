@@ -1,12 +1,12 @@
 "use client";
 
 import { createContext, useContext, useState, useEffect, ReactNode } from "react";
-import { CurrentUser } from "@/types/ypes";
+import { User } from "@/types/types";
 import { authService } from "@/services/auth.service";
 
 interface AuthContextType {
-  user: CurrentUser | null;
-  setUser: (user: CurrentUser | null) => void;
+  user: User | null;
+  setUser: (user: User | null) => void;
   loading: boolean;
   refreshUser: () => Promise<void>;
 }
@@ -14,16 +14,28 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
-  const [user, setUser] = useState<CurrentUser | null>(null);
+  const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
 
   const refreshUser = async () => {
     const session = await authService.getSession();
-    setUser(session ?? null);
+    setUser(session?.user ?? null);
   };
 
   useEffect(() => {
-    refreshUser().finally(() => setLoading(false));
+    let mounted = true;
+
+    const loadUser = async () => {
+      try {
+        const session = await authService.getSession();
+        if (mounted) setUser(session?.user ?? null);
+      } finally {
+        if (mounted) setLoading(false);
+      }
+    };
+
+    loadUser();
+    return () => { mounted = false; };
   }, []);
 
   return (

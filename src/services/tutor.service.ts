@@ -1,4 +1,4 @@
-import { api } from "@/lib/axios";
+import { apiClient } from "@/lib/axios";
 
 export type Role = "STUDENT" | "TUTOR" | "ADMIN";
 export type UserStatus = "ACTIVE" | "BANNED";
@@ -21,14 +21,14 @@ export interface Category {
 }
 
 export interface AvailabilitySlot {
-  id:             string;
+  id: string;
   tutorProfileId: string;
-  date:           string;
-  startTime:      string;
-  endTime:        string;
-  isBooked:       boolean;
-  totalBookings:  number;
-  maxCapacity:    number;
+  date: string;
+  startTime: string;
+  endTime: string;
+  isBooked: boolean;
+  totalBookings: number;
+  maxCapacity: number;
 }
 
 export interface ReviewStudent {
@@ -39,7 +39,7 @@ export interface ReviewStudent {
 
 export interface Review {
   id: string;
-  rating: string; // Prisma Decimal → string e.g. "4.5"
+  rating: string;
   comment: string | null;
   studentId: string;
   tutorProfileId: string;
@@ -139,63 +139,59 @@ export interface CreateAvailabilityPayload {
 }
 
 export const tutorService = {
-
   async getAll(query?: TutorsQuery): Promise<TutorsResponse> {
-    const { data } = await api.get("/api/tutors", { params: query });
+    const { data } = await apiClient.get("/api/tutors", { params: query });
     if (data.tutors && data.pagination) return { tutors: data.tutors, pagination: data.pagination };
     if (data.data?.tutors) return data.data;
     return data.data ?? data;
   },
 
   async getById(id: string): Promise<TutorProfile> {
-    const { data } = await api.get(`/api/tutors/${id}`);
+    const { data } = await apiClient.get(`/api/tutors/${id}`);
     return data.data;
   },
 
   async getCategories(): Promise<Category[]> {
-    const { data } = await api.get("/api/categories");
+    const { data } = await apiClient.get("/api/categories");
     if (Array.isArray(data)) return data;
     if (Array.isArray(data.categories)) return data.categories;
     if (Array.isArray(data.data)) return data.data;
     return [];
   },
 
-
-async getMyProfile(): Promise<TutorProfile | null> {
-  const { data } = await api.get("/api/tutors/me");
-  return data.data ?? null;
-},
+  async getMyProfile(): Promise<TutorProfile | null> {
+    const { data } = await apiClient.get("/api/tutors/me");
+    return data.data ?? null;
+  },
 
   async createProfile(payload: UpdateTutorProfilePayload): Promise<TutorProfile> {
-    const { data } = await api.post("/api/tutors/create-profile", payload);
+    const { data } = await apiClient.post("/api/tutors/create-profile", payload);
     return data.data;
   },
 
   async updateProfile(payload: UpdateTutorProfilePayload): Promise<TutorProfile> {
-    const { data } = await api.put("/api/tutors/me", payload);
+    const { data } = await apiClient.put("/api/tutors/me", payload);
     return data.data;
   },
-
 
   async getMyStats(): Promise<TutorStatsResponse> {
-    const { data } = await api.get("/api/tutors/me/stats");
+    const { data } = await apiClient.get("/api/tutors/me/stats");
     return data.data;
   },
 
-
   async getMyAvailability(): Promise<AvailabilitySlot[]> {
-    const { data } = await api.get("/api/tutor/availability");
+    const { data } = await apiClient.get("/api/tutor/availability");
     if (Array.isArray(data)) return data;
     if (Array.isArray(data.data)) return data.data;
     return [];
   },
 
   async createAvailabilitySlot(payload: CreateAvailabilityPayload): Promise<AvailabilitySlot> {
-    const { data } = await api.post("/api/tutor/availability", payload);
+    const { data } = await apiClient.post("/api/tutor/availability", payload);
     return data.data;
   },
 
   async deleteAvailabilitySlot(slotId: string): Promise<void> {
-    await api.delete(`/api/tutor/availability/${slotId}`);
+    await apiClient.delete(`/api/tutor/availability/${slotId}`);
   },
 };

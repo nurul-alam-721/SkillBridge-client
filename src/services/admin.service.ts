@@ -1,4 +1,4 @@
-import { api } from "@/lib/axios";
+import { createServerApi, apiClient } from "@/lib/axios";
 
 export interface RecentBooking {
   id: string;
@@ -28,8 +28,8 @@ export interface AdminStats {
 }
 
 export type BookingStatus = "PENDING" | "CONFIRMED" | "COMPLETED" | "CANCELLED";
-export type UserStatus    = "ACTIVE" | "BANNED";
-export type UserRole      = "STUDENT" | "TUTOR" | "ADMIN";
+export type UserStatus = "ACTIVE" | "BANNED";
+export type UserRole = "STUDENT" | "TUTOR" | "ADMIN";
 
 export interface AdminBooking {
   id: string;
@@ -56,24 +56,50 @@ export interface AdminUser {
   createdAt: string;
 }
 
-const getStats = async (): Promise<AdminStats> => {
-  const res = await api.get("/api/admin/stats");
-  return res.data.data;
+export const adminService = {
+  getStats: async (): Promise<AdminStats> => {
+    const api = await createServerApi();
+    const res = await api.get("/api/admin/stats");
+    return res.data.data ?? res.data;
+  },
+
+  getAllBookings: async (): Promise<AdminBooking[]> => {
+    const api = await createServerApi();
+    const res = await api.get("/api/admin/bookings");
+    return res.data.data ?? res.data;
+  },
+
+  getAllUsers: async (): Promise<AdminUser[]> => {
+    const api = await createServerApi();
+    const res = await api.get("/api/admin/users");
+    return res.data.data ?? res.data;
+  },
+
+  updateUserStatus: async (id: string, status: UserStatus): Promise<AdminUser> => {
+    const api = await createServerApi();
+    const res = await api.patch(`/api/admin/users/${id}/status`, { status });
+    return res.data.data ?? res.data;
+  },
 };
 
-const getAllBookings = async (): Promise<AdminBooking[]> => {
-  const res = await api.get("/api/admin/bookings");
-  return res.data.data;
-};
+export const adminClientService = {
+  getStats: async (): Promise<AdminStats> => {
+    const res = await apiClient.get("/api/admin/stats");
+    return res.data.data ?? res.data;
+  },
 
-const getAllUsers = async (): Promise<AdminUser[]> => {
-  const res = await api.get("/api/admin/users");
-  return res.data.data;
-};
+  getAllBookings: async (): Promise<AdminBooking[]> => {
+    const res = await apiClient.get("/api/admin/bookings");
+    return res.data.data ?? res.data;
+  },
 
-const updateUserStatus = async (id: string, status: UserStatus): Promise<AdminUser> => {
-  const res = await api.patch(`/api/admin/users/${id}/status`, { status });
-  return res.data.data;
-};
+  getAllUsers: async (): Promise<AdminUser[]> => {
+    const res = await apiClient.get("/api/admin/users");
+    return res.data.data ?? res.data;
+  },
 
-export const adminService = { getStats, getAllBookings, getAllUsers, updateUserStatus };
+  updateUserStatus: async (id: string, status: UserStatus): Promise<AdminUser> => {
+    const res = await apiClient.patch(`/api/admin/users/${id}/status`, { status });
+    return res.data.data ?? res.data;
+  },
+};

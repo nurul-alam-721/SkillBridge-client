@@ -1,4 +1,4 @@
-import { api } from "@/lib/axios";
+import { apiClient } from "@/lib/axios";
 
 export interface CreateReviewPayload {
   tutorProfileId: string;
@@ -17,21 +17,18 @@ export interface Review {
   createdAt: string;
 }
 
-const create = async (payload: CreateReviewPayload): Promise<Review> => {
-  const res = await api.post("/api/reviews", payload);
-  return res.data.data;
-};
+export const reviewService = {
+  create: async (payload: CreateReviewPayload): Promise<Review> => {
+    const res = await apiClient.post("/api/reviews", payload);
+    return res.data.data;
+  },
 
-const update = async (
-  id: string,
-  payload: { rating: number; comment?: string },
-): Promise<Review> => {
-  const res = await api.patch(`/api/reviews/${id}`, payload);
-  return res.data.data;
-};
+  update: async (id: string, payload: { rating: number; comment?: string }): Promise<Review> => {
+    const res = await apiClient.patch(`/api/reviews/${id}`, payload);
+    return res.data.data;
+  },
 
-const remove = async (id: string): Promise<void> => {
-  await api.delete(`/api/reviews/${id}`);
+  remove: async (id: string): Promise<void> => {
+    await apiClient.delete(`/api/reviews/${id}`);
+  },
 };
-
-export const reviewService = { create, update, remove };

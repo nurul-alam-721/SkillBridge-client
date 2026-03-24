@@ -40,9 +40,9 @@ function isSafeRedirect(path: string): boolean {
 }
 
 export function LoginForm() {
-  const router       = useRouter();
+  const router = useRouter();
   const searchParams = useSearchParams();
-  const redirectTo   = searchParams.get("redirect");
+  const redirectTo = searchParams.get("redirect");
 
   const form = useForm({
     defaultValues: { email: "", password: "" },
@@ -64,6 +64,7 @@ export function LoginForm() {
           return;
         }
 
+        // Set cookie with explicit domain for localhost
         document.cookie = `user-role=${user.role}; path=/; max-age=604800; SameSite=Lax`;
 
         toast.success("Login successful!", { id: toastId });
@@ -75,7 +76,10 @@ export function LoginForm() {
           destination = getDefaultRedirect(user);
         }
 
-        router.replace(destination);
+        // ✅ Use window.location.href instead of router.replace
+        // This forces a full page reload so middleware reads the new cookies
+        window.location.href = destination;
+
       } catch (err: unknown) {
         const message = err instanceof Error ? err.message : "Something went wrong!";
         toast.error(message, { id: toastId });

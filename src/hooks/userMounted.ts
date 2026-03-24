@@ -9,7 +9,6 @@ export function useMounted() {
     const id = requestAnimationFrame(() => {
       setMounted(true);
     });
-
     return () => cancelAnimationFrame(id);
   }, []);
 

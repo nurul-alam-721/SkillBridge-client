@@ -1,4 +1,4 @@
-import {api} from "@/lib/axios";
+import { apiClient } from "@/lib/axios";
 
 export interface Category {
   id: string;
@@ -14,28 +14,28 @@ export interface CategoryPayload {
   description?: string;
 }
 
-const getAll = async (): Promise<Category[]> => {
-  const res = await api.get("/api/categories");
-  return res.data.data;
-};
+export const categoryService = {
+  getAll: async (): Promise<Category[]> => {
+    const res = await apiClient.get("/api/categories");
+    return res.data.data ?? res.data;
+  },
 
-const getById = async (id: string): Promise<Category> => {
-  const res = await api.get(`/api/categories/${id}`);
-  return res.data.data;
-};
+  getById: async (id: string): Promise<Category> => {
+    const res = await apiClient.get(`/api/categories/${id}`);
+    return res.data.data;
+  },
 
-const create = async (payload: CategoryPayload): Promise<Category> => {
-  const res = await api.post("/api/categories", payload);
-  return res.data.data;
-};
+  create: async (payload: CategoryPayload): Promise<Category> => {
+    const res = await apiClient.post("/api/categories", payload);
+    return res.data.data;
+  },
 
-const update = async (id: string, payload: CategoryPayload): Promise<Category> => {
-  const res = await api.put(`/api/categories/${id}`, payload);
-  return res.data.data;
-};
+  update: async (id: string, payload: CategoryPayload): Promise<Category> => {
+    const res = await apiClient.put(`/api/categories/${id}`, payload);
+    return res.data.data;
+  },
 
-const remove = async (id: string): Promise<void> => {
-  await api.delete(`/api/categories/${id}`);
+  remove: async (id: string): Promise<void> => {
+    await apiClient.delete(`/api/categories/${id}`);
+  },
 };
-
-export const categoryService = { getAll, getById, create, update, remove };
