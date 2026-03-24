@@ -252,7 +252,7 @@ export default function TutorDetailsPage() {
                 <div className="flex flex-wrap gap-x-4 gap-y-1.5 text-sm text-muted-foreground">
                   <span className="flex items-center gap-1.5">
                     <BriefcaseBusiness className="h-3.5 w-3.5" />
-                    {tutor.experience} yr{tutor.experience !== 1 ? "s" : ""}{" "}
+                    {tutor.experience} year{tutor.experience !== 1 ? "s" : ""}{" "}
                     experience
                   </span>
                   <span className="flex items-center gap-1.5">

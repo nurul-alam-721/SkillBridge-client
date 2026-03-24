@@ -22,7 +22,7 @@ export interface UpdateProfilePayload {
 
 export const userService = {
   async getMe(): Promise<CurrentUser> {
-    const { data } = await apiClient.get("/api/auth/me");
+    const { data } = await apiClient.get("/api/me");
     return data.data;
   },
 

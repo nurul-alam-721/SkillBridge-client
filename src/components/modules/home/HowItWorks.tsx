@@ -26,39 +26,48 @@ const STEPS = [
 
 export function HowItWorksSection() {
   return (
-    <section className="mx-auto max-w-6xl px-4 py-14">
+    <section className="mx-auto max-w-6xl px-4 py-16 bg-background">
       {/* Header */}
-      <div className="text-center mb-10">
-        <p className="text-xs font-semibold uppercase tracking-widest text-primary mb-1">
-          Simple Process
+      <div className="text-center mb-12">
+        <p className="text-xs font-semibold uppercase tracking-widest text-primary mb-2">
+          SIMPLE PROCESS
         </p>
-        <h2 className="text-2xl font-bold tracking-tight">How SkillBridge Works</h2>
-        <p className="text-sm text-muted-foreground mt-2 max-w-md mx-auto">
-          Get started in minutes — from finding the right tutor to booking your first session.
+        <h2 className="text-3xl font-bold tracking-tight mb-3">
+          How SkillBridge Works
+        </h2>
+        <p className="text-muted-foreground max-w-md mx-auto">
+          Get started in just three easy steps — from finding the perfect tutor to completing your first session.
         </p>
       </div>
 
-      {/* Steps */}
-      <div className="grid grid-cols-1 gap-6 sm:grid-cols-3">
-        {STEPS.map(({ icon: Icon, step, title, description }) => (
+      {/* Steps Grid */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+        {STEPS.map(({ icon: Icon, step, title, description }, index) => (
           <div
             key={step}
-            className="relative flex flex-col gap-4 rounded-2xl border bg-card p-6"
+            className="group relative flex flex-col items-center text-center bg-card border rounded-3xl p-8 transition-all duration-300 hover:shadow-xl hover:-translate-y-1"
           >
-            {/* Step number */}
-            <span className="absolute top-5 right-5 text-4xl font-black text-muted/30 select-none">
+            {/* Step Number */}
+            <div className="absolute -top-4 right-6 text-6xl font-black text-muted-foreground/10 group-hover:text-primary/10 transition-colors">
               {step}
-            </span>
-
-            {/* Icon */}
-            <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-primary/10">
-              <Icon className="h-5 w-5 text-primary" />
             </div>
 
-            <div>
-              <h3 className="font-semibold text-sm mb-1.5">{title}</h3>
-              <p className="text-xs text-muted-foreground leading-relaxed">{description}</p>
+            {/* Icon Container */}
+            <div className="mb-6 flex h-16 w-16 items-center justify-center rounded-2xl bg-primary/10 group-hover:bg-primary/20 transition-colors">
+              <Icon className="h-8 w-8 text-primary" />
             </div>
+
+            {/* Content */}
+            <div className="space-y-3">
+              <h3 className="text-xl font-semibold tracking-tight">{title}</h3>
+              <p className="text-sm text-muted-foreground leading-relaxed">
+                {description}
+              </p>
+            </div>
+
+            {index < STEPS.length - 1 && (
+              <div className="hidden md:block absolute top-20 -right-4 h-0.5 w-8 bg-border" />
+            )}
           </div>
         ))}
       </div>

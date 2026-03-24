@@ -56,7 +56,7 @@ export function TutorProfileView({
               </span>
               <span className="flex items-center gap-1.5">
                 <Clock className="h-3.5 w-3.5" />
-                {profile.experience} yr{profile.experience !== 1 ? "s" : ""} experience
+                {profile.experience} year{profile.experience !== 1 ? "s" : ""} experience
               </span>
               <span className="flex items-center gap-1.5 font-medium text-foreground">
                 BDT {profile.hourlyRate}/hr
@@ -100,7 +100,7 @@ export function TutorProfileView({
           </div>
           <div className="px-4 space-y-0.5">
             <p className="text-xl font-bold tabular-nums">{profile.experience}</p>
-            <p className="text-[11px] text-muted-foreground">Yrs Exp</p>
+            <p className="text-[11px] text-muted-foreground">Years Experience</p>
           </div>
           <div className="pl-4 space-y-0.5">
             <p className="text-xl font-bold tabular-nums">{profile.hourlyRate}</p>

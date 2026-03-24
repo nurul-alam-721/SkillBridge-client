@@ -135,7 +135,7 @@ export function TutorProfileEditView({
                 Personal Info
               </CardTitle>
               <p className="text-xs text-muted-foreground mt-0.5">
-                Name, phone and avatar
+                Name, phone and profile image
               </p>
             </div>
           </div>

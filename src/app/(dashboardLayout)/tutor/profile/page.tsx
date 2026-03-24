@@ -76,7 +76,7 @@ export default function TutorProfilePage() {
   };
 
   return (
-    <div className="flex flex-col gap-4 py-4 md:py-6 px-4 lg:px-6 max-w-2xl">
+    <div className="flex flex-col w-full gap-4 py-4 md:py-6 px-4 lg:px-6 max-w-2xl">
       {!editing ? (
         <TutorProfileView
           profile={profile}

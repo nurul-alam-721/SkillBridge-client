@@ -29,7 +29,7 @@ const ROLE_LINKS: Record<
     title: "Tutor Portal",
     links: [
       { label: "Dashboard", href: "/tutor/dashboard" },
-      { label: "Availability", href: "/tutor/availability" },
+      { label: "Availability Slots", href: "/tutor/availability" },
       { label: "Profile", href: "/tutor/profile" },
     ],
   },

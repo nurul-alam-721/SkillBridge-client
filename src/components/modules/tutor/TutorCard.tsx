@@ -19,11 +19,10 @@ export function TutorCard({ tutor }: { tutor: TutorProfile }) {
 
       <div className="relative flex flex-col h-full p-6 gap-5">
 
-        {/* ── Top: Avatar + name + rating ── */}
         <div className="flex items-start justify-between gap-3">
           <div className="flex items-center gap-3.5">
             <div className="relative">
-              <Avatar className="h-[52px] w-[52px] ring-2 ring-border/40 group-hover:ring-primary/30 transition-all duration-300">
+              <Avatar className="h-13 w-13 ring-2 ring-border/40 group-hover:ring-primary/30 transition-all duration-300">
                 <AvatarImage src={tutor.user.image ?? undefined} alt={tutor.user.name ?? "Tutor"} />
                 <AvatarFallback className="text-lg font-bold bg-linear-to-br from-primary/20 to-primary/5 text-primary">
                   {initial}
@@ -69,7 +68,7 @@ export function TutorCard({ tutor }: { tutor: TutorProfile }) {
         <div className="flex items-center gap-4 py-3 px-3.5 rounded-2xl bg-muted/40 border border-border/30">
           <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
             <BriefcaseBusiness className="h-3.5 w-3.5 shrink-0" />
-            <span className="font-medium">{tutor.experience} yr{tutor.experience !== 1 ? "s" : ""}</span>
+            <span className="font-medium">{tutor.experience} year{tutor.experience !== 1 ? "s" : ""}</span>
           </div>
           <div className="h-3 w-px bg-border/60" />
           <div className="flex items-center gap-1.5 text-xs">

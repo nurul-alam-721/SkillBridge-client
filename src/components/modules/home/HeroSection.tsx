@@ -2,6 +2,8 @@ import Link from "next/link";
 import { Search, Star, Users, BookOpen, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { motion } from "framer-motion";
+import { useEffect, useState, useRef } from "react";
 
 interface HeroSectionProps {
   search: string;
@@ -22,21 +24,62 @@ export function HeroSection({
   avgRating,
   loading,
 }: HeroSectionProps) {
+  const [animatedStats, setAnimatedStats] = useState({
+    tutors: 0,
+    subjects: 0,
+    rating: 0,
+  });
+
+  const hasAnimatedRef = useRef(false);
+
+  useEffect(() => {
+    if (!loading && !hasAnimatedRef.current) {
+      hasAnimatedRef.current = true;
+      
+      const tutorInterval = setInterval(() => {
+        setAnimatedStats((prev) => {
+          const next = Math.min(prev.tutors + (totalTutors / 150), totalTutors);
+          return { ...prev, tutors: next };
+        });
+      }, 16);
+      setTimeout(() => clearInterval(tutorInterval), 2500);
+
+      const subjectInterval = setInterval(() => {
+        setAnimatedStats((prev) => {
+          const next = Math.min(prev.subjects + (totalSubjects / 120), totalSubjects);
+          return { ...prev, subjects: next };
+        });
+      }, 16);
+      setTimeout(() => clearInterval(subjectInterval), 2000);
+
+      const ratingInterval = setInterval(() => {
+        setAnimatedStats((prev) => {
+          const next = Math.min(prev.rating + (avgRating / 120), avgRating);
+          return { ...prev, rating: next };
+        });
+      }, 16);
+      setTimeout(() => clearInterval(ratingInterval), 2000);
+    }
+  }, [loading, totalTutors, totalSubjects, avgRating]);
+
   const stats = [
     {
       icon: Users,
-      value: loading ? "..." : totalTutors > 0 ? `${totalTutors}+` : "—",
+      value: loading ? "..." : totalTutors > 0 ? `${Math.floor(animatedStats.tutors)}+` : "—",
       label: "Expert Tutors",
+      animatedValue: animatedStats.tutors,
     },
     {
       icon: BookOpen,
-      value: loading ? "..." : totalSubjects > 0 ? String(totalSubjects) : "—",
+      value: loading ? "..." : totalSubjects > 0 ? Math.floor(animatedStats.subjects).toLocaleString() : "—",
       label: "Subjects Covered",
+      animatedValue: animatedStats.subjects,
     },
     {
       icon: Star,
-      value: loading ? "..." : avgRating > 0 ? avgRating.toFixed(1) : "—",
+      value: loading ? "..." : avgRating > 0 ? animatedStats.rating.toFixed(1) : "—",
       label: "Average Rating",
+      animatedValue: animatedStats.rating,
     },
   ];
 
@@ -107,7 +150,6 @@ export function HeroSection({
           ))}
         </div>
 
-        {/* Stats row */}
         <div className="flex flex-wrap items-center justify-center gap-0">
           {stats.map(({ icon: Icon, value, label }, i) => (
             <div key={label} className="flex items-center">
@@ -120,11 +162,14 @@ export function HeroSection({
                   <Icon className="h-4 w-4 text-primary" />
                 </div>
                 <div className="text-left">
-                  <p
-                    className={`text-sm font-semibold leading-none tabular-nums ${loading ? "animate-pulse text-muted-foreground" : "text-foreground"}`}
+                  <motion.p
+                    key={`${label}-${value}`}
+                    className={`text-sm font-semibold leading-none tabular-nums ${loading ? "text-muted-foreground" : "text-foreground"}`}
+                    initial={{ scale: 1 }}
+
                   >
                     {value}
-                  </p>
+                  </motion.p>
                   <p className="text-xs text-muted-foreground mt-1">{label}</p>
                 </div>
               </div>

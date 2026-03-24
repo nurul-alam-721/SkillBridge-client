@@ -56,7 +56,7 @@ export function EditProfileDialog({
         <DialogHeader>
           <DialogTitle>Edit Profile</DialogTitle>
           <DialogDescription>
-            Update your name, phone number, and avatar.
+            Update your name, phone number, and profile picture.
           </DialogDescription>
         </DialogHeader>
 
@@ -69,7 +69,7 @@ export function EditProfileDialog({
             </AvatarFallback>
           </Avatar>
           <p className="text-xs text-muted-foreground leading-relaxed">
-            Your avatar updates live as you type a URL below.
+            Your profile picture updates live as you type a URL below.
           </p>
         </div>
 
@@ -119,7 +119,7 @@ export function EditProfileDialog({
           <form.Field name="image">
             {(field) => (
               <div className="space-y-1.5">
-                <Label htmlFor="edit-image">Avatar URL</Label>
+                <Label htmlFor="edit-image">Profile Image URL</Label>
                 <Input
                   id="edit-image"
                   value={field.state.value}

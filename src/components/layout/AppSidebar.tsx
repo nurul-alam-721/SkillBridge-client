@@ -50,7 +50,7 @@ const NAV: Record<
   ],
   TUTOR: [
     { title: "Overview", href: "/tutor/dashboard", icon: LayoutDashboard },
-    { title: "Availability", href: "/tutor/availability", icon: Clock },
+    { title: "Availability Slots", href: "/tutor/availability", icon: Clock },
     { title: "Profile", href: "/tutor/profile", icon: UserCircle },
   ],
   ADMIN: [

@@ -119,7 +119,7 @@ export default function TutorDashboardPage() {
                 </span>
                 <span className="flex items-center gap-1">
                   <Clock className="h-3.5 w-3.5" />
-                  {tutorProfile.experience} yr{tutorProfile.experience !== 1 ? "s" : ""} exp
+                  {tutorProfile.experience} year{tutorProfile.experience !== 1 ? "s" : ""} exp
                 </span>
                 <span className="font-medium text-foreground">
                   BDT {tutorProfile.hourlyRate}/hr

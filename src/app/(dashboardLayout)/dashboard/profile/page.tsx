@@ -32,6 +32,7 @@ import { Loader2 } from "lucide-react";
 import { userService, CurrentUser } from "@/services/user.service";
 import { ImageUpload } from "@/app/utils/ImageUpload";
 
+// Edit Profile Dialog
 function EditProfileDialog({
   open,
   user,
@@ -74,7 +75,7 @@ function EditProfileDialog({
         <DialogHeader>
           <DialogTitle>Edit Profile</DialogTitle>
           <DialogDescription>
-            Update your name, phone number, and avatar.
+            Update your name, phone number, and profile picture.
           </DialogDescription>
         </DialogHeader>
 
@@ -155,6 +156,7 @@ function EditProfileDialog({
   );
 }
 
+// Detail Row Component
 function DetailRow({
   icon: Icon,
   label,
@@ -177,6 +179,7 @@ function DetailRow({
   );
 }
 
+// Skeleton while loading
 function ProfileSkeleton() {
   return (
     <div className="px-4 lg:px-6 py-6 max-w-2xl space-y-6">
@@ -202,24 +205,28 @@ function ProfileSkeleton() {
   );
 }
 
+// Main Page
 export default function StudentProfilePage() {
   const [user, setUser] = useState<CurrentUser | null>(null);
   const [loading, setLoading] = useState(true);
   const [editing, setEditing] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     userService
       .getMe()
       .then(setUser)
-      .catch(() => null)
+      .catch(() => setError("Failed to load profile."))
       .finally(() => setLoading(false));
   }, []);
 
   if (loading) return <ProfileSkeleton />;
-  if (!user) return null;
+  if (error) return <div className="text-red-500">{error}</div>;
+  if (!user) return <div>No profile found.</div>;
 
   return (
-    <div className="px-4 lg:px-6 py-6 max-w-2xl space-y-6 p-4">
+    <div className="px-4 lg:px-6 py-6 max-w-2xl space-y-6">
+      {/* Header */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center gap-5">
         <Avatar className="h-24 w-24 text-3xl shrink-0 ring-4 ring-background shadow-md">
           <AvatarImage src={user.image ?? undefined} />
@@ -263,6 +270,7 @@ export default function StudentProfilePage() {
 
       <Separator />
 
+      {/* Details */}
       <div className="divide-y divide-border/60">
         <DetailRow icon={User} label="Full Name" value={user.name ?? "—"} />
         <DetailRow icon={Mail} label="Email" value={user.email} />
@@ -300,6 +308,7 @@ export default function StudentProfilePage() {
         />
       </div>
 
+      {/* Edit Dialog */}
       {editing && (
         <EditProfileDialog
           open={editing}
