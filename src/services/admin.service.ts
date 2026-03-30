@@ -1,4 +1,4 @@
-import { createServerApi, apiClient } from "@/lib/axios";
+import { apiClient } from "@/lib/axios";
 
 export interface RecentBooking {
   id: string;
@@ -57,32 +57,6 @@ export interface AdminUser {
 }
 
 export const adminService = {
-  getStats: async (): Promise<AdminStats> => {
-    const api = await createServerApi();
-    const res = await api.get("/api/admin/stats");
-    return res.data.data ?? res.data;
-  },
-
-  getAllBookings: async (): Promise<AdminBooking[]> => {
-    const api = await createServerApi();
-    const res = await api.get("/api/admin/bookings");
-    return res.data.data ?? res.data;
-  },
-
-  getAllUsers: async (): Promise<AdminUser[]> => {
-    const api = await createServerApi();
-    const res = await api.get("/api/admin/users");
-    return res.data.data ?? res.data;
-  },
-
-  updateUserStatus: async (id: string, status: UserStatus): Promise<AdminUser> => {
-    const api = await createServerApi();
-    const res = await api.patch(`/api/admin/users/${id}/status`, { status });
-    return res.data.data ?? res.data;
-  },
-};
-
-export const adminClientService = {
   getStats: async (): Promise<AdminStats> => {
     const res = await apiClient.get("/api/admin/stats");
     return res.data.data ?? res.data;

@@ -2,55 +2,53 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
-const PROTECTED_PATHS = [
-  "/dashboard",
-  "/tutor/dashboard",
-  "/tutor/profile",
-  "/tutor/availability",
-  "/admin",
-];
-
+const PROTECTED_PATHS = ["/dashboard", "/tutor", "/admin"];
 const AUTH_ROUTES = ["/login", "/register"];
-const CALLBACK_ROUTES = ["/auth/callback"];
+const CALLBACK_ROUTES = ["/auth/callback", "/onboarding"];
+const API_ROUTES = ["/api"];
 
-export async function proxy(request: NextRequest) {
+export function proxy(request: NextRequest) {
   const pathname = request.nextUrl.pathname;
 
-  if (CALLBACK_ROUTES.some((r) => pathname.startsWith(r))) {
+  if (CALLBACK_ROUTES.some((r) => pathname.startsWith(r)) ||
+      API_ROUTES.some((r) => pathname.startsWith(r))) {
     return NextResponse.next();
   }
 
-  const sessionToken =
-    request.cookies.get("better-auth.session_token")?.value ??
-    request.cookies.get("__Secure-better-auth.session_token")?.value ??
-    request.cookies.get("better-auth.session_token.0")?.value;
-
-  const isAuthenticated = !!sessionToken;
   const role = request.cookies.get("user-role")?.value;
+  const isAuthenticated = !!role;
 
   if (isAuthenticated && AUTH_ROUTES.some((r) => pathname.startsWith(r))) {
-    if (role === "tutor") return NextResponse.redirect(new URL("/tutor/dashboard", request.url));
-    if (role === "admin") return NextResponse.redirect(new URL("/admin/dashboard", request.url));
+    if (role === "TUTOR") {
+      return NextResponse.redirect(new URL("/tutor/dashboard", request.url));
+    }
+    if (role === "ADMIN") {
+      return NextResponse.redirect(new URL("/admin/dashboard", request.url));
+    }
     return NextResponse.redirect(new URL("/dashboard", request.url));
   }
+
   const isProtected = PROTECTED_PATHS.some((p) => pathname.startsWith(p));
+
   if (isProtected && !isAuthenticated) {
     const loginUrl = new URL("/login", request.url);
     loginUrl.searchParams.set("redirect", pathname);
-    const res = NextResponse.redirect(loginUrl);
-    res.cookies.delete("user-role");
-    return res;
+    return NextResponse.redirect(loginUrl);
   }
 
   if (isAuthenticated && role) {
-    if (role === "student" && (pathname.startsWith("/tutor/") || pathname.startsWith("/admin"))) {
-      return NextResponse.redirect(new URL("/dashboard", request.url));
-    }
-    if (role === "tutor" && (pathname.startsWith("/dashboard") || pathname.startsWith("/admin"))) {
-      return NextResponse.redirect(new URL("/tutor/dashboard", request.url));
-    }
-    if (role === "admin" && (pathname.startsWith("/dashboard") || pathname.startsWith("/tutor/"))) {
-      return NextResponse.redirect(new URL("/admin/dashboard", request.url));
+    if (role === "STUDENT") {
+      if (pathname.startsWith("/tutor") || pathname.startsWith("/admin")) {
+        return NextResponse.redirect(new URL("/dashboard", request.url));
+      }
+    } else if (role === "TUTOR") {
+      if (pathname.startsWith("/dashboard") || pathname.startsWith("/admin")) {
+        return NextResponse.redirect(new URL("/tutor/dashboard", request.url));
+      }
+    } else if (role === "ADMIN") {
+      if (pathname.startsWith("/dashboard") || pathname.startsWith("/tutor")) {
+        return NextResponse.redirect(new URL("/admin/dashboard", request.url));
+      }
     }
   }
 
@@ -59,6 +57,6 @@ export async function proxy(request: NextRequest) {
 
 export const config = {
   matcher: [
-    "/((?!api|_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)",
+    "/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)",
   ],
 };

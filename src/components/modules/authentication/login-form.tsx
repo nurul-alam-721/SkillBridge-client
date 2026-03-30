@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Field, FieldError, FieldGroup, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
@@ -40,7 +40,6 @@ function isSafeRedirect(path: string): boolean {
 }
 
 export function LoginForm() {
-  const router = useRouter();
   const searchParams = useSearchParams();
   const redirectTo = searchParams.get("redirect");
 
@@ -56,7 +55,9 @@ export function LoginForm() {
           return;
         }
 
-        const session = await authClient.getSession();
+        const session = await authClient.getSession({
+          fetchOptions: { cache: "no-store" },
+        });
         const user = session?.data?.user as User | undefined;
 
         if (!user) {
@@ -64,8 +65,7 @@ export function LoginForm() {
           return;
         }
 
-        // Set cookie with explicit domain for localhost
-        document.cookie = `user-role=${user.role}; path=/; max-age=604800; SameSite=Lax`;
+        document.cookie = `user-role=${user.role}; path=/; max-age=604800; SameSite=None; Secure`;
 
         toast.success("Login successful!", { id: toastId });
 
@@ -76,8 +76,6 @@ export function LoginForm() {
           destination = getDefaultRedirect(user);
         }
 
-        // ✅ Use window.location.href instead of router.replace
-        // This forces a full page reload so middleware reads the new cookies
         window.location.href = destination;
 
       } catch (err: unknown) {
@@ -109,7 +107,6 @@ export function LoginForm() {
             ].join(", "),
           }}
         >
-          {/* Google */}
           <div className="p-6 pb-0">
             <button
               type="button"
@@ -194,7 +191,6 @@ export function LoginForm() {
             </Button>
           </form>
 
-          {/* Footer */}
           <p className="py-6 text-center text-sm text-muted-foreground">
             Don&apos;t have an account?{" "}
             <Link

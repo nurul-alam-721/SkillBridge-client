@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { Users, BookOpen, BadgeDollarSign, Tag, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { adminClientService, AdminStats } from "@/services/admin.service";
+import { adminService, AdminStats } from "@/services/admin.service";
 import { PlatformStats } from "@/components/modules/adminDashboard/PlatformStats";
 import { RecentActivity } from "@/components/modules/adminDashboard/RecentActivity";
 import { Bookings } from "@/components/modules/adminDashboard/Bookings";
@@ -28,7 +28,7 @@ export default function AdminDashboardPage() {
     else setLoading(true);
     setError(null);
     try {
-      const data = await adminClientService.getStats();
+      const data = await adminService.getStats();
       setStats(data);
     } catch (err) {
       setError(getErrorMessage(err));

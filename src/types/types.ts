@@ -9,5 +9,5 @@ export type User = {
   role: UserRole;
   phone?: string;
   image?: string;
+  createdAt: string;
 };
-

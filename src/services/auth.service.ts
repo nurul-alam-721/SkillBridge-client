@@ -1,4 +1,4 @@
-import { createServerApi } from "@/lib/axios";
+import { apiClient } from "@/lib/axios";
 import { User } from "@/types/types";
 
 export interface SessionResponse {
@@ -8,8 +8,7 @@ export interface SessionResponse {
 export const authService = {
   async getSession(): Promise<SessionResponse | null> {
     try {
-      const api = await createServerApi();
-      const { data } = await api.get("/api/me");
+      const { data } = await apiClient.get("/api/me");
       if (data?.success && data?.data) {
         return { user: data.data as User };
       }

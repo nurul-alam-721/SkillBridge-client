@@ -35,4 +35,9 @@ export const userService = {
     const { data } = await apiClient.patch(`/api/users/${userId}`, { status });
     return data.data;
   },
+
+  async updateMyRole(role: UserRole): Promise<CurrentUser> {
+    const { data } = await apiClient.patch("/api/users/me/role", { role });
+    return data.data;
+  },
 };

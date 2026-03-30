@@ -4,7 +4,20 @@ import { useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { Loader2 } from "lucide-react";
 import { authClient } from "@/lib/auth-client";
-import { Roles } from "@/constant/Roles";
+import { User } from "@/types/types";
+
+const getSessionWithRetry = async (retries = 5) => {
+  for (let i = 0; i < retries; i++) {
+    const session = await authClient.getSession({
+      fetchOptions: { cache: "no-store" },
+    });
+
+    if (session?.data?.user) return session;
+
+    await new Promise((res) => setTimeout(res, 300));
+  }
+  return null;
+};
 
 export default function AuthCallbackPage() {
   const router = useRouter();
@@ -16,24 +29,25 @@ export default function AuthCallbackPage() {
 
     const run = async () => {
       try {
-        const { data: session } = await authClient.getSession();
-        const user = session?.user as { role?: string } | undefined;
+        const session = await getSessionWithRetry();
+        const user = session?.data?.user as User | undefined;
 
-        if (!user?.role) {
+        if (!user) {
           router.replace("/login");
           return;
         }
 
-        document.cookie = `user-role=${user.role}; path=/; max-age=604800; SameSite=Lax; Secure`;
+        document.cookie = `user-role=${user.role}; path=/; max-age=604800; SameSite=None; Secure`;
 
-        const target =
-          user.role === Roles.admin
-            ? "/admin/dashboard"
-            : user.role === Roles.tutor
-            ? "/tutor/dashboard"
-            : "/dashboard";
+        const isNewUser =
+          Date.now() - new Date(user.createdAt).getTime() < 30 * 1000;
 
-        router.replace(target);
+        if (isNewUser) {
+          router.replace("/onboarding/role");
+          return;
+        }
+
+        window.location.href = "/";
       } catch (err) {
         console.error(err);
         router.replace("/login");

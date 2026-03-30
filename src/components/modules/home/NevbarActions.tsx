@@ -1,6 +1,5 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import Link from "next/link";
 import {
   Menu,
@@ -84,7 +83,6 @@ const ROLE_BADGE_COLORS: Record<string, string> = {
 export function NavbarActions() {
   const pathname = usePathname();
   const { data: session, isPending } = authClient.useSession();
-
   const mounted = useMounted();
 
   const user = session?.user as User | undefined;
@@ -112,7 +110,6 @@ export function NavbarActions() {
         </div>
       )}
 
-      {/* User Dropdown */}
       {user && (
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
@@ -123,7 +120,7 @@ export function NavbarActions() {
                   {(user.name ?? "U").charAt(0).toUpperCase()}
                 </AvatarFallback>
               </Avatar>
-              <span className="max-w-[96px] truncate font-medium">
+              <span className="max-w-24 truncate font-medium">
                 {user.name}
               </span>
               {role && (
@@ -171,7 +168,6 @@ export function NavbarActions() {
         </DropdownMenu>
       )}
 
-      {/* Mobile Menu */}
       <Sheet>
         <SheetTrigger asChild>
           <Button variant="ghost" size="icon" className="md:hidden h-9 w-9">

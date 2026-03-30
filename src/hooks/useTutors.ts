@@ -9,7 +9,7 @@ import {
   Category,
 } from "@/services/tutor.service";
 
-const defaut_filters: TutorsQuery = { page: 1, limit: 9 };
+const default_filters: TutorsQuery = { page: 1, limit: 9 };
 
 export function useTutors() {
   const searchParams = useSearchParams();
@@ -17,7 +17,7 @@ export function useTutors() {
   const [filters, setFilters] = useState<TutorsQuery>(() => {
     const categoryId = searchParams.get("categoryId");
     return {
-      ...defaut_filters,
+      ...default_filters,
       ...(categoryId && { categoryId }),
     };
   });
@@ -27,7 +27,7 @@ export function useTutors() {
   const [totalPages, setTotalPages] = useState(0);
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(true);
-  const [search, setSearch] = useState("");
+  const [search, setSearch] = useState(() => searchParams.get("search") ?? "");
   const [sort, setSort] = useState("rating");
 
   const fetchTutors = useCallback(async (query: TutorsQuery) => {
@@ -83,7 +83,7 @@ export function useTutors() {
   const setPage = (page: number) => setFilters((prev) => ({ ...prev, page }));
 
   const resetFilters = () => {
-    setFilters(defaut_filters);
+    setFilters(default_filters);
     setSearch("");
     setSort("rating");
   };
