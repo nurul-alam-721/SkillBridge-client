@@ -6,7 +6,7 @@ const STEPS = [
     step: "01",
     title: "Find Your Tutor",
     description:
-      "Browse tutors by subject, price, and rating. Read reviews from real students to find your best match.",
+      "Browse tutors by subject, price, and rating. Read reviews from real students to find your perfect match.",
   },
   {
     icon: CalendarCheck,
@@ -20,56 +20,55 @@ const STEPS = [
     step: "03",
     title: "Learn & Review",
     description:
-      "Attend your session and leave a review to help other students find great tutors.",
+      "Attend your session and leave a review to help other students discover great tutors.",
   },
 ];
 
 export function HowItWorksSection() {
   return (
-    <section className="mx-auto max-w-6xl px-4 py-16 bg-background">
-      {/* Header */}
-      <div className="text-center mb-12">
-        <p className="text-xs font-semibold uppercase tracking-widest text-primary mb-2">
-          SIMPLE PROCESS
-        </p>
-        <h2 className="text-3xl font-bold tracking-tight mb-3">
-          How SkillBridge Works
-        </h2>
-        <p className="text-muted-foreground max-w-md mx-auto">
-          Get started in just three easy steps — from finding the perfect tutor to completing your first session.
-        </p>
-      </div>
+    <section className="bg-background py-20">
+      <div className="mx-auto max-w-5xl px-4">
 
-      {/* Steps Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-        {STEPS.map(({ icon: Icon, step, title, description }, index) => (
-          <div
-            key={step}
-            className="group relative flex flex-col items-center text-center bg-card border rounded-3xl p-8 transition-all duration-300 hover:shadow-xl hover:-translate-y-1"
-          >
-            {/* Step Number */}
-            <div className="absolute -top-4 right-6 text-6xl font-black text-muted-foreground/10 group-hover:text-primary/10 transition-colors">
-              {step}
-            </div>
+        {/* Header */}
+        <div className="text-center mb-16">
+          <span className="inline-flex items-center rounded-full border border-primary/20 bg-primary/8 px-3 py-1 text-xs font-semibold text-primary uppercase tracking-widest mb-4">
+            Simple Process
+          </span>
+          <h2 className="text-3xl font-bold tracking-tight mb-3">
+            How SkillBridge Works
+          </h2>
+          <p className="text-muted-foreground text-sm max-w-sm mx-auto leading-relaxed">
+            From finding the right tutor to completing your first session — it takes just minutes.
+          </p>
+        </div>
 
-            {/* Icon Container */}
-            <div className="mb-6 flex h-16 w-16 items-center justify-center rounded-2xl bg-primary/10 group-hover:bg-primary/20 transition-colors">
-              <Icon className="h-8 w-8 text-primary" />
-            </div>
+        {/* Steps */}
+        <div className="relative grid grid-cols-1 md:grid-cols-3 gap-6">
 
-            {/* Content */}
-            <div className="space-y-3">
-              <h3 className="text-xl font-semibold tracking-tight">{title}</h3>
-              <p className="text-sm text-muted-foreground leading-relaxed">
+          <div className="hidden md:block absolute top-9 left-[calc(16.666%+2rem)] right-[calc(16.666%+2rem)] h-px bg-border" />
+
+          {STEPS.map(({ icon: Icon, step, title, description }) => (
+            <div key={step} className="flex flex-col items-center text-center group">
+
+              <div className="relative mb-6 z-10">
+                <div className="flex h-18 w-18 items-center justify-center rounded-2xl border border-border bg-card shadow-sm group-hover:border-primary/40 group-hover:bg-primary/5 transition-all duration-200"
+                  style={{ width: "4.5rem", height: "4.5rem" }}
+                >
+                  <Icon className="h-6 w-6 text-primary" />
+                </div>
+                <span className="absolute -top-2 -right-2 flex h-5 w-5 items-center justify-center rounded-full bg-primary text-[10px] font-bold text-primary-foreground">
+                  {step.replace("0", "")}
+                </span>
+              </div>
+
+              {/* Text */}
+              <h3 className="text-base font-semibold mb-2">{title}</h3>
+              <p className="text-sm text-muted-foreground leading-relaxed max-w-[220px]">
                 {description}
               </p>
             </div>
-
-            {index < STEPS.length - 1 && (
-              <div className="hidden md:block absolute top-20 -right-4 h-0.5 w-8 bg-border" />
-            )}
-          </div>
-        ))}
+          ))}
+        </div>
       </div>
     </section>
   );

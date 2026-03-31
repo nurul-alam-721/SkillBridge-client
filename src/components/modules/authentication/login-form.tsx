@@ -12,6 +12,8 @@ import { authClient } from "@/lib/auth-client";
 import { handleGoogleLogin } from "@/lib/handleGoogleLogin";
 import { User } from "@/types/types";
 import { Roles } from "@/constant/Roles";
+import { useState } from "react";
+import { Eye, EyeOff } from "lucide-react";
 
 const formSchema = z.object({
   email: z.string().email("Invalid email address"),
@@ -42,6 +44,7 @@ function isSafeRedirect(path: string): boolean {
 export function LoginForm() {
   const searchParams = useSearchParams();
   const redirectTo = searchParams.get("redirect");
+  const [showPassword, setShowPassword] = useState(false);
 
   const form = useForm({
     defaultValues: { email: "", password: "" },
@@ -66,7 +69,6 @@ export function LoginForm() {
         }
 
         document.cookie = `user-role=${user.role}; path=/; max-age=604800; SameSite=None; Secure`;
-
         toast.success("Login successful!", { id: toastId });
 
         let destination: string;
@@ -77,7 +79,6 @@ export function LoginForm() {
         }
 
         window.location.href = destination;
-
       } catch (err: unknown) {
         const message = err instanceof Error ? err.message : "Something went wrong!";
         toast.error(message, { id: toastId });
@@ -167,14 +168,27 @@ export function LoginForm() {
                           Forgot password?
                         </Link>
                       </div>
-                      <Input
-                        type="password"
-                        placeholder="••••••••"
-                        value={field.state.value}
-                        onChange={(e) => field.handleChange(e.target.value)}
-                        onBlur={field.handleBlur}
-                        className="h-10 rounded-xl bg-background px-3.5 text-sm"
-                      />
+                      <div className="relative">
+                        <Input
+                          type={showPassword ? "text" : "password"}
+                          placeholder="••••••••"
+                          value={field.state.value}
+                          onChange={(e) => field.handleChange(e.target.value)}
+                          onBlur={field.handleBlur}
+                          className="h-10 rounded-xl bg-background px-3.5 pr-10 text-sm"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => setShowPassword((v) => !v)}
+                          className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                          tabIndex={-1}
+                        >
+                          {showPassword
+                            ? <EyeOff className="h-4 w-4" />
+                            : <Eye className="h-4 w-4" />
+                          }
+                        </button>
+                      </div>
                       {isInvalid && <FieldError errors={field.state.meta.errors} />}
                     </Field>
                   );

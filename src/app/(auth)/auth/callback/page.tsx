@@ -11,12 +11,15 @@ const getSessionWithRetry = async (retries = 5) => {
     const session = await authClient.getSession({
       fetchOptions: { cache: "no-store" },
     });
-
     if (session?.data?.user) return session;
-
     await new Promise((res) => setTimeout(res, 300));
   }
   return null;
+};
+
+const isNewGoogleUser = (user: User): boolean => {
+  const ageMs = Date.now() - new Date(user.createdAt).getTime();
+  return ageMs < 60 * 1000;
 };
 
 export default function AuthCallbackPage() {
@@ -39,15 +42,18 @@ export default function AuthCallbackPage() {
 
         document.cookie = `user-role=${user.role}; path=/; max-age=604800; SameSite=None; Secure`;
 
-        const isNewUser =
-          Date.now() - new Date(user.createdAt).getTime() < 30 * 1000;
-
-        if (isNewUser) {
+        if (isNewGoogleUser(user)) {
           router.replace("/onboarding/role");
           return;
         }
 
-        window.location.href = "/";
+        if (user.role === "TUTOR") {
+          window.location.href = "/tutor/dashboard";
+        } else if (user.role === "ADMIN") {
+          window.location.href = "/admin/dashboard";
+        } else {
+          window.location.href = "/dashboard";
+        }
       } catch (err) {
         console.error(err);
         router.replace("/login");

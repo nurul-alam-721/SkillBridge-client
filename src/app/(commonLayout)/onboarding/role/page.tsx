@@ -6,30 +6,48 @@ import { toast } from "sonner";
 import { userService } from "@/services/user.service";
 import { Roles } from "@/constant/Roles";
 import { UserRole } from "@/types/types";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from "@/components/ui/dialog";
 
 export default function OnboardingRolePage() {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [selected, setSelected] = useState<UserRole | null>(null);
+  const [showConfirmDialog, setShowConfirmDialog] = useState(false);
 
-  const handleContinue = async () => {
-    if (!selected) return;
+  const handleRoleClick = (role: UserRole) => {
+    setSelected(role);
+    if (role === (Roles.tutor as UserRole)) {
+      setShowConfirmDialog(true);
+    } else {
+      void handleSubmit(role);
+    }
+  };
+
+  const handleSubmit = async (role: UserRole) => {
     setLoading(true);
+    setShowConfirmDialog(false);
 
     try {
-      await userService.updateMyRole(selected);
+      await userService.updateMyRole(role);
 
-      document.cookie = `user-role=${selected}; path=/; max-age=604800; SameSite=Lax`;
+      document.cookie = `user-role=${role}; path=/; max-age=604800; SameSite=None; Secure`;
 
       toast.success("Welcome to SkillBridge!");
 
-      if (selected === Roles.tutor) {
-        router.push("/tutor/dashboard");
+      if (role === (Roles.tutor as UserRole)) {
+        window.location.href = "/tutor/dashboard";
       } else {
-        router.push("/dashboard");
+        window.location.href = "/dashboard";
       }
     } catch {
       toast.error("Something went wrong. Please try again.");
+      setSelected(null);
     } finally {
       setLoading(false);
     }
@@ -42,15 +60,14 @@ export default function OnboardingRolePage() {
           <h1 className="text-2xl font-bold tracking-tight">
             Join as a Student or Tutor?
           </h1>
-          <p className="mt-2 text-sm text-muted-foreground">
-            You can always change this later from your profile settings.
-          </p>
+          
         </div>
 
         <div className="grid grid-cols-2 gap-4">
           <button
-            onClick={() => setSelected(Roles.student as UserRole)}
-            className={`rounded-2xl border-2 p-6 text-left transition-all ${
+            onClick={() => handleRoleClick(Roles.student as UserRole)}
+            disabled={loading}
+            className={`rounded-2xl border-2 p-6 text-left transition-all disabled:opacity-50 ${
               selected === Roles.student
                 ? "border-primary bg-primary/5"
                 : "border-border hover:border-primary/50"
@@ -64,8 +81,9 @@ export default function OnboardingRolePage() {
           </button>
 
           <button
-            onClick={() => setSelected(Roles.tutor as UserRole)}
-            className={`rounded-2xl border-2 p-6 text-left transition-all ${
+            onClick={() => handleRoleClick(Roles.tutor as UserRole)}
+            disabled={loading}
+            className={`rounded-2xl border-2 p-6 text-left transition-all disabled:opacity-50 ${
               selected === Roles.tutor
                 ? "border-primary bg-primary/5"
                 : "border-border hover:border-primary/50"
@@ -79,14 +97,51 @@ export default function OnboardingRolePage() {
           </button>
         </div>
 
-        <button
-          onClick={handleContinue}
-          disabled={!selected || loading}
-          className="mt-6 h-11 w-full rounded-xl bg-primary font-semibold text-primary-foreground transition-all disabled:opacity-50"
-        >
-          {loading ? "Saving..." : "Continue"}
-        </button>
+        {loading && (
+          <div className="mt-6 h-11 w-full rounded-xl bg-primary/50 flex items-center justify-center">
+            <span className="text-sm font-semibold text-primary-foreground">
+              Saving...
+            </span>
+          </div>
+        )}
       </div>
+
+      <Dialog open={showConfirmDialog} onOpenChange={setShowConfirmDialog}>
+        <DialogContent className="max-w-sm rounded-2xl">
+          <DialogHeader>
+            <DialogTitle>Joining as a Tutor?</DialogTitle>
+            <DialogDescription className="pt-1">
+              As a tutor you will be able to create a profile, set your
+              availability, and accept bookings from students.
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="mt-2 rounded-xl border bg-muted/40 p-4 text-sm text-muted-foreground space-y-1">
+            <p>✅ Create your tutor profile</p>
+            <p>✅ Set hourly rate and availability</p>
+            <p>✅ Accept and manage bookings</p>
+          </div>
+
+          <div className="mt-4 flex gap-3">
+            <button
+              onClick={() => {
+                setShowConfirmDialog(false);
+                setSelected(null);
+              }}
+              className="flex-1 h-10 rounded-xl border font-medium text-sm hover:bg-muted transition-colors"
+            >
+              Go back
+            </button>
+            <button
+              onClick={() => handleSubmit(Roles.tutor as UserRole)}
+              disabled={loading}
+              className="flex-1 h-10 rounded-xl bg-primary font-semibold text-sm text-primary-foreground transition-all hover:opacity-90 disabled:opacity-50"
+            >
+              {loading ? "Saving..." : "Yes, join as Tutor"}
+            </button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
