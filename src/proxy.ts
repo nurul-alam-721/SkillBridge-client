@@ -1,4 +1,3 @@
-// middleware.ts
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
@@ -7,12 +6,30 @@ const AUTH_ROUTES = ["/login", "/register"];
 const CALLBACK_ROUTES = ["/auth/callback", "/onboarding"];
 const API_ROUTES = ["/api"];
 
-export function proxy(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   const pathname = request.nextUrl.pathname;
 
   if (CALLBACK_ROUTES.some((r) => pathname.startsWith(r)) ||
       API_ROUTES.some((r) => pathname.startsWith(r))) {
     return NextResponse.next();
+  }
+
+  const isProtectedPath = PROTECTED_PATHS.some((p) => pathname.startsWith(p));
+  if (isProtectedPath && !pathname.startsWith("/banned")) {
+    try {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/me`, {
+        headers: { cookie: request.headers.get("cookie") ?? "" },
+      });
+      if (res.status === 403) {
+        const body = await res.json();
+        if (body.code === "ACCOUNT_BANNED") {
+          const response = NextResponse.redirect(new URL("/banned", request.url));
+          response.cookies.delete("user-role");
+          return response;
+        }
+      }
+    } catch {
+    }
   }
 
   const role = request.cookies.get("user-role")?.value;

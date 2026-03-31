@@ -24,7 +24,7 @@ export const reviewService = {
   },
 
   update: async (id: string, payload: { rating: number; comment?: string }): Promise<Review> => {
-    const res = await apiClient.patch(`/api/reviews/${id}`, payload);
+    const res = await apiClient.put(`/api/reviews/${id}`, payload);
     return res.data.data;
   },
 

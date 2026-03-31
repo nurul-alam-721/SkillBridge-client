@@ -2,7 +2,16 @@
 
 import { useState } from "react";
 import { format } from "date-fns";
-import { ShieldBan, ShieldCheck, Loader2, ArrowUpDown, ArrowUp, ArrowDown, ChevronLeft, ChevronRight } from "lucide-react";
+import {
+  ShieldBan,
+  ShieldCheck,
+  Loader2,
+  ArrowUpDown,
+  ArrowUp,
+  ArrowDown,
+  ChevronLeft,
+  ChevronRight,
+} from "lucide-react";
 import {
   useReactTable,
   getCoreRowModel,
@@ -25,12 +34,19 @@ import {
 } from "@/components/ui/table";
 import { AdminUser, UserRole, UserStatus } from "@/services/admin.service";
 
-// ── Role badge ────────────────────────────────────────────────────────────
-
 const ROLE_CONFIG: Record<UserRole, { label: string; cls: string }> = {
-  STUDENT: { label: "Student", cls: "text-violet-600 bg-violet-50 ring-1 ring-violet-200 dark:text-violet-400 dark:bg-violet-900/30 dark:ring-violet-800" },
-  TUTOR:   { label: "Tutor",   cls: "text-sky-600 bg-sky-50 ring-1 ring-sky-200 dark:text-sky-400 dark:bg-sky-900/30 dark:ring-sky-800" },
-  ADMIN:   { label: "Admin",   cls: "text-rose-600 bg-rose-50 ring-1 ring-rose-200 dark:text-rose-400 dark:bg-rose-900/30 dark:ring-rose-800" },
+  STUDENT: {
+    label: "Student",
+    cls: "text-violet-600 bg-violet-50 ring-1 ring-violet-200 dark:text-violet-400 dark:bg-violet-900/30 dark:ring-violet-800",
+  },
+  TUTOR: {
+    label: "Tutor",
+    cls: "text-sky-600 bg-sky-50 ring-1 ring-sky-200 dark:text-sky-400 dark:bg-sky-900/30 dark:ring-sky-800",
+  },
+  ADMIN: {
+    label: "Admin",
+    cls: "text-rose-600 bg-rose-50 ring-1 ring-rose-200 dark:text-rose-400 dark:bg-rose-900/30 dark:ring-rose-800",
+  },
 };
 
 function RoleBadge({ role }: { role: UserRole }) {
@@ -42,31 +58,27 @@ function RoleBadge({ role }: { role: UserRole }) {
   );
 }
 
-// ── Status badge ──────────────────────────────────────────────────────────
-
 function StatusBadge({ status }: { status: UserStatus }) {
   const active = status === "ACTIVE";
   return (
-    <span className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-semibold ${
-      active
-        ? "text-emerald-700 bg-emerald-50 ring-1 ring-emerald-200 dark:text-emerald-400 dark:bg-emerald-900/30 dark:ring-emerald-800"
-        : "text-rose-600 bg-rose-50 ring-1 ring-rose-200 dark:text-rose-400 dark:bg-rose-900/30 dark:ring-rose-800"
-    }`}>
+    <span
+      className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-semibold ${
+        active
+          ? "text-emerald-700 bg-emerald-50 ring-1 ring-emerald-200 dark:text-emerald-400 dark:bg-emerald-900/30 dark:ring-emerald-800"
+          : "text-rose-600 bg-rose-50 ring-1 ring-rose-200 dark:text-rose-400 dark:bg-rose-900/30 dark:ring-rose-800"
+      }`}
+    >
       <span className={`h-1.5 w-1.5 rounded-full ${active ? "bg-emerald-500" : "bg-rose-500"}`} />
       {active ? "Active" : "Banned"}
     </span>
   );
 }
 
-// ── Sort icon ─────────────────────────────────────────────────────────────
-
 function SortIcon({ direction }: { direction: "asc" | "desc" | false }) {
-  if (direction === "asc")  return <ArrowUp   className="ml-1.5 h-3.5 w-3.5 shrink-0" />;
-  if (direction === "desc") return <ArrowDown  className="ml-1.5 h-3.5 w-3.5 shrink-0" />;
+  if (direction === "asc") return <ArrowUp className="ml-1.5 h-3.5 w-3.5 shrink-0" />;
+  if (direction === "desc") return <ArrowDown className="ml-1.5 h-3.5 w-3.5 shrink-0" />;
   return <ArrowUpDown className="ml-1.5 h-3.5 w-3.5 shrink-0 opacity-40" />;
 }
-
-// ── Toggle button ─────────────────────────────────────────────────────────
 
 function ToggleButton({
   user,
@@ -96,17 +108,16 @@ function ToggleButton({
         setBusy(false);
       }}
     >
-      {busy
-        ? <Loader2 className="h-3.5 w-3.5 animate-spin" />
-        : active
-          ? <><ShieldBan    className="h-3.5 w-3.5" /> Ban</>
-          : <><ShieldCheck  className="h-3.5 w-3.5" /> Unban</>
-      }
+      {busy ? (
+        <Loader2 className="h-3.5 w-3.5 animate-spin" />
+      ) : active ? (
+        <><ShieldBan className="h-3.5 w-3.5" /> Ban</>
+      ) : (
+        <><ShieldCheck className="h-3.5 w-3.5" /> Unban</>
+      )}
     </Button>
   );
 }
-
-// ── Skeleton ──────────────────────────────────────────────────────────────
 
 function TableSkeleton() {
   return (
@@ -132,8 +143,6 @@ function TableSkeleton() {
   );
 }
 
-// ── Column definitions ────────────────────────────────────────────────────
-
 function buildColumns(
   onToggle: (id: string, currentStatus: UserStatus) => Promise<void>
 ): ColumnDef<AdminUser>[] {
@@ -155,18 +164,24 @@ function buildColumns(
           <div className="flex items-center gap-2.5">
             <Avatar className="h-8 w-8 shrink-0">
               <AvatarImage src={u.image ?? undefined} />
-              <AvatarFallback className={`text-xs font-bold ${
-                u.role === "STUDENT" ? "bg-violet-100 text-violet-600 dark:bg-violet-900/30 dark:text-violet-400"
-                : u.role === "TUTOR" ? "bg-sky-100 text-sky-600 dark:bg-sky-900/30 dark:text-sky-400"
-                :                      "bg-rose-100 text-rose-600 dark:bg-rose-900/30 dark:text-rose-400"
-              }`}>
+              <AvatarFallback
+                className={`text-xs font-bold ${
+                  u.role === "STUDENT"
+                    ? "bg-violet-100 text-violet-600 dark:bg-violet-900/30 dark:text-violet-400"
+                    : u.role === "TUTOR"
+                      ? "bg-sky-100 text-sky-600 dark:bg-sky-900/30 dark:text-sky-400"
+                      : "bg-rose-100 text-rose-600 dark:bg-rose-900/30 dark:text-rose-400"
+                }`}
+              >
                 {(u.name ?? "U").charAt(0).toUpperCase()}
               </AvatarFallback>
             </Avatar>
             <div className="min-w-0">
               <p className="font-medium truncate leading-snug">{u.name ?? "—"}</p>
               <p className="text-xs text-muted-foreground truncate">{u.email ?? "—"}</p>
-              {u.phone && <p className="text-xs text-muted-foreground truncate">{u.phone}</p>}
+              {u.phone && (
+                <p className="text-xs text-muted-foreground truncate">{u.phone}</p>
+              )}
             </div>
           </div>
         );
@@ -214,14 +229,14 @@ function buildColumns(
     },
     {
       id: "action",
-      header: () => <span className="text-xs font-semibold uppercase tracking-wide">Action</span>,
+      header: () => (
+        <span className="text-xs font-semibold uppercase tracking-wide">Action</span>
+      ),
       cell: ({ row }) => <ToggleButton user={row.original} onToggle={onToggle} />,
       enableSorting: false,
     },
   ];
 }
-
-// ── Table ─────────────────────────────────────────────────────────────────
 
 export function UsersTable({
   users,
@@ -267,7 +282,10 @@ export function UsersTable({
               <TableSkeleton />
             ) : table.getRowModel().rows.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={columns.length} className="py-12 text-center text-sm text-muted-foreground">
+                <TableCell
+                  colSpan={columns.length}
+                  className="py-12 text-center text-sm text-muted-foreground"
+                >
                   No users found.
                 </TableCell>
               </TableRow>
@@ -275,7 +293,11 @@ export function UsersTable({
               table.getRowModel().rows.map((row) => (
                 <TableRow
                   key={row.id}
-                  className={row.original.status === "BANNED" ? "bg-rose-50/30 dark:bg-rose-900/5" : undefined}
+                  className={
+                    row.original.status === "BANNED"
+                      ? "bg-rose-50/30 dark:bg-rose-900/5"
+                      : undefined
+                  }
                 >
                   {row.getVisibleCells().map((cell) => (
                     <TableCell key={cell.id}>
@@ -289,16 +311,13 @@ export function UsersTable({
         </Table>
       </div>
 
-      {/* Pagination */}
       {!loading && table.getPageCount() > 1 && (
         <div className="flex items-center justify-between px-1">
-          {/* Result count */}
           <p className="text-xs text-muted-foreground">
             {users.length} user{users.length !== 1 ? "s" : ""}
           </p>
 
           <div className="flex items-center gap-1">
-            {/* Previous */}
             <Button
               variant="outline"
               size="icon"
@@ -309,16 +328,14 @@ export function UsersTable({
               <ChevronLeft className="h-4 w-4" />
             </Button>
 
-            {/* Page number buttons */}
             {(() => {
-              const current    = table.getState().pagination.pageIndex;
-              const total      = table.getPageCount();
-              const delta      = 2; 
+              const current = table.getState().pagination.pageIndex;
+              const total = table.getPageCount();
+              const delta = 2;
               const pages: (number | "…")[] = [];
 
-              // Build raw range around current
               const rangeStart = Math.max(0, current - delta);
-              const rangeEnd   = Math.min(total - 1, current + delta);
+              const rangeEnd = Math.min(total - 1, current + delta);
 
               if (rangeStart > 0) {
                 pages.push(0);
@@ -332,7 +349,10 @@ export function UsersTable({
 
               return pages.map((p, i) =>
                 p === "…" ? (
-                  <span key={`ellipsis-${i}`} className="h-8 w-8 flex items-center justify-center text-xs text-muted-foreground select-none">
+                  <span
+                    key={`ellipsis-${i}`}
+                    className="h-8 w-8 flex items-center justify-center text-xs text-muted-foreground select-none"
+                  >
                     …
                   </span>
                 ) : (
@@ -349,7 +369,6 @@ export function UsersTable({
               );
             })()}
 
-            {/* Next */}
             <Button
               variant="outline"
               size="icon"

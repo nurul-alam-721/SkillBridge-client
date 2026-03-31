@@ -31,15 +31,18 @@ export default function HomePage() {
           sortOrder: "desc",
         }),
       ]);
+
       setCategories(cats);
       setTutors(tutorRes.tutors);
       setTotalTutors(tutorRes.pagination.totalTutors);
+
       const rated = tutorRes.tutors.filter((t) => t.rating > 0);
       if (rated.length > 0) {
         const avg = rated.reduce((sum, t) => sum + t.rating, 0) / rated.length;
         setAvgRating(Math.round(avg * 10) / 10);
       }
-    } catch {
+    } catch (err) {
+      console.error("Homepage fetch failed:", err);
     } finally {
       setLoading(false);
     }
@@ -47,8 +50,6 @@ export default function HomePage() {
 
   useEffect(() => {
     fetchData();
-    window.addEventListener("focus", fetchData);
-    return () => window.removeEventListener("focus", fetchData);
   }, [fetchData]);
 
   const handleSearchSubmit = () => {

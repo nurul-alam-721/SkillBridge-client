@@ -4,9 +4,8 @@ import Link from "next/link";
 import { Search, Star, Users, BookOpen, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { motion } from "framer-motion";
+import { motion, Variants } from "framer-motion";
 import { useEffect, useState, useRef } from "react";
-import { useTypewriter, Cursor } from "react-simple-typewriter";
 
 interface HeroSectionProps {
   search: string;
@@ -16,6 +15,67 @@ interface HeroSectionProps {
   totalSubjects: number;
   avgRating: number;
   loading: boolean;
+}
+
+const SUBJECTS = [
+  "Mathematics",
+  "Physics",
+  "Chemistry",
+  "Biology",
+  "English",
+  "History",
+  "Economics",
+  "Computer Science",
+];
+
+function AnimatedTitle() {
+  const line1 = "Browse Tutors. Book a Session.";
+  const line2 = "Start Your Learning Journey.";
+
+  const containerVariants: Variants = {
+    hidden: {},
+    visible: {
+      transition: { staggerChildren: 0.018, delayChildren: 0.1 },
+    },
+  };
+
+  const charVariants: Variants = {
+    hidden: { opacity: 0, y: 20 },
+    visible: {
+      opacity: 1,
+      y: 0,
+      transition: { duration: 0.35, ease: [0.22, 1, 0.36, 1] },
+    },
+  };
+
+  const renderChars = (text: string, isPrimary: boolean) =>
+    text.split("").map((char, i) => (
+      <motion.span
+        key={i}
+        variants={charVariants}
+        className={
+          char === " "
+            ? "inline-block w-[0.25em]"
+            : isPrimary
+            ? "inline-block"
+            : "inline-block text-primary"
+        }
+      >
+        {char === " " ? "\u00A0" : char}
+      </motion.span>
+    ));
+
+  return (
+    <motion.h1
+      variants={containerVariants}
+      initial="hidden"
+      animate="visible"
+      className="text-[2.75rem] sm:text-5xl font-bold tracking-tight leading-[1.2] mb-5 text-foreground"
+    >
+      <span className="block">{renderChars(line1, true)}</span>
+      <span className="block">{renderChars(line2, false)}</span>
+    </motion.h1>
+  );
 }
 
 export function HeroSection({
@@ -35,53 +95,30 @@ export function HeroSection({
 
   const hasAnimatedRef = useRef(false);
 
-  const [typedText] = useTypewriter({
-    words: [
-      "Mathematics",
-      "Physics",
-      "Chemistry",
-      "Biology",
-      "English",
-      "History",
-      "Economics",
-      "Computer Science",
-    ],
-    loop: true,
-    delaySpeed: 2000,
-    deleteSpeed: 40,
-    typeSpeed: 70,
-  });
-
   useEffect(() => {
     if (!loading && !hasAnimatedRef.current) {
       hasAnimatedRef.current = true;
 
-      const tutorInterval = setInterval(() => {
-        setAnimatedStats((prev) => {
-          const next = Math.min(prev.tutors + totalTutors / 150, totalTutors);
-          return { ...prev, tutors: next };
-        });
-      }, 16);
-      setTimeout(() => clearInterval(tutorInterval), 2500);
+      const animate = (
+        key: keyof typeof animatedStats,
+        target: number,
+        duration: number
+      ) => {
+        const interval = setInterval(() => {
+          setAnimatedStats((prev) => {
+            const next = Math.min(
+              prev[key] + target / (duration / 16),
+              target
+            );
+            return { ...prev, [key]: next };
+          });
+        }, 16);
+        setTimeout(() => clearInterval(interval), duration);
+      };
 
-      const subjectInterval = setInterval(() => {
-        setAnimatedStats((prev) => {
-          const next = Math.min(
-            prev.subjects + totalSubjects / 120,
-            totalSubjects
-          );
-          return { ...prev, subjects: next };
-        });
-      }, 16);
-      setTimeout(() => clearInterval(subjectInterval), 2000);
-
-      const ratingInterval = setInterval(() => {
-        setAnimatedStats((prev) => {
-          const next = Math.min(prev.rating + avgRating / 120, avgRating);
-          return { ...prev, rating: next };
-        });
-      }, 16);
-      setTimeout(() => clearInterval(ratingInterval), 2000);
+      animate("tutors", totalTutors, 2500);
+      animate("subjects", totalSubjects, 2500);
+      animate("rating", avgRating, 2000);
     }
   }, [loading, totalTutors, totalSubjects, avgRating]);
 
@@ -91,8 +128,8 @@ export function HeroSection({
       value: loading
         ? "..."
         : totalTutors > 0
-          ? `${Math.floor(animatedStats.tutors)}+`
-          : "—",
+        ? `${Math.floor(animatedStats.tutors)}+`
+        : "—",
       label: "Expert Tutors",
     },
     {
@@ -100,8 +137,8 @@ export function HeroSection({
       value: loading
         ? "..."
         : totalSubjects > 0
-          ? Math.floor(animatedStats.subjects).toLocaleString()
-          : "—",
+        ? Math.floor(animatedStats.subjects).toLocaleString()
+        : "—",
       label: "Subjects Covered",
     },
     {
@@ -109,57 +146,24 @@ export function HeroSection({
       value: loading
         ? "..."
         : avgRating > 0
-          ? animatedStats.rating.toFixed(1)
-          : "—",
+        ? animatedStats.rating.toFixed(1)
+        : "—",
       label: "Average Rating",
     },
-  ];
-
-  const popularSubjects = [
-    "Mathematics",
-    "Physics",
-    "English",
-    "Chemistry",
-    "Biology",
   ];
 
   return (
     <section className="relative overflow-hidden border-b bg-background">
       <div className="absolute inset-0 bg-linear-to-b from-primary/5 via-transparent to-transparent" />
-      <div className="absolute top-0 left-1/2 -translate-x-1/2 h-64 w-[600px] rounded-full bg-primary/8 blur-3xl" />
+      <div className="absolute top-0 left-1/2 -translate-x-1/2 h-64 w-150 rounded-full bg-primary/8 blur-3xl" />
 
       <div className="relative mx-auto max-w-3xl px-6 py-24 text-center">
-        {/* Typing animation above headline */}
-        <motion.div
-          initial={{ opacity: 0, y: 8 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
-          className="inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/8 px-4 py-1.5 mb-6"
-        >
-          <span className="text-xs font-semibold text-primary uppercase tracking-widest">
-            Now tutoring
-          </span>
-          <span className="text-xs font-medium text-foreground min-w-[140px] text-left">
-            {typedText}
-            <Cursor cursorStyle="|" cursorColor="currentColor" />
-          </span>
-        </motion.div>
-
-        <motion.h1
-          initial={{ opacity: 0, y: 16 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.55, delay: 0.1 }}
-          className="text-[2.75rem] sm:text-5xl font-bold tracking-tight leading-[1.15] mb-5 text-foreground"
-        >
-          Browse Tutors. Book a Session.
-          <br />
-          <span className="text-primary"> Start Your Learning.</span>
-        </motion.h1>
+        <AnimatedTitle />
 
         <motion.p
           initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: 0.2 }}
+          transition={{ duration: 0.5, delay: 0.9 }}
           className="text-muted-foreground text-base sm:text-lg max-w-lg mx-auto mb-10 leading-relaxed"
         >
           Browse verified tutors, check real availability, and book sessions
@@ -169,7 +173,7 @@ export function HeroSection({
         <motion.div
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: 0.28 }}
+          transition={{ duration: 0.5, delay: 1.0 }}
           className="flex gap-2.5 max-w-md mx-auto mb-8"
         >
           <div className="relative flex-1">
@@ -194,13 +198,13 @@ export function HeroSection({
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          transition={{ duration: 0.5, delay: 0.36 }}
+          transition={{ duration: 0.5, delay: 1.1 }}
           className="flex flex-wrap items-center justify-center gap-2 mb-16"
         >
           <span className="text-xs text-muted-foreground/60 font-medium">
             Popular:
           </span>
-          {popularSubjects.map((subject) => (
+          {SUBJECTS.slice(0, 5).map((subject) => (
             <Link
               key={subject}
               href={`/tutors?search=${subject}`}
@@ -214,28 +218,32 @@ export function HeroSection({
         <motion.div
           initial={{ opacity: 0, y: 8 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: 0.44 }}
+          transition={{ duration: 0.5, delay: 1.2 }}
           className="flex flex-wrap items-center justify-center gap-0"
         >
           {stats.map(({ icon: Icon, value, label }, i) => (
             <div key={label} className="flex items-center">
               {i > 0 && (
-                <div className="h-8 w-px bg-border/60 mx-6 hidden sm:block" />
+                <div className="h-8 w-px bg-border/60 mx-5 hidden sm:block" />
               )}
-              {i > 0 && <div className="sm:hidden w-4" />}
+              {i > 0 && <div className="sm:hidden w-3" />}
               <div className="flex items-center gap-3">
                 <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary/8 ring-1 ring-primary/12">
                   <Icon className="h-4 w-4 text-primary" />
                 </div>
                 <div className="text-left">
-                  <motion.p
-                    key={`${label}-${value}`}
-                    className={`text-sm font-semibold leading-none tabular-nums ${loading ? "text-muted-foreground" : "text-foreground"}`}
-                    initial={{ scale: 1 }}
+                  <p
+                    className={`text-sm font-semibold leading-none tabular-nums ${
+                      loading
+                        ? "text-muted-foreground"
+                        : "text-foreground"
+                    }`}
                   >
                     {value}
-                  </motion.p>
-                  <p className="text-xs text-muted-foreground mt-1">{label}</p>
+                  </p>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    {label}
+                  </p>
                 </div>
               </div>
             </div>
