@@ -1,17 +1,5 @@
 import { apiClient } from "@/lib/axios";
 
-export type Role = "STUDENT" | "TUTOR" | "ADMIN";
-export type UserStatus = "ACTIVE" | "BANNED";
-export type BookingStatus = "PENDING" | "CONFIRMED" | "COMPLETED" | "CANCELLED";
-
-export interface TutorUser {
-  id: string;
-  name: string | null;
-  email: string;
-  image: string | null;
-  phone: string | null;
-}
-
 export interface Category {
   id: string;
   name: string;
@@ -31,28 +19,7 @@ export interface AvailabilitySlot {
   maxCapacity: number;
 }
 
-export interface ReviewStudent {
-  id: string;
-  name: string | null;
-  image: string | null;
-}
-
-export interface Review {
-  id: string;
-  rating: string;
-  comment: string | null;
-  studentId: string;
-  tutorProfileId: string;
-  createdAt: string;
-  student?: ReviewStudent;
-}
-
-export interface BookingStudent {
-  id: string;
-  name: string | null;
-  image: string | null;
-  email: string;
-}
+export type BookingStatus = "PENDING" | "CONFIRMED" | "COMPLETED" | "CANCELLED";
 
 export interface TutorBooking {
   id: string;
@@ -63,7 +30,17 @@ export interface TutorBooking {
   createdAt: string;
   updatedAt: string;
   slot: AvailabilitySlot;
-  student: BookingStudent;
+  student: { id: string; name: string | null; image: string | null; email: string };
+}
+
+export interface Review {
+  id: string;
+  rating: string;
+  comment: string | null;
+  studentId: string;
+  tutorProfileId: string;
+  createdAt: string;
+  student?: { id: string; name: string | null; image: string | null };
 }
 
 export interface TutorProfile {
@@ -77,29 +54,11 @@ export interface TutorProfile {
   totalReviews: number;
   createdAt: string;
   updatedAt: string;
-  user: TutorUser;
+  user: { id: string; name: string | null; email: string; image: string | null; phone: string | null };
   category: Category;
   availability?: AvailabilitySlot[];
   reviews?: Review[];
   bookings?: TutorBooking[];
-}
-
-export interface TutorStats {
-  totalSessions: number;
-  upcoming: number;
-  completed: number;
-  cancelled: number;
-  totalEarnings: number;
-  availableSlots: number;
-  rating: number;
-  totalReviews: number;
-}
-
-export interface TutorStatsResponse {
-  stats: TutorStats;
-  tutorProfile: TutorProfile;
-  recentBookings: TutorBooking[];
-  recentReviews: Review[];
 }
 
 export interface TutorsQuery {
@@ -125,6 +84,24 @@ export interface TutorsResponse {
   };
 }
 
+export interface TutorStats {
+  totalSessions: number;
+  upcoming: number;
+  completed: number;
+  cancelled: number;
+  totalEarnings: number;
+  availableSlots: number;
+  rating: number;
+  totalReviews: number;
+}
+
+export interface TutorStatsResponse {
+  stats: TutorStats;
+  tutorProfile: TutorProfile;
+  recentBookings: TutorBooking[];
+  recentReviews: Review[];
+}
+
 export interface UpdateTutorProfilePayload {
   bio?: string;
   hourlyRate?: number;
@@ -141,14 +118,14 @@ export interface CreateAvailabilityPayload {
 export const tutorService = {
   async getAll(query?: TutorsQuery): Promise<TutorsResponse> {
     const { data } = await apiClient.get("/api/tutors", { params: query });
-    if (data.tutors && data.pagination) return { tutors: data.tutors, pagination: data.pagination };
+    if (data.tutors) return { tutors: data.tutors, pagination: data.pagination };
     if (data.data?.tutors) return data.data;
-    return data.data ?? data;
+    return data;
   },
 
   async getById(id: string): Promise<TutorProfile> {
     const { data } = await apiClient.get(`/api/tutors/${id}`);
-    return data.data;
+    return data.data ?? data;
   },
 
   async getCategories(): Promise<Category[]> {
@@ -166,17 +143,17 @@ export const tutorService = {
 
   async createProfile(payload: UpdateTutorProfilePayload): Promise<TutorProfile> {
     const { data } = await apiClient.post("/api/tutors/create-profile", payload);
-    return data.data;
+    return data.data ?? data;
   },
 
   async updateProfile(payload: UpdateTutorProfilePayload): Promise<TutorProfile> {
     const { data } = await apiClient.put("/api/tutors/me", payload);
-    return data.data;
+    return data.data ?? data;
   },
 
   async getMyStats(): Promise<TutorStatsResponse> {
     const { data } = await apiClient.get("/api/tutors/me/stats");
-    return data.data;
+    return data.data ?? data;
   },
 
   async getMyAvailability(): Promise<AvailabilitySlot[]> {
@@ -188,10 +165,27 @@ export const tutorService = {
 
   async createAvailabilitySlot(payload: CreateAvailabilityPayload): Promise<AvailabilitySlot> {
     const { data } = await apiClient.post("/api/tutor/availability", payload);
-    return data.data;
+    return data.data ?? data;
   },
 
   async deleteAvailabilitySlot(slotId: string): Promise<void> {
-    await apiClient.delete(`/api/tutor/availability/${slotId}`);
+    try {
+      await apiClient.delete(`/api/tutor/availability/${slotId}`);
+    } catch (error: unknown) {
+      if (
+        error &&
+        typeof error === "object" &&
+        "response" in error &&
+        error.response &&
+        typeof error.response === "object" &&
+        "data" in error.response
+      ) {
+        const data = error.response.data as { message?: string };
+        throw new Error(
+          data.message || "Cannot delete this slot — it has an active booking."
+        );
+      }
+      throw new Error("Cannot delete this slot — it has an active booking.");
+    }
   },
 };

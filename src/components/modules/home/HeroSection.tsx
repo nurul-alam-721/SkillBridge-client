@@ -15,18 +15,8 @@ interface HeroSectionProps {
   totalSubjects: number;
   avgRating: number;
   loading: boolean;
+  categories?: { id: string; name: string }[];
 }
-
-const SUBJECTS = [
-  "Mathematics",
-  "Physics",
-  "Chemistry",
-  "Biology",
-  "English",
-  "History",
-  "Economics",
-  "Computer Science",
-];
 
 function AnimatedTitle() {
   const line1 = "Browse Tutors. Book a Session.";
@@ -86,6 +76,7 @@ export function HeroSection({
   totalSubjects,
   avgRating,
   loading,
+  categories = [],
 }: HeroSectionProps) {
   const [animatedStats, setAnimatedStats] = useState({
     tutors: 0,
@@ -152,6 +143,12 @@ export function HeroSection({
     },
   ];
 
+  // Use real category names from DB; fall back to defaults while loading
+  const popularSubjects =
+    categories.length > 0
+      ? categories.slice(0, 5).map((c) => c.name)
+      : ["Mathematics", "Physics", "English", "Chemistry", "Biology"];
+
   return (
     <section className="relative overflow-hidden border-b bg-background">
       <div className="absolute inset-0 bg-linear-to-b from-primary/5 via-transparent to-transparent" />
@@ -204,10 +201,10 @@ export function HeroSection({
           <span className="text-xs text-muted-foreground/60 font-medium">
             Popular:
           </span>
-          {SUBJECTS.slice(0, 5).map((subject) => (
+          {popularSubjects.map((subject) => (
             <Link
               key={subject}
-              href={`/tutors?search=${subject}`}
+              href={`/tutors?search=${encodeURIComponent(subject)}`}
               className="rounded-full border border-border/60 bg-background/80 px-3 py-1 text-xs text-muted-foreground hover:border-primary/50 hover:text-primary hover:bg-primary/5 transition-all duration-150"
             >
               {subject}
@@ -234,9 +231,7 @@ export function HeroSection({
                 <div className="text-left">
                   <p
                     className={`text-sm font-semibold leading-none tabular-nums ${
-                      loading
-                        ? "text-muted-foreground"
-                        : "text-foreground"
+                      loading ? "text-muted-foreground" : "text-foreground"
                     }`}
                   >
                     {value}

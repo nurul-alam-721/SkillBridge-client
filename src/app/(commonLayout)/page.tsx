@@ -70,6 +70,7 @@ export default function HomePage() {
         totalSubjects={categories.length}
         avgRating={avgRating}
         loading={loading}
+        categories={categories}
       />
       <CategoriesSection loading={loading} categories={categories} />
       <FeaturedTutorsSection tutors={tutors} loading={loading} />

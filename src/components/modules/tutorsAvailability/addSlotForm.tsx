@@ -17,7 +17,7 @@ import { CreateAvailabilityPayload } from "@/services/tutor.service";
 
 interface AddSlotFormProps {
   saving: boolean;
-  error: string | null;
+  error?: string | null;
   onAdd: (payload: CreateAvailabilityPayload) => Promise<boolean>;
 }
 
@@ -174,7 +174,6 @@ export function AddSlotForm({ saving, error, onAdd }: AddSlotFormProps) {
           </div>
         </div>
 
-        {/* Client-side validation error */}
         {clientError && (
           <p className="text-xs text-destructive">{clientError}</p>
         )}
