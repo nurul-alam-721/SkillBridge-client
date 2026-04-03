@@ -30,7 +30,12 @@ export interface TutorBooking {
   createdAt: string;
   updatedAt: string;
   slot: AvailabilitySlot;
-  student: { id: string; name: string | null; image: string | null; email: string };
+  student: {
+    id: string;
+    name: string | null;
+    image: string | null;
+    email: string;
+  };
 }
 
 export interface Review {
@@ -54,7 +59,13 @@ export interface TutorProfile {
   totalReviews: number;
   createdAt: string;
   updatedAt: string;
-  user: { id: string; name: string | null; email: string; image: string | null; phone: string | null };
+  user: {
+    id: string;
+    name: string | null;
+    email: string;
+    image: string | null;
+    phone: string | null;
+  };
   category: Category;
   availability?: AvailabilitySlot[];
   reviews?: Review[];
@@ -118,7 +129,8 @@ export interface CreateAvailabilityPayload {
 export const tutorService = {
   async getAll(query?: TutorsQuery): Promise<TutorsResponse> {
     const { data } = await apiClient.get("/api/tutors", { params: query });
-    if (data.tutors) return { tutors: data.tutors, pagination: data.pagination };
+    if (data.tutors)
+      return { tutors: data.tutors, pagination: data.pagination };
     if (data.data?.tutors) return data.data;
     return data;
   },
@@ -141,12 +153,19 @@ export const tutorService = {
     return data.data ?? null;
   },
 
-  async createProfile(payload: UpdateTutorProfilePayload): Promise<TutorProfile> {
-    const { data } = await apiClient.post("/api/tutors/create-profile", payload);
+  async createProfile(
+    payload: UpdateTutorProfilePayload,
+  ): Promise<TutorProfile> {
+    const { data } = await apiClient.post(
+      "/api/tutors/create-profile",
+      payload,
+    );
     return data.data ?? data;
   },
 
-  async updateProfile(payload: UpdateTutorProfilePayload): Promise<TutorProfile> {
+  async updateProfile(
+    payload: UpdateTutorProfilePayload,
+  ): Promise<TutorProfile> {
     const { data } = await apiClient.put("/api/tutors/me", payload);
     return data.data ?? data;
   },
@@ -163,9 +182,28 @@ export const tutorService = {
     return [];
   },
 
-  async createAvailabilitySlot(payload: CreateAvailabilityPayload): Promise<AvailabilitySlot> {
-    const { data } = await apiClient.post("/api/tutor/availability", payload);
-    return data.data ?? data;
+  async createAvailabilitySlot(
+    payload: CreateAvailabilityPayload,
+  ): Promise<AvailabilitySlot> {
+    try {
+      const { data } = await apiClient.post("/api/tutor/availability", payload);
+      return data.data ?? data;
+    } catch (error: unknown) {
+      if (
+        error &&
+        typeof error === "object" &&
+        "response" in error &&
+        error.response &&
+        typeof error.response === "object" &&
+        "data" in error.response
+      ) {
+        const data = error.response.data as { message?: string };
+        throw new Error(
+          data.message || "A slot in this time period already exists.",
+        );
+      }
+      throw new Error("A slot in this time period already exists.");
+    }
   },
 
   async deleteAvailabilitySlot(slotId: string): Promise<void> {
@@ -182,7 +220,7 @@ export const tutorService = {
       ) {
         const data = error.response.data as { message?: string };
         throw new Error(
-          data.message || "Cannot delete this slot — it has an active booking."
+          data.message || "Cannot delete this slot — it has an active booking.",
         );
       }
       throw new Error("Cannot delete this slot — it has an active booking.");

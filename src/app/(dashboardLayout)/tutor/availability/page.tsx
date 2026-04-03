@@ -21,7 +21,6 @@ import { AddSlotForm } from "@/components/modules/tutorsAvailability/addSlotForm
 import { AvailabilitySlot } from "@/services/tutor.service";
 
 function formatTime(value: string): string {
-  // Handles both "HH:MM:SS", "HH:MM", and full ISO strings
   if (value.includes("T")) {
     return new Date(value).toLocaleTimeString("en-US", {
       hour: "2-digit",
@@ -29,7 +28,6 @@ function formatTime(value: string): string {
       hour12: true,
     });
   }
-  // "14:30:00" or "14:30" → "2:30 PM"
   const [h, m] = value.split(":").map(Number);
   const date = new Date();
   date.setHours(h, m, 0);

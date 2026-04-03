@@ -27,24 +27,24 @@ export function useAvailability() {
     fetch();
   }, [fetch]);
 
-  const addSlot = async (payload: CreateAvailabilityPayload): Promise<boolean> => {
-    setSaving(true);
-    try {
-      const slot = await tutorService.createAvailabilitySlot(payload);
-      setSlots((prev) => [...prev, slot]);
-      toast.success("Availability slot added successfully");
-      return true;
-    } catch (error: unknown) {
-      toast.error(
-        error instanceof Error
-          ? error.message
-          : "Failed to add slot. Slot in this time period may already exist."
-      );
-      return false;
-    } finally {
-      setSaving(false);
-    }
-  };
+ const addSlot = async (payload: CreateAvailabilityPayload): Promise<boolean> => {
+  setSaving(true);
+  try {
+    const slot = await tutorService.createAvailabilitySlot(payload);
+    setSlots((prev) => [...prev, slot]);
+    toast.success("Availability slot added successfully");
+    return true;
+  } catch (error: unknown) {
+    toast.error(
+      error instanceof Error
+        ? error.message
+        : "A slot in this time period already exists."
+    );
+    return false;
+  } finally {
+    setSaving(false);
+  }
+};
 
   const removeSlot = async (slotId: string): Promise<void> => {
     try {
