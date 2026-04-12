@@ -23,6 +23,9 @@ import {
 } from "@/services/booking.service";
 import { LeaveReviewDialog } from "./LeaveReviewDialog";
 import { ViewReviewDialog } from "./ViewReviewDialog";
+import { PaymentDialog } from "./PaymentDialog";
+import { authClient } from "@/lib/auth-client";
+import { CreditCard } from "lucide-react";
 
 
 
@@ -77,6 +80,10 @@ export function BookingCard({
 }) {
   const [reviewOpen, setReviewOpen] = useState(false);
   const [viewReviewOpen, setViewReviewOpen] = useState(false);
+  const [paymentOpen, setPaymentOpen] = useState(false);
+
+  const { data: session } = authClient.useSession();
+  const userRole = session?.user?.role;
 
   
 
@@ -228,6 +235,18 @@ export function BookingCard({
                 </Button>
               )}
 
+              {/* Pay Now Button (Only for students with pending bookings) */}
+              {booking.status === "PENDING" && userRole === "STUDENT" && (
+                <Button
+                  size="sm"
+                  className="h-8 rounded-xl text-xs gap-1.5 bg-emerald-600 hover:bg-emerald-700 shadow-md shadow-emerald-500/20"
+                  onClick={() => setPaymentOpen(true)}
+                >
+                  <CreditCard className="h-3.5 w-3.5" />
+                  Pay Now
+                </Button>
+              )}
+
               {/* View tutor / View details */}
               {!booking.review && booking.status !== "CANCELLED" && (
                 <Button
@@ -235,7 +254,7 @@ export function BookingCard({
                   size="sm"
                   className="h-8 rounded-xl text-xs gap-1.5"
                   variant={
-                    booking.status === "COMPLETED" ? "outline" : "default"
+                    booking.status === "COMPLETED" || (booking.status === "PENDING" && userRole === "STUDENT") ? "outline" : "default"
                   }
                 >
                   <Link href={`/tutors/${booking.tutorProfile.id}`}>
@@ -301,6 +320,16 @@ export function BookingCard({
           }}
         />
       )}
+
+      <PaymentDialog
+        open={paymentOpen}
+        booking={booking}
+        onClose={() => setPaymentOpen(false)}
+        onSuccess={() => {
+          setPaymentOpen(false);
+          onReviewed?.(); // Refresh the list
+        }}
+      />
     </>
   );
 }

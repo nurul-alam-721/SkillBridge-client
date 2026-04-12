@@ -1,7 +1,7 @@
 "use client";
 
 import { format, differenceInHours } from "date-fns";
-import { CalendarDays, Clock, DollarSign, User, Loader2 } from "lucide-react";
+import { CalendarDays, Clock, Loader2 } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
@@ -38,121 +38,90 @@ export function BookingConfirmDialog({
 
   return (
     <Dialog open={open} onOpenChange={(v) => !v && !confirming && onCancel()}>
-      <DialogContent className="sm:max-w-sm rounded-2xl p-0 overflow-hidden gap-0">
-        {/* Header */}
-        <div className="bg-primary px-6 py-5">
+      <DialogContent className="sm:max-w-md rounded-xl p-0 overflow-hidden">
+        <div className="p-6 pb-4">
           <DialogHeader>
-            <DialogTitle className="text-primary-foreground text-lg font-bold">
-              Confirm Booking
+            <DialogTitle className="text-xl font-semibold">
+              Confirm your booking
             </DialogTitle>
-            <DialogDescription className="text-primary-foreground/70 text-sm mt-0.5">
-              Review your session details before confirming.
+            <DialogDescription className="text-sm mt-1">
+              Please review your session details. Confirmation will take you to payment.
             </DialogDescription>
           </DialogHeader>
         </div>
 
-        <div className="px-6 py-5 space-y-5">
-          {/* Tutor info */}
-          <div className="flex items-center gap-3 p-3.5 rounded-xl bg-muted/40 border border-border/40">
-            <Avatar className="h-10 w-10 shrink-0">
+        <div className="px-6 py-2 space-y-6">
+          {/* Tutor Info */}
+          <div className="flex items-center gap-3">
+            <Avatar className="h-12 w-12 border">
               <AvatarImage src={tutor.user.image ?? undefined} />
-              <AvatarFallback className="text-sm font-bold bg-primary/10 text-primary">
+              <AvatarFallback className="font-semibold text-primary">
                 {(tutor.user.name ?? "T").charAt(0).toUpperCase()}
               </AvatarFallback>
             </Avatar>
-            <div className="min-w-0">
-              <p className="text-sm font-semibold truncate">
-                {tutor.user.name}
-              </p>
-              <p className="text-xs text-muted-foreground">
-                {tutor.category.name}
-              </p>
+            <div>
+              <p className="font-medium text-foreground">{tutor.user.name}</p>
+              <p className="text-sm text-muted-foreground">{tutor.category.name}</p>
             </div>
           </div>
 
-          {/* Session details */}
-          <div className="space-y-3">
-            <div className="flex items-center gap-3">
-              <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-primary/10">
-                <CalendarDays className="h-4 w-4 text-primary" />
-              </div>
-              <div>
-                <p className="text-[11px] text-muted-foreground uppercase tracking-wide font-medium">
-                  Date
-                </p>
-                <p className="text-sm font-semibold">
-                  {format(startDt, "EEEE, MMMM d, yyyy")}
-                </p>
+          <div className="rounded-lg border bg-muted/20 p-4 space-y-4">
+            <div className="flex justify-between items-start gap-4">
+              <div className="flex gap-3">
+                <CalendarDays className="h-5 w-5 text-muted-foreground mt-0.5" />
+                <div>
+                  <p className="text-xs text-muted-foreground font-medium uppercase tracking-wider">Date</p>
+                  <p className="text-sm font-medium">{format(startDt, "EEEE, MMMM d, yyyy")}</p>
+                </div>
               </div>
             </div>
 
-            <div className="flex items-center gap-3">
-              <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-primary/10">
-                <Clock className="h-4 w-4 text-primary" />
-              </div>
-              <div>
-                <p className="text-[11px] text-muted-foreground uppercase tracking-wide font-medium">
-                  Time
-                </p>
-                <p className="text-sm font-semibold tabular-nums">
-                  {format(startDt, "h:mm a")} → {format(endDt, "h:mm a")}
-                  <span className="text-xs font-normal text-muted-foreground ml-1.5">
-                    ({hours}h session)
-                  </span>
-                </p>
+            <div className="flex justify-between items-start gap-4">
+              <div className="flex gap-3">
+                <Clock className="h-5 w-5 text-muted-foreground mt-0.5" />
+                <div>
+                  <p className="text-xs text-muted-foreground font-medium uppercase tracking-wider">Time</p>
+                  <p className="text-sm font-medium">
+                    {format(startDt, "h:mm a")} - {format(endDt, "h:mm a")} 
+                    <span className="text-muted-foreground ml-1">({hours}h)</span>
+                  </p>
+                </div>
               </div>
             </div>
-
-            <div className="flex items-center gap-3">
-              <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-primary/10">
-                <User className="h-4 w-4 text-primary" />
-              </div>
-              <div>
-                <p className="text-[11px] text-muted-foreground uppercase tracking-wide font-medium">
-                  Rate
-                </p>
-                <p className="text-sm font-semibold">৳{tutor.hourlyRate}/hr</p>
-              </div>
+            
+            <Separator />
+            
+            <div className="flex justify-between items-center whitespace-nowrap">
+              <span className="text-sm font-medium text-muted-foreground">Total Amount</span>
+              <span className="text-lg font-bold">BDT {total}</span>
             </div>
           </div>
 
-          <Separator />
-
-          {/* Total */}
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <DollarSign className="h-4 w-4 text-muted-foreground" />
-              <span className="text-sm text-muted-foreground">
-                Estimated total
-              </span>
-            </div>
-            <span className="text-base font-bold">৳{total}</span>
-          </div>
-
-          <p className="text-[11px] text-muted-foreground text-center leading-relaxed">
-            You won&apos;t be charged until the session is confirmed by the
-            tutor.
+          <p className="text-xs text-muted-foreground mt-2">
+             Payment is required immediately after confirmation to secure this slot.
           </p>
+        </div>
 
-          {/* Actions */}
-          <div className="flex gap-2.5 pt-1">
-            <Button
-              variant="outline"
-              className="flex-1 rounded-xl"
-              onClick={onCancel}
-              disabled={confirming}
-            >
-              Cancel
-            </Button>
-            <Button
-              className="flex-1 rounded-xl gap-2"
-              onClick={onConfirm}
-              disabled={confirming}
-            >
-              {confirming && <Loader2 className="h-3.5 w-3.5 animate-spin" />}
-              {confirming ? "Booking…" : "Confirm"}
-            </Button>
-          </div>
+        <div className="px-6 py-4 bg-muted/30 flex justify-end gap-3 border-t">
+          <Button
+            variant="outline"
+            className="rounded-lg"
+            onClick={onCancel}
+            disabled={confirming}
+          >
+            Cancel
+          </Button>
+          <Button
+            className="rounded-lg min-w-[120px]"
+            onClick={onConfirm}
+            disabled={confirming}
+          >
+            {confirming ? (
+              <Loader2 className="h-4 w-4 animate-spin mx-auto" />
+            ) : (
+              "Confirm & Pay"
+            )}
+          </Button>
         </div>
       </DialogContent>
     </Dialog>

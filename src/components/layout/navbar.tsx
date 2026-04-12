@@ -2,7 +2,7 @@ import Link from "next/link";
 import { GraduationCap } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { ModeToggle } from "./ModeToggle";
-import { NavbarActions } from "../modules/home/NevbarActions";
+import { NavbarActions } from "../modules/home/NavbarActions";
 import { Suspense } from "react";
 
 const PUBLIC_LINKS = [

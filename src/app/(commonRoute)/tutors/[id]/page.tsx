@@ -40,6 +40,7 @@ import { TutorDetailsSkeleton } from "@/components/modules/tutorDetails/TutorDet
 import { AvailabilitySlots } from "@/components/modules/tutorDetails/AvailabilitySlots";
 import { ReviewsList } from "@/components/modules/tutorDetails/ReviewsList";
 import { BookingConfirmDialog } from "@/components/modules/tutorDetails/BookingConfirmDialog";
+import { PaymentDialog } from "@/components/modules/bookings/PaymentDialog";
 
 function getErrorMessage(
   err: unknown,
@@ -111,6 +112,9 @@ export default function TutorDetailsPage() {
   const [myBookedSlots, setMyBookedSlots] = useState<Set<string>>(new Set());
   const [bookingsLoading, setBookingsLoading] = useState(false);
 
+  const [paymentOpen, setPaymentOpen] = useState(false);
+  const [createdBooking, setCreatedBooking] = useState<Booking | null>(null);
+
   const isStudent = user?.role === Roles.student;
   const isGuest = !user && !sessionPending;
 
@@ -139,7 +143,7 @@ export default function TutorDetailsPage() {
     if (!selectedSlot || !tutor) return;
     setBooking(true);
     try {
-      await bookingService.create({
+      const newBooking = await bookingService.create({
         tutorProfileId: tutor.id,
         slotId: selectedSlot.id,
       });
@@ -147,7 +151,9 @@ export default function TutorDetailsPage() {
       setMyBookedSlots((prev) => new Set(prev).add(selectedSlot.id));
       setSelectedSlot(null);
       setConfirmOpen(false);
-      toast.success("Session booked! Check your dashboard for details.");
+      setCreatedBooking(newBooking);
+      setPaymentOpen(true);
+      toast.success("Booking secured! Please complete your payment.");
     } catch (err) {
       toast.error(getErrorMessage(err, "Failed to book. Please try again."));
     } finally {
@@ -495,6 +501,20 @@ export default function TutorDetailsPage() {
           confirming={booking}
         />
       )}
+
+      {/* Payment dialog triggered immediately after successful booking */}
+      <PaymentDialog
+        open={paymentOpen}
+        booking={createdBooking}
+        onClose={() => {
+          setPaymentOpen(false);
+          setCreatedBooking(null);
+        }}
+        onSuccess={() => {
+          toast.success("Payment completed successfully!");
+          router.push("/dashboard/bookings");
+        }}
+      />
     </div>
   );
 }
