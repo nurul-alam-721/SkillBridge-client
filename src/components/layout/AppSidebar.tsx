@@ -14,6 +14,8 @@ import {
   UserCircle,
   Clock,
   GraduationCap,
+  Receipt,
+  WalletCards,
 } from "lucide-react";
 import {
   Sidebar,
@@ -47,17 +49,24 @@ const NAV: Record<
     { title: "Overview", href: "/dashboard", icon: LayoutDashboard },
     { title: "Bookings", href: "/dashboard/bookings", icon: CalendarDays },
     { title: "Profile", href: "/dashboard/profile", icon: UserCircle },
+    {
+      title: "Payment History",
+      href: "/dashboard/payments/history",
+      icon: Receipt,
+    },
   ],
   TUTOR: [
     { title: "Overview", href: "/tutor/dashboard", icon: LayoutDashboard },
     { title: "Availability Slots", href: "/tutor/availability", icon: Clock },
     { title: "Profile", href: "/tutor/profile", icon: UserCircle },
+    { title: "Earnings", href: "/tutor/payments/earnings", icon: WalletCards },
   ],
   ADMIN: [
     { title: "Overview", href: "/admin/dashboard", icon: LayoutDashboard },
     { title: "Users", href: "/admin/users", icon: Users },
     { title: "Bookings", href: "/admin/bookings", icon: BookMarked },
     { title: "Categories", href: "/admin/categories", icon: Tag },
+    { title: "Payments", href: "/admin/payments", icon: Receipt },
   ],
 };
 
@@ -123,9 +132,9 @@ export function AppSidebar({
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
-        
+
         <Separator />
-        
+
         <SidebarGroup>
           <SidebarGroupContent>
             <SidebarMenu>

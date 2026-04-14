@@ -25,8 +25,13 @@ export function useMyBookings() {
     );
   }, []);
 
+  const cancelBooking = useCallback(async (bookingId: string) => {
+    await bookingService.cancelBooking(bookingId);
+    setBookings((prev) => prev.filter((b) => b.id !== bookingId));
+  }, []);
+
   const upcoming = bookings.filter((b) => ["PENDING", "CONFIRMED"].includes(b.status));
   const past     = bookings.filter((b) => ["COMPLETED", "CANCELLED"].includes(b.status));
 
-  return { bookings, upcoming, past, loading, refresh: load, patchReview };
+  return { bookings, upcoming, past, loading, refresh: load, patchReview, cancelBooking };
 }

@@ -41,6 +41,7 @@ import { AvailabilitySlots } from "@/components/modules/tutorDetails/Availabilit
 import { ReviewsList } from "@/components/modules/tutorDetails/ReviewsList";
 import { BookingConfirmDialog } from "@/components/modules/tutorDetails/BookingConfirmDialog";
 import { PaymentDialog } from "@/components/modules/bookings/PaymentDialog";
+import { CurrentUser } from "@/services/user.service";
 
 function getErrorMessage(
   err: unknown,
@@ -138,7 +139,6 @@ export default function TutorDetailsPage() {
       .finally(() => setBookingsLoading(false));
   }, [isStudent, tutor?.id]);
 
-  // Called from confirm dialog
   const handleConfirmBooking = async () => {
     if (!selectedSlot || !tutor) return;
     setBooking(true);
@@ -178,9 +178,11 @@ export default function TutorDetailsPage() {
     setConfirmOpen(true);
   };
 
+  // ── Guards ──────────────────────────────────────────────────────────────────
+
   if (loading || sessionPending) return <TutorDetailsSkeleton />;
 
-  if (error || !tutor) {
+  if (error || !tutor || !tutor.user) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[60vh] gap-4 text-center px-4">
         <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-muted">
@@ -229,12 +231,10 @@ export default function TutorDetailsPage() {
 
         {/* ── Profile header ── */}
         <div className="mb-6 rounded-2xl border border-border/50 bg-card overflow-hidden shadow-sm">
-          {/* Subtle header band */}
           <div className="h-24 bg-linear-to-br from-primary/8 via-primary/4 to-transparent" />
 
           <div className="px-6 pb-6 -mt-12">
             <div className="flex flex-col sm:flex-row items-start gap-5">
-              {/* Avatar — overlaps the band */}
               <Avatar className="h-20 w-20 text-2xl ring-4 ring-background shadow-lg shrink-0">
                 <AvatarImage
                   src={tutor.user.image ?? undefined}
@@ -395,7 +395,6 @@ export default function TutorDetailsPage() {
               </CardHeader>
 
               <CardContent className="space-y-3.5">
-                {/* Selected slot preview */}
                 {selectedSlot && isStudent && (
                   <div
                     className={`rounded-xl border p-3.5 text-sm space-y-1 ${
@@ -449,7 +448,11 @@ export default function TutorDetailsPage() {
                       Available slots
                     </span>
                     <span
-                      className={`font-semibold ${availableCount === 0 ? "text-destructive" : "text-emerald-600 dark:text-emerald-400"}`}
+                      className={`font-semibold ${
+                        availableCount === 0
+                          ? "text-destructive"
+                          : "text-emerald-600 dark:text-emerald-400"
+                      }`}
                     >
                       {availableCount}
                     </span>
@@ -490,7 +493,6 @@ export default function TutorDetailsPage() {
         </div>
       </div>
 
-      {/* Booking confirmation dialog */}
       {confirmOpen && selectedSlot && (
         <BookingConfirmDialog
           open={confirmOpen}
@@ -502,10 +504,10 @@ export default function TutorDetailsPage() {
         />
       )}
 
-      {/* Payment dialog triggered immediately after successful booking */}
       <PaymentDialog
         open={paymentOpen}
         booking={createdBooking}
+        user={(user as unknown as CurrentUser) ?? null}
         onClose={() => {
           setPaymentOpen(false);
           setCreatedBooking(null);

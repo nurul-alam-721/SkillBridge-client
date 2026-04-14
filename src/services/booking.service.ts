@@ -51,4 +51,8 @@ export const bookingService = {
     const { data } = await apiClient.put(`/api/bookings/${id}/status`, { status });
     return data.data;
   },
+
+  async cancelBooking(id: string): Promise<void> {
+    await apiClient.delete(`/api/bookings/${id}`);
+  },
 };

@@ -35,37 +35,27 @@ const STATUS_CONFIG: Record<
     label: string;
     icon: React.ElementType;
     pill: string;
-    glow: string;
-    bar: string;
   }
 > = {
   PENDING: {
     label: "Pending",
     icon: Hourglass,
     pill: "text-amber-600 bg-amber-50 ring-1 ring-amber-200 dark:text-amber-400 dark:bg-amber-900/30 dark:ring-amber-800",
-    glow: "from-amber-500/5 to-transparent",
-    bar: "bg-gradient-to-r from-amber-400 to-amber-300",
   },
   CONFIRMED: {
     label: "Confirmed",
     icon: CheckCircle2,
     pill: "text-sky-600 bg-sky-50 ring-1 ring-sky-200 dark:text-sky-400 dark:bg-sky-900/30 dark:ring-sky-800",
-    glow: "from-sky-500/5 to-transparent",
-    bar: "bg-gradient-to-r from-sky-500 to-blue-400",
   },
   COMPLETED: {
     label: "Completed",
     icon: CheckCircle2,
     pill: "text-emerald-700 bg-emerald-50 ring-1 ring-emerald-200 dark:text-emerald-400 dark:bg-emerald-900/30 dark:ring-emerald-800",
-    glow: "from-emerald-500/5 to-transparent",
-    bar: "bg-gradient-to-r from-emerald-500 to-teal-400",
   },
   CANCELLED: {
     label: "Cancelled",
     icon: XCircle,
     pill: "text-rose-600 bg-rose-50 ring-1 ring-rose-200 dark:text-rose-400 dark:bg-rose-900/30 dark:ring-rose-800",
-    glow: "from-rose-500/5 to-transparent",
-    bar: "bg-gradient-to-r from-rose-500 to-pink-400",
   },
 };
 
@@ -99,15 +89,7 @@ export function BookingCard({
 
   return (
     <>
-      <div className="relative flex flex-col rounded-2xl border border-border/60 bg-card overflow-hidden shadow-xs hover:shadow-md transition-all duration-300 group">
-        {/* Gradient glow */}
-        <div
-          className={`absolute inset-0 bg-linear-to-br ${cfg.glow} pointer-events-none`}
-        />
-
-        {/* Top status bar */}
-        <div className={`h-1 w-full ${cfg.bar}`} />
-
+      <div className="relative flex flex-col rounded-2xl border border-border/60 bg-card overflow-hidden shadow-xs hover:shadow-sm transition-all duration-300 group">
         <div className="relative p-5 flex flex-col gap-4">
           {/* Row 1: Tutor + status */}
           <div className="flex items-start justify-between gap-3">

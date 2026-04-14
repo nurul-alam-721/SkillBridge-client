@@ -11,6 +11,8 @@ import {
   BookMarked,
   Tag,
   Clock,
+  Receipt,
+  WalletCards,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -49,19 +51,26 @@ const DASHBOARD_LINKS: Record<
 > = {
   [Roles.student]: [
     { label: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
-    { label: "My Bookings", href: "/dashboard/bookings", icon: CalendarDays },
     { label: "Profile", href: "/dashboard/profile", icon: UserCircle },
+    { label: "My Bookings", href: "/dashboard/bookings", icon: CalendarDays },
+    {
+      label: "Payment History",
+      href: "/dashboard/payments/history",
+      icon: Receipt,
+    },
   ],
   [Roles.tutor]: [
     { label: "Dashboard", href: "/tutor/dashboard", icon: LayoutDashboard },
     { label: "Availability", href: "/tutor/availability", icon: Clock },
     { label: "Profile", href: "/tutor/profile", icon: UserCircle },
+    { label: "Earnings", href: "/tutor/payments/earnings", icon: WalletCards },
   ],
   [Roles.admin]: [
     { label: "Dashboard", href: "/admin/dashboard", icon: LayoutDashboard },
     { label: "Users", href: "/admin/users", icon: Users },
     { label: "Bookings", href: "/admin/bookings", icon: BookMarked },
     { label: "Categories", href: "/admin/categories", icon: Tag },
+    { label: "Payments", href: "/admin/payments", icon: Receipt },
   ],
 };
 
@@ -120,9 +129,7 @@ export function NavbarActions() {
                   {(user.name ?? "U").charAt(0).toUpperCase()}
                 </AvatarFallback>
               </Avatar>
-              <span className="max-w-24 truncate font-medium">
-                {user.name}
-              </span>
+              <span className="max-w-24 truncate font-medium">{user.name}</span>
               {role && (
                 <span
                   className={cn(

@@ -65,71 +65,50 @@ function SessionActions({
     setBusy(null);
   };
 
-  if (booking.status === "PENDING") {
-    return (
-      <div className="flex items-center gap-2">
-        <Button
-          size="sm"
-          className="h-8 rounded-xl gap-1.5 text-xs"
-          disabled={!!busy}
-          onClick={() => act("CONFIRMED")}
-        >
-          {busy === "CONFIRMED"
-            ? <Loader2 className="h-3.5 w-3.5 animate-spin" />
-            : <CheckCircle2 className="h-3.5 w-3.5" />
-          }
-          Confirm
-        </Button>
-        <Button
-          size="sm"
-          variant="outline"
-          className="h-8 rounded-xl gap-1.5 text-xs border-rose-200 text-rose-600 hover:bg-rose-50 dark:border-rose-800 dark:text-rose-400 dark:hover:bg-rose-900/20"
-          disabled={!!busy}
-          onClick={() => act("CANCELLED")}
-        >
-          {busy === "CANCELLED"
-            ? <Loader2 className="h-3.5 w-3.5 animate-spin" />
-            : <XCircle className="h-3.5 w-3.5" />
-          }
-          Decline
-        </Button>
-      </div>
-    );
+  if (booking.status === "COMPLETED" || booking.status === "CANCELLED") {
+     return <span className="text-xs text-muted-foreground">—</span>;
   }
 
-  if (booking.status === "CONFIRMED") {
-    return (
-      <div className="flex items-center gap-2">
+  return (
+    <div className="flex items-center gap-2">
+      {booking.status === "CONFIRMED" && (
         <Button
           size="sm"
-          className="h-8 rounded-xl gap-1.5 text-xs bg-emerald-600 hover:bg-emerald-700 text-white"
+          className="h-8 rounded-lg gap-1.5 text-xs font-semibold bg-emerald-600 hover:bg-emerald-700 text-white shadow-sm"
           disabled={!!busy}
           onClick={() => act("COMPLETED")}
         >
-          {busy === "COMPLETED"
-            ? <Loader2 className="h-3.5 w-3.5 animate-spin" />
-            : <CheckCircle2 className="h-3.5 w-3.5" />
-          }
-          Mark Complete
+          {busy === "COMPLETED" ? (
+            <Loader2 className="h-3.5 w-3.5 animate-spin" />
+          ) : (
+            <CheckCircle2 className="h-3.5 w-3.5" />
+          )}
+          Complete
         </Button>
-        <Button
-          size="sm"
-          variant="outline"
-          className="h-8 rounded-xl gap-1.5 text-xs border-rose-200 text-rose-600 hover:bg-rose-50 dark:border-rose-800 dark:text-rose-400 dark:hover:bg-rose-900/20"
-          disabled={!!busy}
-          onClick={() => act("CANCELLED")}
-        >
-          {busy === "CANCELLED"
-            ? <Loader2 className="h-3.5 w-3.5 animate-spin" />
-            : <XCircle className="h-3.5 w-3.5" />
-          }
-          Cancel
-        </Button>
-      </div>
-    );
-  }
+      )}
 
-  return <span className="text-xs text-muted-foreground">—</span>;
+      <Button
+        size="sm"
+        variant="outline"
+        className="h-8 rounded-lg gap-1.5 text-xs font-semibold border-rose-200 text-rose-600 hover:bg-rose-50 hover:border-rose-300 dark:border-rose-900/50 dark:text-rose-400 dark:hover:bg-rose-950/30 transition-colors"
+        disabled={!!busy}
+        onClick={() => act("CANCELLED")}
+      >
+        {busy === "CANCELLED" ? (
+          <Loader2 className="h-3.5 w-3.5 animate-spin" />
+        ) : (
+          <XCircle className="h-3.5 w-3.5" />
+        )}
+        Decline
+      </Button>
+
+      {booking.status === "PENDING" && (
+        <span className="text-[12px] text-muted-foreground font-medium italic text-yellow-500 ml-1">
+          Awaiting Payment
+        </span>
+      )}
+    </div>
+  );
 }
 
 

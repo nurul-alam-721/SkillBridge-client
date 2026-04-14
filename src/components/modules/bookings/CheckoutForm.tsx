@@ -6,33 +6,52 @@ import {
   useStripe,
   useElements,
 } from "@stripe/react-stripe-js";
-import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { paymentService } from "@/services/payment.service";
-import { Loader2, ShieldCheck, Lock, CreditCard } from "lucide-react";
+import { Loader2, Lock, ShieldCheck } from "lucide-react";
 
 interface CheckoutFormProps {
   bookingId: string;
   amount: number;
+  userEmail: string;
+  userName?: string;
+  tutorName?: string;
   onSuccess: () => void;
   onCancel: () => void;
 }
 
-export function CheckoutForm({ bookingId, amount, onSuccess, onCancel }: CheckoutFormProps) {
+export function CheckoutForm({
+  bookingId,
+  amount,
+  userEmail,
+  userName,
+  tutorName,
+  onSuccess,
+  onCancel,
+}: CheckoutFormProps) {
   const stripe = useStripe();
   const elements = useElements();
+
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [isReady, setIsReady] = useState(false);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-
+  const handlePay = async () => {
     if (!stripe || !elements) return;
 
     setIsLoading(true);
     setErrorMessage(null);
 
     try {
+      const { error: submitError } = await elements.submit();
+      if (submitError) {
+        setErrorMessage(
+          submitError.message ?? "Please check your payment details.",
+        );
+        setIsLoading(false);
+        return;
+      }
+
       const { error, paymentIntent } = await stripe.confirmPayment({
         elements,
         redirect: "if_required",
@@ -44,19 +63,22 @@ export function CheckoutForm({ bookingId, amount, onSuccess, onCancel }: Checkou
       if (error) {
         setErrorMessage(error.message ?? "An unexpected error occurred.");
         toast.error(error.message ?? "Payment failed.");
-      } else if (paymentIntent && paymentIntent.status === "succeeded") {
-        // Sync with backend
+      } else if (paymentIntent?.status === "succeeded") {
         await paymentService.confirmPayment({
           bookingId,
           paymentIntentId: paymentIntent.id,
         });
-        
         onSuccess();
       }
-    } catch (err: any) {
-      console.error("Payment error:", err);
-      const msg = err?.response?.data?.message ?? "Failed to sync payment with server.";
-      setErrorMessage(msg);
+    } catch (err) {
+      const msg =
+        err instanceof Error && "response" in err
+          ? (err as { response?: { data?: { message?: string } } }).response
+              ?.data?.message
+          : undefined;
+      const message = msg ?? "Failed to sync payment with server.";
+      setErrorMessage(message);
+      toast.error(message);
       toast.error(msg);
     } finally {
       setIsLoading(false);
@@ -64,73 +86,105 @@ export function CheckoutForm({ bookingId, amount, onSuccess, onCancel }: Checkou
   };
 
   return (
-    <div className="w-full">
-      <form onSubmit={handleSubmit} className="space-y-6">
-        <div className="rounded-xl border bg-muted/30 p-5 shadow-sm">
-          <div className="flex items-center justify-between mb-2">
-            <div className="flex items-center gap-2">
-              <CreditCard className="h-4 w-4 text-primary" />
-              <span className="text-sm font-semibold text-foreground">Order Summary</span>
-            </div>
-          </div>
-          
-          <div className="flex items-baseline gap-1 mb-3">
-            <span className="text-2xl font-bold">BDT {amount}</span>
-            <span className="text-sm text-muted-foreground">total</span>
-          </div>
-
-          <div className="flex items-center gap-2 text-xs text-muted-foreground pt-4 border-t">
-            <ShieldCheck className="h-3.5 w-3.5 text-emerald-500" />
-            <span>Secure payment processed by Stripe</span>
-          </div>
+    <div className="flex flex-col gap-5">
+      {/* ── Amount row ── */}
+      <div className="flex items-center justify-between px-4 py-3 rounded-xl bg-white/5 border border-white/10">
+        <div>
+          <p className="text-[10px] font-semibold uppercase tracking-widest text-white/40">
+            Total due
+          </p>
+          <p className="text-2xl font-bold text-white mt-0.5 tracking-tight">
+            ৳ {amount.toLocaleString()}
+          </p>
         </div>
-
-        <div className="space-y-3">
-          <label className="text-sm font-medium">Payment Details</label>
-          <div className="rounded-xl border bg-background p-4 shadow-sm">
-            <PaymentElement 
-              options={{ 
-                layout: "tabs",
-                business: { name: "SkillBridge" }
-              }} 
-            />
-          </div>
-        </div>
-
-        {errorMessage && (
-          <div className="text-sm font-medium text-destructive bg-destructive/10 p-3 rounded-lg border border-destructive/20">
-            {errorMessage}
+        {tutorName && (
+          <div className="text-right">
+            <p className="text-[10px] text-white/40 uppercase tracking-widest">
+              Session with
+            </p>
+            <p className="text-sm font-semibold text-white/80 mt-0.5">
+              {tutorName}
+            </p>
           </div>
         )}
+      </div>
 
-        <div className="flex flex-col sm:flex-row items-center gap-3 pt-2">
-          <Button
-            type="button"
-            variant="outline"
-            className="w-full sm:w-auto flex-1 h-11"
-            onClick={onCancel}
-            disabled={isLoading}
-          >
-            Cancel
-          </Button>
-          <Button
-            type="submit"
-            className="w-full sm:w-auto flex-[2] h-11 gap-2 font-semibold"
-            disabled={!stripe || isLoading}
-          >
-            {isLoading ? (
-              <Loader2 className="h-4 w-4 animate-spin" />
-            ) : (
-              <Lock className="h-4 w-4" />
-            )}
-            {isLoading ? "Processing..." : `Pay BDT ${amount}`}
-          </Button>
-        </div>
-
-        <p className="text-center text-xs text-muted-foreground mt-4">
-          By clicking "Pay", you agree to our Terms of Service.
+      {/* ── Stripe PaymentElement ── */}
+      <div>
+        <p className="text-[10px] font-semibold text-white/40 uppercase tracking-widest mb-3">
+          Payment details
         </p>
-      </form>
+        <PaymentElement
+          onReady={() => setIsReady(true)}
+          options={{
+            layout: { type: "tabs", defaultCollapsed: false },
+            business: { name: "SkillBridge" },
+
+            defaultValues: {
+              billingDetails: {
+                name: userName || userEmail || "",
+                email: userEmail || "",
+                phone: "",
+                address: {
+                  country: "BD",
+                },
+              },
+            },
+            terms: { card: "never" },
+          }}
+        />
+      </div>
+
+      {/* ── Error ── */}
+      {errorMessage && (
+        <div className="flex items-start gap-2.5 text-xs text-red-400 bg-red-500/10 border border-red-500/20 rounded-xl px-4 py-3">
+          <span className="mt-px shrink-0">⚠</span>
+          <span>{errorMessage}</span>
+        </div>
+      )}
+
+      {/* ── Actions ── */}
+      <div className="flex gap-3">
+        <button
+          type="button"
+          onClick={onCancel}
+          disabled={isLoading}
+          className="h-11 px-5 rounded-xl border border-white/10 bg-white/5 text-sm font-medium text-white/60 transition-all hover:bg-white/10 hover:text-white/80 disabled:opacity-40"
+        >
+          Cancel
+        </button>
+
+        <button
+          type="button"
+          disabled={!stripe || !isReady || isLoading}
+          onClick={handlePay}
+          className="flex-1 h-11 rounded-xl text-sm font-semibold text-slate-900 flex items-center justify-center gap-2 transition-all disabled:opacity-40 disabled:cursor-not-allowed"
+          style={{
+            background: isLoading ? "rgba(255,255,255,0.7)" : "#FFFFFF",
+            boxShadow: isLoading ? "none" : "0 2px 12px rgba(255,255,255,0.10)",
+          }}
+        >
+          {isLoading ? (
+            <>
+              <Loader2 className="h-3.5 w-3.5 animate-spin text-slate-500" />
+              <span className="text-slate-500">Processing…</span>
+            </>
+          ) : (
+            <>
+              <Lock className="h-3.5 w-3.5" />
+              Pay ৳ {amount.toLocaleString()}
+            </>
+          )}
+        </button>
+      </div>
+
+      {/* ── Trust badge ── */}
+      <div className="flex items-center justify-center gap-1.5">
+        <ShieldCheck className="h-3 w-3 text-emerald-400" />
+        <p className="text-[11px] text-white/25">
+          Secured by Stripe · 256-bit SSL
+        </p>
+      </div>
     </div>
   );
 }

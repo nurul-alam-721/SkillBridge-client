@@ -1,6 +1,8 @@
 "use client";
 
-import { CalendarClock, Plus, Trash2, Clock, CalendarDays, AlertCircle, Loader2 } from "lucide-react";
+import { useState } from "react";
+
+import { CalendarClock, Plus, Trash2, Clock, CalendarDays, AlertCircle, Loader2, Pencil } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -18,6 +20,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { useAvailability } from "@/hooks/UseAvailability";
 import { AddSlotForm } from "@/components/modules/tutorsAvailability/addSlotForm";
+import { UpdateSlotModal } from "@/components/modules/tutorsAvailability/updateSlotModal";
 import { AvailabilitySlot } from "@/services/tutor.service";
 
 function formatTime(value: string): string {
@@ -34,7 +37,15 @@ function formatTime(value: string): string {
   return date.toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit", hour12: true });
 }
 
-function SlotCard({ slot, onDelete }: { slot: AvailabilitySlot; onDelete: (id: string) => Promise<void> }) {
+function SlotCard({
+  slot,
+  onDelete,
+  onEdit,
+}: {
+  slot:     AvailabilitySlot;
+  onDelete: (id: string) => Promise<void>;
+  onEdit:   (slot: AvailabilitySlot) => void;
+}) {
   const date = new Date(slot.date);
   const dayName = date.toLocaleDateString("en-US", { weekday: "short" });
   const dayNum  = date.toLocaleDateString("en-US", { day: "numeric" });
@@ -73,7 +84,19 @@ function SlotCard({ slot, onDelete }: { slot: AvailabilitySlot; onDelete: (id: s
         </div>
       </div>
 
-      {/* Delete */}
+      {/* Actions */}
+      <div className="flex items-center gap-1.5">
+        <Button
+          variant="ghost"
+          size="icon"
+          disabled={slot.isBooked}
+          onClick={() => onEdit(slot)}
+          className="h-8 w-8 shrink-0 text-muted-foreground hover:text-primary hover:bg-primary/8 transition-colors disabled:opacity-30"
+        >
+          <Pencil className="h-3.5 w-3.5" />
+        </Button>
+
+        {/* Delete */}
       <AlertDialog>
         <AlertDialogTrigger asChild>
           <Button
@@ -110,13 +133,22 @@ function SlotCard({ slot, onDelete }: { slot: AvailabilitySlot; onDelete: (id: s
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
-      </AlertDialog>
+        </AlertDialog>
+      </div>
     </div>
   );
 }
 
 export default function AvailabilityPage() {
-  const { slots, loading, saving, addSlot, removeSlot } = useAvailability();
+  const { slots, loading, saving, addSlot, removeSlot, updateSlot } = useAvailability();
+
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [editingSlot, setEditingSlot] = useState<AvailabilitySlot | null>(null);
+
+  const openEditModal = (slot: AvailabilitySlot) => {
+    setEditingSlot(slot);
+    setIsEditModalOpen(true);
+  };
 
   const upcoming = slots.filter((s) => new Date(s.date) >= new Date());
   const past     = slots.filter((s) => new Date(s.date) < new Date());
@@ -197,14 +229,18 @@ export default function AvailabilityPage() {
                 ) : (
                   <div className="flex flex-col gap-2.5">
                     {upcoming.map((slot) => (
-                      <SlotCard key={slot.id} slot={slot} onDelete={removeSlot} />
+                      <SlotCard
+                        key={slot.id}
+                        slot={slot}
+                        onDelete={removeSlot}
+                        onEdit={openEditModal}
+                      />
                     ))}
                   </div>
                 )}
               </CardContent>
             </Card>
 
-            {/* Past slots — collapsed by default */}
             {past.length > 0 && (
               <Card className="rounded-2xl border-border/60 shadow-none opacity-60">
                 <CardHeader className="pb-3">
@@ -222,7 +258,12 @@ export default function AvailabilityPage() {
                 <CardContent className="pt-4">
                   <div className="flex flex-col gap-2.5">
                     {past.slice(0, 3).map((slot) => (
-                      <SlotCard key={slot.id} slot={slot} onDelete={removeSlot} />
+                      <SlotCard
+                        key={slot.id}
+                        slot={slot}
+                        onDelete={removeSlot}
+                        onEdit={openEditModal}
+                      />
                     ))}
                     {past.length > 3 && (
                       <p className="text-xs text-center text-muted-foreground pt-1">
@@ -237,6 +278,14 @@ export default function AvailabilityPage() {
 
         </div>
       </div>
+
+      <UpdateSlotModal
+        open={isEditModalOpen}
+        onOpenChange={setIsEditModalOpen}
+        slot={editingSlot}
+        saving={saving}
+        onUpdate={updateSlot}
+      />
     </div>
   );
 }

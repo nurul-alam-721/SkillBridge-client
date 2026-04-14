@@ -60,5 +60,38 @@ export function useAvailability() {
     }
   };
 
-  return { slots, loading, saving, addSlot, removeSlot, refresh: fetch };
+  const updateSlot = async (
+    slotId: string,
+    payload: Partial<CreateAvailabilityPayload & { maxCapacity: number }>,
+  ): Promise<boolean> => {
+    setSaving(true);
+    try {
+      const updatedSlot = await tutorService.updateAvailabilitySlot(
+        slotId,
+        payload,
+      );
+      setSlots((prev) => prev.map((s) => (s.id === slotId ? updatedSlot : s)));
+      toast.success("Availability slot updated successfully");
+      return true;
+    } catch (error: unknown) {
+      toast.error(
+        error instanceof Error
+          ? error.message
+          : "Failed to update slot. Check for overlaps.",
+      );
+      return false;
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  return {
+    slots,
+    loading,
+    saving,
+    addSlot,
+    removeSlot,
+    updateSlot,
+    refresh: fetch,
+  };
 }

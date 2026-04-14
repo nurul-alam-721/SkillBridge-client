@@ -1,7 +1,13 @@
 "use client";
 
 import Link from "next/link";
-import { GraduationCap, Mail, Twitter, Github, Linkedin } from "lucide-react";
+import {
+  GraduationCap,
+  Mail,
+  Twitter,
+  Github,
+  Linkedin,
+} from "lucide-react";
 import { Separator } from "@/components/ui/separator";
 import { authClient } from "@/lib/auth-client";
 import { User } from "@/types/types";
@@ -23,6 +29,10 @@ const ROLE_LINKS: Record<
       { label: "Dashboard", href: "/dashboard" },
       { label: "My Bookings", href: "/dashboard/bookings" },
       { label: "Profile", href: "/dashboard/profile" },
+      {
+        label: "Payment History",
+        href: "/dashboard/payments/history"
+      },
     ],
   },
   [Roles.tutor]: {
@@ -31,6 +41,10 @@ const ROLE_LINKS: Record<
       { label: "Dashboard", href: "/tutor/dashboard" },
       { label: "Availability Slots", href: "/tutor/availability" },
       { label: "Profile", href: "/tutor/profile" },
+      {
+        label: "Earnings",
+        href: "/tutor/payments/earnings"
+      },
     ],
   },
   [Roles.admin]: {
@@ -40,6 +54,7 @@ const ROLE_LINKS: Record<
       { label: "Users", href: "/admin/users" },
       { label: "Bookings", href: "/admin/bookings" },
       { label: "Categories", href: "/admin/categories" },
+      { label: "Payments", href: "/admin/payments"},
     ],
   },
 };
@@ -64,7 +79,6 @@ export function Footer() {
   const { data: session } = authClient.useSession();
   const user = session?.user as User | undefined;
   const role = user?.role as string | undefined;
-
 
   const mounted = useMounted();
 

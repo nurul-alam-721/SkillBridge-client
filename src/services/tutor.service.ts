@@ -226,4 +226,32 @@ export const tutorService = {
       throw new Error("Cannot delete this slot — it has an active booking.");
     }
   },
+
+  async updateAvailabilitySlot(
+    slotId: string,
+    payload: Partial<CreateAvailabilityPayload & { maxCapacity: number }>,
+  ): Promise<AvailabilitySlot> {
+    try {
+      const { data } = await apiClient.patch(
+        `/api/availability-slots/${slotId}`,
+        payload,
+      );
+      return data.data ?? data;
+    } catch (error: unknown) {
+      if (
+        error &&
+        typeof error === "object" &&
+        "response" in error &&
+        error.response &&
+        typeof error.response === "object" &&
+        "data" in error.response
+      ) {
+        const data = error.response.data as { message?: string };
+        throw new Error(
+          data.message || "Failed to update slot. Check for overlaps.",
+        );
+      }
+      throw new Error("Failed to update slot. Check for overlaps.");
+    }
+  },
 };
