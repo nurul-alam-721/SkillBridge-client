@@ -4,8 +4,8 @@ import { useEffect, useState, useMemo } from "react";
 import { RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { adminService, AdminBooking, BookingStatus } from "@/services/admin.service";
-import { BookingsFilter } from "@/components/modules/adminDashboard/BookingsFilter";
-import { BookingsTable } from "@/components/modules/adminDashboard/BookingsTable";
+import { BookingsFilter } from "../_components/bookings/BookingsFilter";
+import { BookingsTable } from "../_components/bookings/BookingsTable";
 
 function getErrorMessage(err: unknown): string {
   if (err && typeof err === "object" && "response" in err) {
@@ -21,8 +21,8 @@ export default function AdminBookingsPage() {
   const [error,      setError]      = useState<string | null>(null);
   const [refreshing, setRefreshing] = useState(false);
 
-  const [search,  setSearch]  = useState("");
-  const [status,  setStatus]  = useState<BookingStatus | "ALL">("ALL");
+  const [search, setSearch] = useState("");
+  const [status, setStatus] = useState<BookingStatus | "ALL">("ALL");
 
   const load = async (silent = false) => {
     if (silent) setRefreshing(true);
@@ -56,6 +56,7 @@ export default function AdminBookingsPage() {
     });
   }, [bookings, status, search]);
 
+
   return (
     <div className="space-y-5 px-4 py-3">
 
@@ -85,13 +86,15 @@ export default function AdminBookingsPage() {
         </div>
       )}
 
+     
       <BookingsFilter
         search={search}
         onSearchChange={setSearch}
         status={status}
         onStatusChange={setStatus}
+        bookings={bookings}
+        loading={loading}
         total={bookings.length}
-        filtered={filtered.length}
       />
 
       <BookingsTable bookings={filtered} loading={loading} />

@@ -1,38 +1,41 @@
-import { apiClient } from "@/lib/axios";
+  import { apiClient } from "@/lib/axios";
+  import { Payment } from "@/types/payment-history.types";
+  import { TutorPayment } from "@/types/tutor-earnings.types";
+  import { AdminPayment } from "@/types/admin-payments.types";
 
-export interface CreatePaymentIntentResponse {
-  clientSecret: string;
-  payment: Payment;
-}
+  export interface CreatePaymentIntentResponse {
+    clientSecret: string;
+    payment: Payment;
+  }
 
-export interface ConfirmPaymentPayload {
-  bookingId: string;
-  paymentIntentId?: string;
-}
+  export interface ConfirmPaymentPayload {
+    bookingId: string;
+    paymentIntentId?: string;
+  }
 
-export interface Payment {
-  id: string;
-  bookingId: string;
-  amount: number;
-  status: "PENDING" | "COMPLETED" | "FAILED" | "REFUNDED";
-  paymentIntentId?: string;
-  createdAt: string;
-  updatedAt: string;
-}
+  export const paymentService = {
+    async createPaymentIntent(bookingId: string): Promise<CreatePaymentIntentResponse> {
+      const { data } = await apiClient.post("/api/payments/create-intent", { bookingId });
+      return data.data;
+    },
 
-export const paymentService = {
-  async createPaymentIntent(bookingId: string): Promise<CreatePaymentIntentResponse> {
-    const { data } = await apiClient.post("/api/payments/create-intent", { bookingId });
-    return data.data as CreatePaymentIntentResponse;
-  },
+    async confirmPayment(payload: ConfirmPaymentPayload): Promise<Payment> {
+      const { data } = await apiClient.post("/api/payments/confirm", payload);
+      return data.data;
+    },
 
-  async confirmPayment(payload: ConfirmPaymentPayload): Promise<Payment> {
-    const { data } = await apiClient.post("/api/payments/confirm", payload);
-    return data.data as Payment;
-  },
+    async getMyPayments(): Promise<Payment[]> {
+      const { data } = await apiClient.get("/api/payments/me");
+      return data.data;
+    },
 
-  async getMyPayments(): Promise<Payment[]> {
-    const { data } = await apiClient.get("/api/payments/me");
-    return data.data as Payment[];
-  },
-};
+    async getTutorEarnings(): Promise<TutorPayment[]> {
+      const { data } = await apiClient.get("/api/payments/me");
+      return data.data;
+    },
+
+    async getAllPayments(): Promise<AdminPayment[]> {
+      const { data } = await apiClient.get("/api/payments");
+      return data.data;
+    },
+  };

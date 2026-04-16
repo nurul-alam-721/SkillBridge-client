@@ -1,8 +1,13 @@
 import { apiClient } from "@/lib/axios";
 
+export type BookingStatus = "PENDING" | "CONFIRMED" | "COMPLETED" | "CANCELLED";
+export type UserStatus = "ACTIVE" | "BANNED";
+export type UserRole = "STUDENT" | "TUTOR" | "ADMIN";
+export type PaymentStatus = "COMPLETED" | "PENDING" | "FAILED" | "REFUNDED";
+
 export interface RecentBooking {
   id: string;
-  status: "PENDING" | "CONFIRMED" | "COMPLETED" | "CANCELLED";
+  status: BookingStatus;
   createdAt: string;
   student: { name: string | null; image: string | null };
   tutorProfile: {
@@ -27,22 +32,68 @@ export interface AdminStats {
   recentActivity: RecentBooking[];
 }
 
-export type BookingStatus = "PENDING" | "CONFIRMED" | "COMPLETED" | "CANCELLED";
-export type UserStatus = "ACTIVE" | "BANNED";
-export type UserRole = "STUDENT" | "TUTOR" | "ADMIN";
+
 
 export interface AdminBooking {
   id: string;
   status: BookingStatus;
   createdAt: string;
   updatedAt: string;
-  student: { id: string; name: string | null; email: string | null; image: string | null };
+  student: {
+    id: string;
+    name: string | null;
+    email: string | null;
+    image: string | null; 
+  };
   tutorProfile: {
-    user: { name: string | null; email: string | null };
-    category: { name: string };
+    user: {
+      name: string | null;
+      email: string | null;
+      image?: string | null;
+    };
+    category: {
+      name: string;
+    };
     hourlyRate: number;
   };
-  slot: { startTime: string; endTime: string };
+  slot: {
+    startTime: string;
+    endTime: string;
+  };
+}
+
+
+export interface TutorUser {
+  id: string;
+  name: string;
+  email: string;
+  image: string | null;
+}
+
+export interface TutorProfile {
+  id: string;
+  hourlyRate: number;
+  experience: number;
+  user: TutorUser;
+}
+
+export interface PaymentBooking {
+  id: string;
+  status: BookingStatus;
+  tutorProfile: TutorProfile;
+}
+
+export interface Payment {
+  id: string;
+  bookingId: string;
+  amount: number;
+  currency: string;
+  status: PaymentStatus;
+  transactionId: string;
+  paymentMethod: string | null;
+  createdAt: string;
+  updatedAt: string;
+  booking: PaymentBooking;
 }
 
 export interface AdminUser {

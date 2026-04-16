@@ -5,8 +5,10 @@ import { RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { adminService, AdminUser, UserRole, UserStatus } from "@/services/admin.service";
-import { UsersFilter } from "@/components/modules/adminDashboard/UsersFilter";
-import { UsersTable } from "@/components/modules/adminDashboard/UsersTable";
+import { SearchX } from "lucide-react";
+import { UsersTable } from "../_components/users/UsersTable";
+import { UsersFilter } from "../_components/users/UsersFilter";
+
 
 function getErrorMessage(err: unknown): string {
   if (err && typeof err === "object" && "response" in err) {
@@ -14,6 +16,42 @@ function getErrorMessage(err: unknown): string {
     if (e.response?.data?.message) return e.response.data.message;
   }
   return "Something went wrong. Please try again.";
+}
+
+
+ export function UserTableSkeleton() {
+  return (
+    <div className="rounded-xl border border-border bg-card overflow-hidden">
+      <div className="divide-y divide-border">
+        {Array.from({ length: 8 }).map((_, i) => (
+          <div key={i} className="flex items-center gap-4 px-4 py-3">
+            <div className="h-8 w-8 rounded-full bg-muted animate-pulse shrink-0" />
+            <div className="flex-1 space-y-1.5">
+              <div className="h-3.5 w-28 bg-muted animate-pulse rounded" />
+              <div className="h-3 w-36 bg-muted animate-pulse rounded" />
+            </div>
+            <div className="h-6 w-16 bg-muted animate-pulse rounded-full" />
+            <div className="h-6 w-14 bg-muted animate-pulse rounded-full" />
+            <div className="h-3.5 w-24 bg-muted animate-pulse rounded" />
+            <div className="h-8 w-20 bg-muted animate-pulse rounded-xl" />
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+
+export function UserEmptyState() {
+  return (
+    <div className="rounded-xl border border-border bg-card flex flex-col items-center justify-center py-16 gap-3">
+      <SearchX className="h-10 w-10 text-muted-foreground/40" />
+      <p className="text-sm font-medium text-foreground">No users found</p>
+      <p className="text-xs text-muted-foreground">
+        No users match your current filters.
+      </p>
+    </div>
+  );
 }
 
 export default function AdminUsersPage() {
@@ -44,12 +82,10 @@ export default function AdminUsersPage() {
 
   const handleToggle = useCallback(async (id: string, currentStatus: UserStatus) => {
     const newStatus: UserStatus = currentStatus === "ACTIVE" ? "BANNED" : "ACTIVE";
-
     setUsers((prev) => prev.map((u) => u.id === id ? { ...u, status: newStatus } : u));
-
     try {
       await adminService.updateUserStatus(id, newStatus);
-      toast.success(newStatus === "BANNED" ? "User banned" : "User unbanned");
+      toast.success(newStatus === "BANNED" ? "User banned successfully!" : "User unbanned successfully!");
     } catch (err) {
       setUsers((prev) => prev.map((u) => u.id === id ? { ...u, status: currentStatus } : u));
       toast.error(getErrorMessage(err));
@@ -65,12 +101,13 @@ export default function AdminUsersPage() {
   }), [users, role, status, search]);
 
   return (
-    <div className="space-y-5 px-4  py-2">
-
+    <div className="space-y-5 px-4 py-2">
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold tracking-tight">Users</h1>
-          <p className="text-sm text-muted-foreground mt-0.5">Manage students, tutors and admins</p>
+          <p className="text-sm text-muted-foreground mt-0.5">
+            Manage students, tutors and admins
+          </p>
         </div>
         <Button
           variant="outline"
@@ -91,9 +128,9 @@ export default function AdminUsersPage() {
       )}
 
       <UsersFilter
-        search={search} onSearchChange={setSearch}
-        role={role}     onRoleChange={setRole}
-        status={status} onStatusChange={setStatus}
+        search={search}   onSearchChange={setSearch}
+        role={role}       onRoleChange={setRole}
+        status={status}   onStatusChange={setStatus}
         total={users.length}
         filtered={filtered.length}
       />
@@ -103,7 +140,6 @@ export default function AdminUsersPage() {
         loading={loading}
         onToggle={handleToggle}
       />
-
     </div>
   );
 }

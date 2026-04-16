@@ -6,9 +6,9 @@ import { SortingState } from "@tanstack/react-table";
 import { Receipt } from "lucide-react";
 import { paymentService } from "@/services/payment.service";
 import { Payment, PaymentStatus } from "@/types/payment-history.types";
-import { PaymentStatCards }  from "../../_components/page/payment-history/PaymentStatCards";
-import { PaymentFilterTabs } from "../../_components/page/payment-history/PaymentFilterTabs";
-import { PaymentTable }      from "../../_components/page/payment-history/PaymentTable";
+import { PaymentStatCards }  from "../../_components/payment-history/PaymentStatCards";
+import { PaymentFilterTabs } from "../../_components/payment-history/PaymentFilterTabs";
+import { PaymentTable }      from "../../_components/payment-history/PaymentTable";
 
 export default function PaymentHistoryPage() {
   const router = useRouter();

@@ -10,9 +10,9 @@ import {
   Category,
   CategoryPayload,
 } from "@/services/category.service";
-import { CategoriesTable } from "@/components/modules/adminDashboard/categories/CategoriesTable";
-import { CategoryDialog } from "@/components/modules/adminDashboard/categories/CategoryDialog";
-import { DeleteCategoryDialog } from "@/components/modules/adminDashboard/categories/DeleteCategoryDialog";
+import { CategoriesTable } from "../_components/categories/CategoriesTable";
+import { CategoryDialog } from "../_components/categories/CategoryDialog";
+import { DeleteCategoryDialog } from "../_components/categories/DeleteCategoryDialog";
 
 function getErrorMessage(err: unknown): string {
   if (err && typeof err === "object" && "response" in err) {

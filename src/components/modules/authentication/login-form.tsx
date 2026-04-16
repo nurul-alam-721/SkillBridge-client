@@ -96,7 +96,7 @@ export function LoginForm() {
         }
 
         document.cookie = `user-role=${user.role}; path=/; max-age=604800; SameSite=None; Secure`;
-        toast.success("Login successful!", { id: toastId });
+        toast.success("You have successfully logged into your account!", { id: toastId });
 
         let destination: string;
         if (
