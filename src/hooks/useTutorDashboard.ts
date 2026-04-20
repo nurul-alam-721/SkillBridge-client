@@ -1,5 +1,6 @@
+import { TutorStatsResponse } from "@/types";
 import { useState, useEffect, useRef, useCallback } from "react";
-import { tutorService, TutorStatsResponse } from "@/services/tutor.service";
+import { tutorService } from "@/services/tutor.service";
 
 type State =
   | { status: "loading" }

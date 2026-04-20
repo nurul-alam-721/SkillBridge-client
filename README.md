@@ -2,20 +2,23 @@
 
 Frontend for SkillBridge — a platform connecting learners with expert tutors.
 
-**Live App:** https://skill-bridge-client-green.vercel.app  
-**Backend API:** https://skillbridge-server-vj5k.onrender.com
+**Live App:** https://skill-bridge-client-green.vercel.app
+**Backend API:** https://skillbridge-backend-tcy5.onrender.com
 
 ---
 
 ## Tech Stack
 
-- **Framework:** Next.js 15 (App Router)
-- **Language:** TypeScript
-- **Styling:** Tailwind CSS
-- **UI Components:** shadcn/ui
-- **Authentication:** Better Auth
-- **Frontend Deployment:** Vercel
-- **Backend Deployment:** Render
+| Layer | Technology |
+|-------|------------|
+| Framework | Next.js 15 (App Router) |
+| Language | TypeScript |
+| Styling | Tailwind CSS |
+| UI Components | shadcn/ui |
+| Authentication | Better Auth |
+| Payments | Stripe |
+| Frontend Deployment | Vercel |
+| Backend Deployment | Render |
 
 ---
 
@@ -33,6 +36,16 @@ git clone <your-repo-url>
 cd skillbridge-client
 pnpm install
 ```
+
+### Environment Variables
+
+Create a `.env.local` file in the root:
+
+```env
+NEXT_PUBLIC_API_URL=https://skillbridge-backend-tcy5.onrender.com
+NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=your_stripe_publishable_key
+```
+
 ### Development
 
 ```bash
@@ -67,6 +80,7 @@ pnpm start
 | `/dashboard` | Overview and bookings |
 | `/dashboard/bookings` | Booking history |
 | `/dashboard/profile` | Edit profile |
+| `/dashboard/payments` | Payment history |
 
 ### Tutor
 
@@ -75,6 +89,7 @@ pnpm start
 | `/tutor/dashboard` | Sessions and stats |
 | `/tutor/availability` | Manage time slots |
 | `/tutor/profile` | Edit tutor info |
+| `/tutor/payments/earning` | Earnings and student payments |
 
 ### Admin
 
@@ -84,6 +99,7 @@ pnpm start
 | `/admin/users` | Manage users |
 | `/admin/bookings` | All bookings |
 | `/admin/categories` | Manage categories |
+| `/admin/payments` | All platform payments |
 
 ---
 

@@ -1,18 +1,5 @@
 import { apiClient } from "@/lib/axios";
-
-export interface Category {
-  id: string;
-  name: string;
-  description: string | null;
-  createdAt: string;
-  updatedAt: string;
-  _count: { tutors: number };
-}
-
-export interface CategoryPayload {
-  name: string;
-  description?: string;
-}
+import { Category, CategoryPayload } from "@/types";
 
 export const categoryService = {
   getAll: async (): Promise<Category[]> => {

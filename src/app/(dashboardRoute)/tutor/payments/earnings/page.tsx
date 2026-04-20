@@ -4,16 +4,16 @@ import { useEffect, useMemo, useState } from "react";
 import { SortingState, Updater } from "@tanstack/react-table";
 import { Wallet } from "lucide-react";
 import { paymentService } from "@/services/payment.service";
-import { TutorPayment, TutorPaymentStatus } from "@/types/tutor-earnings.types";
-import { EarningStatCards } from "../../_components/page/earnings/EarningStatCards";
-import { EarningFilterTabs } from "../../_components/page/earnings/EarningFilterTabs";
-import { EarningTable } from "../../_components/page/earnings/EarningTable";
+import { Payment, PaymentStatus } from "@/types";
+import { EarningStatCards } from "../../_components/earnings/EarningStatCards";
+import { EarningFilterTabs } from "../../_components/earnings/EarningFilterTabs";
+import { EarningTable } from "../../_components/earnings/EarningTable";
 
 
 export default function TutorEarningPage() {
-  const [payments, setPayments] = useState<TutorPayment[]>([]);
+  const [payments, setPayments] = useState<Payment[]>([]);
   const [loading, setLoading] = useState(true);
-  const [activeFilter, setActiveFilter] = useState<TutorPaymentStatus | "ALL">("ALL");
+  const [activeFilter, setActiveFilter] = useState<PaymentStatus | "ALL">("ALL");
   const [sorting, setSorting] = useState<SortingState>([
     { id: "createdAt", desc: true },
   ]);

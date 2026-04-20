@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { userService } from "@/services/user.service";
 import { Roles } from "@/constant/Roles";
-import { UserRole } from "@/types/types";
+import { UserRole } from "@/types";
 import {
   Dialog,
   DialogContent,
@@ -36,14 +36,14 @@ export default function OnboardingRolePage() {
     try {
       await userService.updateMyRole(role);
 
-      document.cookie = `user-role=${role}; path=/; max-age=604800; SameSite=None; Secure`;
+      document.cookie = `user-role=${role}; path=/; max-age=604800; SameSite=Lax`;
 
       toast.success("Welcome to SkillBridge!");
 
       if (role === (Roles.tutor as UserRole)) {
         window.location.href = "/tutor/dashboard";
       } else {
-        window.location.href = "/dashboard";
+        window.location.href = "/student/dashboard";
       }
     } catch {
       toast.error("Something went wrong. Please try again.");

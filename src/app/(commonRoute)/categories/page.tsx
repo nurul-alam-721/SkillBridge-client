@@ -1,4 +1,5 @@
 "use client";
+import { Category } from "@/types";
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
@@ -22,7 +23,7 @@ import {
   Landmark,
 } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Category, categoryService } from "@/services/category.service";
+import { categoryService } from "@/services/category.service";
 
 const CARD_ACCENTS = [
   { bg: "bg-violet-500/10", text: "text-violet-600", ring: "ring-violet-500/20" },

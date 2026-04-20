@@ -1,15 +1,12 @@
 "use client";
+import { Category, CategoryPayload } from "@/types";
 
 import { useEffect, useState, useCallback } from "react";
 import { Plus, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 
-import {
-  categoryService,
-  Category,
-  CategoryPayload,
-} from "@/services/category.service";
+import { categoryService } from "@/services/category.service";
 import { CategoriesTable } from "../_components/categories/CategoriesTable";
 import { CategoryDialog } from "../_components/categories/CategoryDialog";
 import { DeleteCategoryDialog } from "../_components/categories/DeleteCategoryDialog";

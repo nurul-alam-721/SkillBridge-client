@@ -1,7 +1,8 @@
+import { BookingStatus, AdminBooking } from "@/types";
 import { Search, X } from "lucide-react";
 import { Input } from "@/components/ui/input";
-import { BookingStatus } from "@/services/admin.service";
-import { AdminBooking } from "@/services/admin.service";
+
+
 
 const STATUSES: { value: BookingStatus | "ALL"; label: string }[] = [
   { value: "ALL",       label: "All" },

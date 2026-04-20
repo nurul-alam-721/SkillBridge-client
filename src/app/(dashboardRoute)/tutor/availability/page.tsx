@@ -1,4 +1,5 @@
 "use client";
+import { AvailabilitySlot } from "@/types";
 
 import { useState } from "react";
 
@@ -19,9 +20,9 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { useAvailability } from "@/hooks/UseAvailability";
-import { AddSlotForm } from "@/components/modules/tutorsAvailability/addSlotForm";
-import { UpdateSlotModal } from "@/components/modules/tutorsAvailability/updateSlotModal";
-import { AvailabilitySlot } from "@/services/tutor.service";
+import { AddSlotForm } from "@/app/(dashboardRoute)/tutor/_components/availabilty/addSlotForm";
+import { UpdateSlotModal } from "@/app/(dashboardRoute)/tutor/_components/availabilty/updateSlotModal";
+
 
 function formatTime(value: string): string {
   if (value.includes("T")) {
@@ -42,14 +43,14 @@ function SlotCard({
   onDelete,
   onEdit,
 }: {
-  slot:     AvailabilitySlot;
+  slot: AvailabilitySlot;
   onDelete: (id: string) => Promise<void>;
-  onEdit:   (slot: AvailabilitySlot) => void;
+  onEdit: (slot: AvailabilitySlot) => void;
 }) {
   const date = new Date(slot.date);
   const dayName = date.toLocaleDateString("en-US", { weekday: "short" });
-  const dayNum  = date.toLocaleDateString("en-US", { day: "numeric" });
-  const month   = date.toLocaleDateString("en-US", { month: "short" });
+  const dayNum = date.toLocaleDateString("en-US", { day: "numeric" });
+  const month = date.toLocaleDateString("en-US", { month: "short" });
 
   return (
     <div className="flex items-center justify-between gap-4 rounded-xl border border-border bg-card px-4 py-3.5 hover:border-border/80 transition-colors">
@@ -97,42 +98,42 @@ function SlotCard({
         </Button>
 
         {/* Delete */}
-      <AlertDialog>
-        <AlertDialogTrigger asChild>
-          <Button
-            variant="ghost"
-            size="icon"
-            className="h-8 w-8 shrink-0 text-muted-foreground hover:text-destructive hover:bg-destructive/8 transition-colors"
-          >
-            <Trash2 className="h-3.5 w-3.5" />
-          </Button>
-        </AlertDialogTrigger>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Delete this slot?</AlertDialogTitle>
-            <AlertDialogDescription>
-              {slot.isBooked
-                ? "This slot has an active booking. You must cancel the booking before deleting the slot."
-                : `This will permanently remove the ${dayName} ${dayNum} ${month} slot (${formatTime(slot.startTime)} — ${formatTime(slot.endTime)}). This action cannot be undone.`}
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          {slot.isBooked && (
-            <div className="flex items-start gap-2.5 rounded-lg border border-amber-500/20 bg-amber-500/8 px-3.5 py-3 text-sm text-amber-700 dark:text-amber-400">
-              <AlertCircle className="h-4 w-4 shrink-0 mt-0.5" />
-              <span>Cancel the student&apos;s booking first, then you can delete this slot.</span>
-            </div>
-          )}
-          <AlertDialogFooter>
-            <AlertDialogCancel>Keep slot</AlertDialogCancel>
-            <AlertDialogAction
-              disabled={slot.isBooked}
-              onClick={() => onDelete(slot.id)}
-              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+        <AlertDialog>
+          <AlertDialogTrigger asChild>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-8 w-8 shrink-0 text-muted-foreground hover:text-destructive hover:bg-destructive/8 transition-colors"
             >
-              Delete slot
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
+              <Trash2 className="h-3.5 w-3.5" />
+            </Button>
+          </AlertDialogTrigger>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Delete this slot?</AlertDialogTitle>
+              <AlertDialogDescription>
+                {slot.isBooked
+                  ? "This slot has an active booking. You must cancel the booking before deleting the slot."
+                  : `This will permanently remove the ${dayName} ${dayNum} ${month} slot (${formatTime(slot.startTime)} — ${formatTime(slot.endTime)}). This action cannot be undone.`}
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            {slot.isBooked && (
+              <div className="flex items-start gap-2.5 rounded-lg border border-amber-500/20 bg-amber-500/8 px-3.5 py-3 text-sm text-amber-700 dark:text-amber-400">
+                <AlertCircle className="h-4 w-4 shrink-0 mt-0.5" />
+                <span>Cancel the student&apos;s booking first, then you can delete this slot.</span>
+              </div>
+            )}
+            <AlertDialogFooter>
+              <AlertDialogCancel>Keep slot</AlertDialogCancel>
+              <AlertDialogAction
+                disabled={slot.isBooked}
+                onClick={() => onDelete(slot.id)}
+                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              >
+                Delete slot
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
         </AlertDialog>
       </div>
     </div>
@@ -151,7 +152,7 @@ export default function AvailabilityPage() {
   };
 
   const upcoming = slots.filter((s) => new Date(s.date) >= new Date());
-  const past     = slots.filter((s) => new Date(s.date) < new Date());
+  const past = slots.filter((s) => new Date(s.date) < new Date());
 
   return (
     <div className="flex flex-col gap-6 py-4 md:py-6">

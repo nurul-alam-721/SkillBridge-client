@@ -1,24 +1,5 @@
 import { apiClient } from "@/lib/axios";
-import { UserRole, UserStatus } from "@/types/types";
-
-export interface CurrentUser {
-  id: string;
-  name: string | null;
-  email: string;
-  emailVerified: boolean;
-  image: string | null;
-  phone: string | null;
-  role: UserRole;
-  status: UserStatus;
-  createdAt: string;
-  updatedAt: string;
-}
-
-export interface UpdateProfilePayload {
-  name?: string;
-  phone?: string;
-  image?: string;
-}
+import { CurrentUser, UpdateProfilePayload, UserStatus, UserRole } from "@/types";
 
 export const userService = {
   async getMe(): Promise<CurrentUser> {

@@ -5,14 +5,14 @@ import { useRouter } from "next/navigation";
 import { SortingState } from "@tanstack/react-table";
 import { CreditCard } from "lucide-react";
 import { paymentService } from "@/services/payment.service";
-import { AdminPayment, PaymentStatus } from "@/types/admin-payments.types";
+import { Payment, PaymentStatus } from "@/types";
 import { AdminPaymentStatCards } from "../_components/payments/PaymentStatCard";
 import { AdminPaymentFilterTabs } from "../_components/payments/PaymentsFilterTables";
 import { AdminPaymentTable } from "../_components/payments/AdminPaymentsTable";
 export default function AdminPaymentsPage() {
   const router = useRouter();
 
-  const [payments, setPayments] = useState<AdminPayment[]>([]);
+  const [payments, setPayments] = useState<Payment[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeFilter, setActiveFilter] = useState<PaymentStatus | "ALL">(
     "ALL",

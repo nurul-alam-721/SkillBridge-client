@@ -1,9 +1,10 @@
 "use client";
+import { CurrentUser } from "@/types";
 
 import dynamic from "next/dynamic";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useSyncExternalStore } from "react";
+import { useMounted } from "@/hooks/useMounted";
 import {
   BookOpen,
   CalendarDays,
@@ -30,7 +31,7 @@ import {
   SidebarMenuItem,
   SidebarRail,
 } from "@/components/ui/sidebar";
-import { CurrentUser } from "@/services/user.service";
+
 import { Separator } from "../ui/separator";
 
 const SidebarUserFooter = dynamic(
@@ -46,12 +47,12 @@ const NAV: Record<
   { title: string; href: string; icon: React.ElementType }[]
 > = {
   STUDENT: [
-    { title: "Overview", href: "/dashboard", icon: LayoutDashboard },
-    { title: "Bookings", href: "/dashboard/bookings", icon: CalendarDays },
-    { title: "Profile", href: "/dashboard/profile", icon: UserCircle },
+    { title: "Overview", href: "/student/dashboard", icon: LayoutDashboard },
+    { title: "Bookings", href: "/student/bookings", icon: CalendarDays },
+    { title: "Profile", href: "/student/profile", icon: UserCircle },
     {
       title: "Payment History",
-      href: "/dashboard/payments/history",
+      href: "/student/payments/history",
       icon: Receipt,
     },
   ],
@@ -70,20 +71,12 @@ const NAV: Record<
   ],
 };
 
-function useIsMounted() {
-  return useSyncExternalStore(
-    () => () => {},
-    () => true,
-    () => false,
-  );
-}
-
 export function AppSidebar({
   user,
   ...props
 }: React.ComponentProps<typeof Sidebar> & { user: CurrentUser }) {
   const pathname = usePathname();
-  const mounted = useIsMounted();
+  const mounted = useMounted();
   const navItems = NAV[user.role] ?? NAV.STUDENT;
 
   return (

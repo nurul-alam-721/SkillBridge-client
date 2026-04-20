@@ -1,35 +1,5 @@
 import { apiClient } from "@/lib/axios";
-import { TutorProfile, AvailabilitySlot } from "./tutor.service";
-
-export type BookingStatus = "PENDING" | "CONFIRMED" | "COMPLETED" | "CANCELLED";
-
-export interface BookingReview {
-  id: string;
-  rating: string;
-  comment: string | null;
-  createdAt: string;
-  studentId?: string;
-  tutorProfileId?: string;
-  bookingId?: string | null;
-}
-
-export interface Booking {
-  id: string;
-  studentId: string;
-  tutorProfileId: string;
-  slotId: string;
-  status: BookingStatus;
-  createdAt: string;
-  updatedAt: string;
-  tutorProfile: TutorProfile;
-  slot: AvailabilitySlot;
-  review?: BookingReview | null;
-}
-
-export interface CreateBookingPayload {
-  tutorProfileId: string;
-  slotId: string;
-}
+import { CreateBookingPayload, Booking, BookingStatus } from "@/types";
 
 export const bookingService = {
   async create(payload: CreateBookingPayload): Promise<Booking> {

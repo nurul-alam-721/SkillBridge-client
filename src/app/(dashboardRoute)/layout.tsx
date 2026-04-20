@@ -1,9 +1,10 @@
-import { headers } from "next/headers";
+import { CurrentUser } from "@/types";
+import { headers, cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/layout/AppSidebar";
 import { SiteHeader } from "@/components/layout/SiteHeader";
-import { CurrentUser } from "@/services/user.service";
+
 
 const BACKEND_URL =
   process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:5000";
@@ -37,6 +38,7 @@ export default async function DashboardLayout({
   } catch {}
 
   if (!sessionData?.user) {
+    (await cookies()).delete("user-role");
     redirect("/login");
   }
 

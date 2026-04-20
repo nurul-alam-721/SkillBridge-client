@@ -1,5 +1,6 @@
+import { TutorProfile } from "@/types";
 import { useState, useEffect, useCallback } from "react";
-import { tutorService, TutorProfile } from "@/services/tutor.service";
+import { tutorService } from "@/services/tutor.service";
 
 export function useTutorProfile() {
   const [profile, setProfile] = useState<TutorProfile | null>(null);

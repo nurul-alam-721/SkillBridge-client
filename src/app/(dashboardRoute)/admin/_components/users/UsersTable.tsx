@@ -13,9 +13,9 @@ import {
   SortingState,
 } from "@tanstack/react-table";
 import { Button } from "@/components/ui/button";
-import { AdminUser, UserStatus } from "@/services/admin.service";
+
 import { UserAvatarCell } from "./UserAvaterCell";
-import { UserRole } from "@/types/types";
+import { AdminUser, UserStatus, UserRole } from "@/types";
 import { UserToggleButton } from "./UserToggleButton";
 
 function SortIcon({ direction }: { direction: "asc" | "desc" | false }) {

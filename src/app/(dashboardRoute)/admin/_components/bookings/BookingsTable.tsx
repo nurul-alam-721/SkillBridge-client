@@ -1,4 +1,5 @@
 "use client";
+import { AdminBooking, BookingStatus } from "@/types";
 
 import { useState } from "react";
 import { format, isValid, parseISO } from "date-fns";
@@ -18,7 +19,7 @@ import {
   SortingState,
 } from "@tanstack/react-table";
 import { Button } from "@/components/ui/button";
-import { AdminBooking, BookingStatus } from "@/services/admin.service";
+
 
 /* ── Status badge ────────────────────────────────────────────── */
 

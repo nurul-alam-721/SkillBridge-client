@@ -10,9 +10,9 @@ import {
 } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
 import { authClient } from "@/lib/auth-client";
-import { User } from "@/types/types";
+import { User } from "@/types";
 import { Roles } from "@/constant/Roles";
-import { useMounted } from "@/hooks/userMounted";
+import { useMounted } from "@/hooks/useMounted";
 
 const PUBLIC_LINKS = [
   { label: "Browse Tutors", href: "/tutors" },
@@ -26,12 +26,12 @@ const ROLE_LINKS: Record<
   [Roles.student]: {
     title: "My Account",
     links: [
-      { label: "Dashboard", href: "/dashboard" },
-      { label: "My Bookings", href: "/dashboard/bookings" },
-      { label: "Profile", href: "/dashboard/profile" },
+      { label: "Dashboard", href: "/student/dashboard" },
+      { label: "My Bookings", href: "/student/bookings" },
+      { label: "Profile", href: "/student/profile" },
       {
         label: "Payment History",
-        href: "/dashboard/payments/history"
+        href: "/student/payments/history"
       },
     ],
   },

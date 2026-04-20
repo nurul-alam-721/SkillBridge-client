@@ -1,9 +1,5 @@
 import { apiClient } from "@/lib/axios";
-import { User } from "@/types/types";
-
-export interface SessionResponse {
-  user: User;
-}
+import { SessionResponse, User } from "@/types";
 
 export const authService = {
   async getSession(): Promise<SessionResponse | null> {

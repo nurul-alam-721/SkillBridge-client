@@ -1,15 +1,16 @@
 "use client";
+import { CurrentUser, Category, TutorProfile } from "@/types";
 
 import { useEffect, useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
-import { tutorService, Category, TutorProfile } from "@/services/tutor.service";
-import { userService, CurrentUser } from "@/services/user.service";
+import { tutorService } from "@/services/tutor.service";
+import { userService } from "@/services/user.service";
 import { useTutorProfile } from "@/hooks/useTutorProfile";
-import { CreateProfileDialog } from "@/components/modules/tutor/CreateProfileDialog";
-import { TutorProfileView } from "@/components/modules/tutor/TutorProfileView";
-import { TutorProfileEditView } from "@/components/modules/tutor/TutorProfileEditView";
+import { CreateProfileDialog } from "@/app/(dashboardRoute)/tutor/_components/profile/CreateProfileDialog";
+import { TutorProfileView } from "@/app/(dashboardRoute)/tutor/_components/profile/TutorProfileView";
+import { TutorProfileEditView } from "@/app/(dashboardRoute)/tutor/_components/profile/TutorProfileEditView";
 
 function ProfileSkeleton() {
   return (
@@ -39,12 +40,12 @@ function ProfileSkeleton() {
 export default function TutorProfilePage() {
   const { profile, loading, setProfile } = useTutorProfile();
   const [categories, setCategories] = useState<Category[]>([]);
-  const [user,       setUser]       = useState<CurrentUser | null>(null);
-  const [editing,    setEditing]    = useState(false);
+  const [user, setUser] = useState<CurrentUser | null>(null);
+  const [editing, setEditing] = useState(false);
 
   useEffect(() => {
-    tutorService.getCategories().then(setCategories).catch(() => {});
-    userService.getMe().then(setUser).catch(() => {});
+    tutorService.getCategories().then(setCategories).catch(() => { });
+    userService.getMe().then(setUser).catch(() => { });
   }, []);
 
   if (loading) return <ProfileSkeleton />;
@@ -63,14 +64,14 @@ export default function TutorProfilePage() {
     setProfile((prev: TutorProfile | null) =>
       prev
         ? {
-            ...prev,
-            user: {
-              ...prev.user,
-              name:  updated.name,
-              image: updated.image,
-              phone: updated.phone,
-            },
-          }
+          ...prev,
+          user: {
+            ...prev.user,
+            name: updated.name,
+            image: updated.image,
+            phone: updated.phone,
+          },
+        }
         : prev
     );
   };
@@ -87,16 +88,16 @@ export default function TutorProfilePage() {
           profile={profile}
           categories={categories}
           user={user ?? {
-            id:            profile.userId,
-            name:          profile.user.name,
-            email:         profile.user.email ?? "",
-            phone:         profile.user.phone ?? null,
-            image:         profile.user.image ?? null,
-            role:          "TUTOR",
-            status:        "ACTIVE",
+            id: profile.userId,
+            name: profile.user.name,
+            email: profile.user.email ?? "",
+            phone: profile.user.phone ?? null,
+            image: profile.user.image ?? null,
+            role: "TUTOR",
+            status: "ACTIVE",
             emailVerified: true,
-            createdAt:     "",
-            updatedAt:     "",
+            createdAt: "",
+            updatedAt: "",
           } as CurrentUser}
           onPersonalInfoSaved={handlePersonalInfoSaved}
           onSuccess={(updated) => {

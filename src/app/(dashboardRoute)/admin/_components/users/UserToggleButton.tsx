@@ -1,7 +1,8 @@
+import { AdminUser, UserStatus } from "@/types";
 import { Button } from "@/components/ui/button";
 import { Loader2, ShieldBan, ShieldCheck } from "lucide-react";
 import { useState } from "react";
-import { AdminUser, UserStatus } from "@/services/admin.service";
+
 
 interface Props {
   user:     AdminUser;

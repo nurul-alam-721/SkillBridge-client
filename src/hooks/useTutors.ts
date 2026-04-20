@@ -1,13 +1,9 @@
 "use client";
+import { TutorProfile, TutorsQuery, Category } from "@/types";
 
 import { useState, useEffect, useCallback } from "react";
 import { useSearchParams } from "next/navigation";
-import {
-  tutorService,
-  TutorProfile,
-  TutorsQuery,
-  Category,
-} from "@/services/tutor.service";
+import { tutorService } from "@/services/tutor.service";
 
 const default_filters: TutorsQuery = { page: 1, limit: 9 };
 
@@ -78,9 +74,9 @@ export function useTutors() {
   }, [filters, search, sort, fetchTutors]);
 
   const updateFilters = (partial: Partial<TutorsQuery>) =>
-    setFilters((prev) => ({ ...prev, ...partial, page: 1 }));
+    setFilters((prev: TutorsQuery) => ({ ...prev, ...partial, page: 1 }));
 
-  const setPage = (page: number) => setFilters((prev) => ({ ...prev, page }));
+  const setPage = (page: number) => setFilters((prev: TutorsQuery) => ({ ...prev, page }));
 
   const resetFilters = () => {
     setFilters(default_filters);

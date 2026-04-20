@@ -1,9 +1,10 @@
 "use client";
+import { AdminBooking, BookingStatus } from "@/types";
 
 import { useEffect, useState, useMemo } from "react";
 import { RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { adminService, AdminBooking, BookingStatus } from "@/services/admin.service";
+import { adminService } from "@/services/admin.service";
 import { BookingsFilter } from "../_components/bookings/BookingsFilter";
 import { BookingsTable } from "../_components/bookings/BookingsTable";
 
@@ -16,9 +17,9 @@ function getErrorMessage(err: unknown): string {
 }
 
 export default function AdminBookingsPage() {
-  const [bookings,   setBookings]   = useState<AdminBooking[]>([]);
-  const [loading,    setLoading]    = useState(true);
-  const [error,      setError]      = useState<string | null>(null);
+  const [bookings, setBookings] = useState<AdminBooking[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [refreshing, setRefreshing] = useState(false);
 
   const [search, setSearch] = useState("");
@@ -39,7 +40,9 @@ export default function AdminBookingsPage() {
     }
   };
 
-  useEffect(() => { load(); }, []);
+  useEffect(() => {
+    load();
+  }, []);
 
   const filtered = useMemo(() => {
     return bookings.filter((b) => {
@@ -56,10 +59,8 @@ export default function AdminBookingsPage() {
     });
   }, [bookings, status, search]);
 
-
   return (
     <div className="space-y-5 px-4 py-3">
-
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
@@ -75,7 +76,9 @@ export default function AdminBookingsPage() {
           onClick={() => load(true)}
           disabled={loading || refreshing}
         >
-          <RefreshCw className={`h-3.5 w-3.5 ${refreshing ? "animate-spin" : ""}`} />
+          <RefreshCw
+            className={`h-3.5 w-3.5 ${refreshing ? "animate-spin" : ""}`}
+          />
           Refresh
         </Button>
       </div>
@@ -86,7 +89,6 @@ export default function AdminBookingsPage() {
         </div>
       )}
 
-     
       <BookingsFilter
         search={search}
         onSearchChange={setSearch}
@@ -98,7 +100,6 @@ export default function AdminBookingsPage() {
       />
 
       <BookingsTable bookings={filtered} loading={loading} />
-
     </div>
   );
 }

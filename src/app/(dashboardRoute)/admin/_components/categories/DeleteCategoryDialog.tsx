@@ -1,4 +1,5 @@
 "use client";
+import { Category } from "@/types";
 
 import { useState } from "react";
 import { Loader2, TriangleAlert } from "lucide-react";
@@ -11,7 +12,7 @@ import {
   DialogFooter,
   DialogDescription,
 } from "@/components/ui/dialog";
-import { Category } from "@/services/category.service";
+
 
 interface DeleteCategoryDialogProps {
   category: Category | null;
@@ -30,7 +31,7 @@ export function DeleteCategoryDialog({ category, onClose, onConfirm }: DeleteCat
     onClose();
   };
 
-  const tutorCount = category?._count.tutors ?? 0;
+  const tutorCount = category?._count?.tutors ?? 0;
 
   return (
     <Dialog open={!!category} onOpenChange={(v) => !v && onClose()}>

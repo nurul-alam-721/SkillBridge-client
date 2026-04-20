@@ -24,10 +24,10 @@ import {
 } from "lucide-react";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
-import { AdminPayment, PaymentStatus, BookingStatus } from "@/types/admin-payments.types";
+import { Payment, PaymentStatus, BookingStatus } from "@/types";
 
 interface AdminPaymentTableProps {
-  payments: AdminPayment[];
+  payments: Payment[];
   loading: boolean;
   activeFilter: PaymentStatus | "ALL";
   onResetFilter: () => void;
@@ -55,6 +55,11 @@ function PaymentStatusBadge({ status }: { status: PaymentStatus }) {
       icon:  XCircle,
       cls:   "bg-red-500/10 text-red-600 border-red-500/20",
     },
+    REFUNDED: {
+      label: "Refunded",
+      icon:  ArrowUpDown,
+      cls:   "bg-gray-500/10 text-gray-600 border-gray-500/20",
+    },
   };
   const { label, icon: Icon, cls } = map[status] ?? map.PENDING;
   return (
@@ -70,6 +75,7 @@ function BookingStatusBadge({ status }: { status: BookingStatus }) {
     CONFIRMED: "bg-blue-500/10 text-blue-600 border-blue-500/20",
     PENDING:   "bg-amber-500/10 text-amber-600 border-amber-500/20",
     CANCELLED: "bg-red-500/10 text-red-600 border-red-500/20",
+    COMPLETED: "bg-emerald-500/10 text-emerald-600 border-emerald-500/20",
   };
   return (
     <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold border ${map[status] ?? "bg-muted text-muted-foreground border-border"}`}>
@@ -178,7 +184,7 @@ export function AdminPaymentTable({
   onSortingChange,
   onViewTutor,
 }: AdminPaymentTableProps) {
-  const columns: ColumnDef<AdminPayment>[] = [
+  const columns: ColumnDef<Payment>[] = [
     {
       id: "student",
       header: "Student",

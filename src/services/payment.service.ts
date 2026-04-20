@@ -1,8 +1,5 @@
   import { apiClient } from "@/lib/axios";
-  import { Payment } from "@/types/payment-history.types";
-  import { TutorPayment } from "@/types/tutor-earnings.types";
-  import { AdminPayment } from "@/types/admin-payments.types";
-
+import { Payment } from "@/types";
   export interface CreatePaymentIntentResponse {
     clientSecret: string;
     payment: Payment;
@@ -29,12 +26,12 @@
       return data.data;
     },
 
-    async getTutorEarnings(): Promise<TutorPayment[]> {
+    async getTutorEarnings(): Promise<Payment[]> {
       const { data } = await apiClient.get("/api/payments/me");
       return data.data;
     },
 
-    async getAllPayments(): Promise<AdminPayment[]> {
+    async getAllPayments(): Promise<Payment[]> {
       const { data } = await apiClient.get("/api/payments");
       return data.data;
     },

@@ -1,13 +1,14 @@
 "use client";
+import { TutorProfile, Category } from "@/types";
 
 import { useEffect, useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
-import { tutorService, TutorProfile, Category } from "@/services/tutor.service";
-import { HeroSection } from "@/components/modules/home/HeroSection";
-import { CategoriesSection } from "@/components/modules/home/CategoriesSection";
-import { FeaturedTutorsSection } from "@/components/modules/home/FeaturedTutorsSection";
-import { HowItWorksSection } from "@/components/modules/home/HowItWorks";
-import { CtaSection } from "@/components/modules/home/CtaSection";
+import { tutorService } from "@/services/tutor.service";
+import { HeroSection } from "@/app/(commonRoute)/_components/home/HeroSection";
+import { CategoriesSection } from "@/app/(commonRoute)/_components/home/CategoriesSection";
+import { FeaturedTutorsSection } from "@/app/(commonRoute)/_components/home/FeaturedTutorsSection";
+import { HowItWorksSection } from "@/app/(commonRoute)/_components/home/HowItWorks";
+import { CtaSection } from "@/app/(commonRoute)/_components/home/CtaSection";
 
 export default function HomePage() {
   const router = useRouter();
@@ -36,9 +37,9 @@ export default function HomePage() {
       setTutors(tutorRes.tutors);
       setTotalTutors(tutorRes.pagination.totalTutors);
 
-      const rated = tutorRes.tutors.filter((t) => t.rating > 0);
+      const rated = tutorRes.tutors.filter((t) => (t.rating ?? 0) > 0);
       if (rated.length > 0) {
-        const avg = rated.reduce((sum, t) => sum + t.rating, 0) / rated.length;
+        const avg = rated.reduce((sum, t) => sum + (t.rating ?? 0), 0) / rated.length;
         setAvgRating(Math.round(avg * 10) / 10);
       }
     } catch (err) {

@@ -1,13 +1,14 @@
 "use client";
+import { AdminStats } from "@/types";
 
 import { useEffect, useState } from "react";
 import { Users, BookOpen, BadgeDollarSign, Tag, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { adminService, AdminStats } from "@/services/admin.service";
-import { PlatformStats } from "@/components/modules/adminDashboard/PlatformStats";
-import { RecentActivity } from "@/components/modules/adminDashboard/RecentActivity";
-import { Bookings } from "@/components/modules/adminDashboard/Bookings";
-import { StatsCard } from "@/components/modules/adminDashboard/StatsCard";
+import { adminService } from "@/services/admin.service";
+import { PlatformStats } from "../_components/dashboard/PlatformStats";
+import { RecentActivity } from "../_components/dashboard/RecentActivity";
+import { Bookings } from "../_components/dashboard/Bookings";
+import { StatsCard } from "../_components/dashboard/StatsCard";
 
 function getErrorMessage(err: unknown): string {
   if (err && typeof err === "object" && "response" in err) {

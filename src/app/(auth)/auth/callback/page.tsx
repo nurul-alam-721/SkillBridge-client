@@ -4,7 +4,7 @@ import { useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { Loader2 } from "lucide-react";
 import { authClient } from "@/lib/auth-client";
-import { User } from "@/types/types";
+import { User } from "@/types";
 
 const getSessionWithRetry = async (retries = 5) => {
   for (let i = 0; i < retries; i++) {
@@ -40,7 +40,7 @@ export default function AuthCallbackPage() {
           return;
         }
 
-        document.cookie = `user-role=${user.role}; path=/; max-age=604800; SameSite=None; Secure`;
+        document.cookie = `user-role=${user.role}; path=/; max-age=604800; SameSite=Lax`;
 
         if (isNewGoogleUser(user)) {
           router.replace("/onboarding/role");
@@ -52,7 +52,7 @@ export default function AuthCallbackPage() {
         } else if (user.role === "ADMIN") {
           window.location.href = "/admin/dashboard";
         } else {
-          window.location.href = "/dashboard";
+          window.location.href = "/student/dashboard";
         }
       } catch (err) {
         console.error(err);

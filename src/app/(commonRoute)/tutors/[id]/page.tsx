@@ -27,21 +27,17 @@ import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
-import {
-  AvailabilitySlot,
-  TutorProfile,
-  tutorService,
-} from "@/services/tutor.service";
-import { bookingService, Booking } from "@/services/booking.service";
+import { tutorService } from "@/services/tutor.service";
+import { bookingService } from "@/services/booking.service";
 import { authClient } from "@/lib/auth-client";
-import { User } from "@/types/types";
+import { CurrentUser, AvailabilitySlot, TutorProfile, Booking, User } from "@/types";
 import { Roles } from "@/constant/Roles";
-import { TutorDetailsSkeleton } from "@/components/modules/tutorDetails/TutorDetailsSkeleton";
-import { AvailabilitySlots } from "@/components/modules/tutorDetails/AvailabilitySlots";
-import { ReviewsList } from "@/components/modules/tutorDetails/ReviewsList";
-import { BookingConfirmDialog } from "@/components/modules/tutorDetails/BookingConfirmDialog";
-import { PaymentDialog } from "@/components/modules/bookings/PaymentDialog";
-import { CurrentUser } from "@/services/user.service";
+import { TutorDetailsSkeleton } from "@/app/(commonRoute)/_components/tutorDetails/TutorDetailsSkeleton";
+import { AvailabilitySlots } from "@/app/(commonRoute)/_components/tutorDetails/AvailabilitySlots";
+import { ReviewsList } from "@/app/(commonRoute)/_components/tutorDetails/ReviewsList";
+import { BookingConfirmDialog } from "@/app/(dashboardRoute)/student/_components/bookings/BookingConfirmDialog";
+import { PaymentDialog } from "@/app/(dashboardRoute)/student/_components/bookings/PaymentDialog";
+
 
 function getErrorMessage(
   err: unknown,
@@ -80,17 +76,17 @@ function useTutor(id: string) {
     setTutor((prev) =>
       prev
         ? {
-            ...prev,
-            availability: prev.availability?.map((s) => {
-              if (s.id !== slotId) return s;
-              const newTotal = (s.totalBookings ?? 0) + 1;
-              return {
-                ...s,
-                totalBookings: newTotal,
-                isBooked: newTotal >= (s.maxCapacity ?? 50),
-              };
-            }),
-          }
+          ...prev,
+          availability: prev.availability?.map((s) => {
+            if (s.id !== slotId) return s;
+            const newTotal = (s.totalBookings ?? 0) + 1;
+            return {
+              ...s,
+              totalBookings: newTotal,
+              isBooked: newTotal >= (s.maxCapacity ?? 50),
+            };
+          }),
+        }
         : prev,
     );
 
@@ -131,11 +127,11 @@ export default function TutorDetailsPage() {
               (b) =>
                 b.tutorProfile?.id === tutor?.id && b.status !== "CANCELLED",
             )
-            .map((b) => b.slotId),
+            .map((b) => b.slotId as string),
         );
         setMyBookedSlots(ids);
       })
-      .catch(() => {})
+      .catch(() => { })
       .finally(() => setBookingsLoading(false));
   }, [isStudent, tutor?.id]);
 
@@ -264,7 +260,7 @@ export default function TutorDetailsPage() {
                   <span className="flex items-center gap-1.5">
                     <Star className="h-3.5 w-3.5 fill-amber-400 text-amber-400" />
                     <span className="font-medium text-foreground">
-                      {tutor.rating.toFixed(1)}
+                      {(tutor.rating ?? 0).toFixed(1)}
                     </span>
                     <span className="text-muted-foreground">
                       ({tutor.totalReviews} review
@@ -351,7 +347,7 @@ export default function TutorDetailsPage() {
                       slots={tutor.availability ?? []}
                       selectedSlotId={selectedSlot?.id ?? null}
                       myBookedSlotIds={myBookedSlots}
-                      onSelect={isStudent ? setSelectedSlot : () => {}}
+                      onSelect={isStudent ? setSelectedSlot : () => { }}
                     />
                   </CardContent>
                 </Card>
@@ -364,7 +360,7 @@ export default function TutorDetailsPage() {
                     <CardDescription>
                       {tutor.totalReviews} review
                       {tutor.totalReviews !== 1 ? "s" : ""} ·{" "}
-                      {tutor.rating.toFixed(1)} avg
+                      {(tutor.rating ?? 0).toFixed(1)} avg
                     </CardDescription>
                   </CardHeader>
                   <CardContent>
@@ -397,18 +393,16 @@ export default function TutorDetailsPage() {
               <CardContent className="space-y-3.5">
                 {selectedSlot && isStudent && (
                   <div
-                    className={`rounded-xl border p-3.5 text-sm space-y-1 ${
-                      selectedAlreadyBooked
+                    className={`rounded-xl border p-3.5 text-sm space-y-1 ${selectedAlreadyBooked
                         ? "bg-amber-50 border-amber-200 dark:bg-amber-900/20 dark:border-amber-700"
                         : "bg-primary/5 border-primary/20"
-                    }`}
+                      }`}
                   >
                     <p
-                      className={`text-xs font-semibold uppercase tracking-wide ${
-                        selectedAlreadyBooked
+                      className={`text-xs font-semibold uppercase tracking-wide ${selectedAlreadyBooked
                           ? "text-amber-600 dark:text-amber-400"
                           : "text-primary"
-                      }`}
+                        }`}
                     >
                       {selectedAlreadyBooked
                         ? "Already booked"
@@ -448,11 +442,10 @@ export default function TutorDetailsPage() {
                       Available slots
                     </span>
                     <span
-                      className={`font-semibold ${
-                        availableCount === 0
+                      className={`font-semibold ${availableCount === 0
                           ? "text-destructive"
                           : "text-emerald-600 dark:text-emerald-400"
-                      }`}
+                        }`}
                     >
                       {availableCount}
                     </span>
@@ -514,7 +507,7 @@ export default function TutorDetailsPage() {
         }}
         onSuccess={() => {
           toast.success("Payment completed successfully!");
-          router.push("/dashboard/bookings");
+          router.push("/student/bookings");
         }}
       />
     </div>

@@ -1,4 +1,5 @@
 "use client";
+import { Category, CategoryPayload } from "@/types";
 
 import { useEffect, useState } from "react";
 import { Loader2 } from "lucide-react";
@@ -14,7 +15,7 @@ import {
   DialogFooter,
   DialogDescription,
 } from "@/components/ui/dialog";
-import { Category, CategoryPayload } from "@/services/category.service";
+
 
 interface CategoryDialogProps {
   open: boolean;

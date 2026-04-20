@@ -1,4 +1,5 @@
 "use client";
+import { CurrentUser } from "@/types";
 
 import Link from "next/link";
 import { LogOut, UserCircle, ChevronsUpDown } from "lucide-react";
@@ -10,7 +11,7 @@ import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem,
   DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { CurrentUser } from "@/services/user.service";
+
 import { signOut } from "@/lib/signOut";
 
 export function SidebarUserFooter({ user }: { user: CurrentUser }) {
@@ -65,7 +66,7 @@ export function SidebarUserFooter({ user }: { user: CurrentUser }) {
                 href={
                   user.role === "TUTOR" ? "/tutor/profile"
                   : user.role === "ADMIN" ? "/admin/dashboard"
-                  : "/dashboard/profile"
+                  : "/student/profile"
                 }
               >
                 <UserCircle className="mr-2 h-4 w-4" />

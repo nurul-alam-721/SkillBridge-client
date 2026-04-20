@@ -1,5 +1,6 @@
+import { UserRole } from "@/types";
 import Image from "next/image";
-import { UserRole } from "@/services/admin.service";
+
 
 const FALLBACK_CLS: Record<UserRole, string> = {
   STUDENT: "bg-violet-100 text-violet-600 dark:bg-violet-900/30 dark:text-violet-400",

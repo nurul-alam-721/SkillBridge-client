@@ -1,10 +1,11 @@
 "use client";
+import { AdminUser, UserRole, UserStatus } from "@/types";
 
 import { useEffect, useState, useMemo, useCallback } from "react";
 import { RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
-import { adminService, AdminUser, UserRole, UserStatus } from "@/services/admin.service";
+import { adminService } from "@/services/admin.service";
 import { SearchX } from "lucide-react";
 import { UsersTable } from "../_components/users/UsersTable";
 import { UsersFilter } from "../_components/users/UsersFilter";

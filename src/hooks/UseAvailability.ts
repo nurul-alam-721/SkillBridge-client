@@ -1,7 +1,8 @@
 "use client";
+import { AvailabilitySlot, CreateAvailabilityPayload } from "@/types";
 
 import { useState, useEffect, useCallback } from "react";
-import { tutorService, AvailabilitySlot, CreateAvailabilityPayload } from "@/services/tutor.service";
+import { tutorService } from "@/services/tutor.service";
 import { toast } from "sonner";
 
 export function useAvailability() {

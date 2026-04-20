@@ -1,9 +1,9 @@
 "use client";
 
-import { AdminPayment, PaymentStatus } from "@/types/admin-payments.types";
+import { Payment, PaymentStatus } from "@/types";
 
 interface AdminPaymentFilterTabsProps {
-  payments: AdminPayment[];
+  payments: Payment[];
   loading: boolean;
   activeFilter: PaymentStatus | "ALL";
   onFilterChange: (filter: PaymentStatus | "ALL") => void;

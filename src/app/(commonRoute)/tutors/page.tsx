@@ -20,9 +20,9 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet";
 import { Separator } from "@/components/ui/separator";
-import { TutorsFilter } from "@/components/modules/tutor/TutorsFilter";
-import { TutorCardSkeleton } from "@/components/modules/tutor/TutorCardSkeleton";
-import { TutorCard } from "@/components/modules/tutor/TutorCard";
+import { TutorsFilter } from "@/app/(commonRoute)/_components/tutors/TutorsFilter";
+import { TutorCardSkeleton } from "@/app/(commonRoute)/_components/tutors/TutorCardSkeleton";
+import { TutorCard } from "@/app/(commonRoute)/_components/tutors/TutorCard";
 import { useTutors } from "@/hooks/useTutors";
 
 const SORT_OPTIONS = [

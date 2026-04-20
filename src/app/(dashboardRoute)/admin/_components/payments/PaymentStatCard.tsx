@@ -2,10 +2,10 @@
 
 import { useMemo } from "react";
 import { DollarSign, CheckCircle2, Clock, TrendingUp } from "lucide-react";
-import { AdminPayment, AdminPaymentStats } from "@/types/admin-payments.types";
+import { Payment, PaymentStats } from "@/types";
 
 interface AdminPaymentStatCardsProps {
-  payments: AdminPayment[];
+  payments: Payment[];
   loading: boolean;
 }
 
@@ -45,7 +45,7 @@ function StatCard({
 }
 
 export function AdminPaymentStatCards({ payments, loading }: AdminPaymentStatCardsProps) {
-  const stats: AdminPaymentStats = useMemo(() => {
+  const stats: PaymentStats = useMemo(() => {
     const completed    = payments.filter((p) => p.status === "COMPLETED");
     const pending      = payments.filter((p) => p.status === "PENDING");
     const totalRevenue = completed.reduce((sum, p) => sum + p.amount, 0);

@@ -1,8 +1,9 @@
 "use client";
+import { UserRole, UserStatus } from "@/types";
 
 import { Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
-import { UserRole, UserStatus } from "@/services/admin.service";
+
 
 interface Props {
   search:         string;
@@ -16,13 +17,13 @@ interface Props {
 }
 
 const ROLES:    (UserRole   | "ALL")[] = ["ALL", "STUDENT", "TUTOR", "ADMIN"];
-const STATUSES: (UserStatus | "ALL")[] = ["ALL", "ACTIVE", "BANNED"];
+const STATUSES: (UserStatus | "ALL")[] = ["ALL", "ACTIVE", "INACTIVE", "BANNED"];
 
 const ROLE_LABEL: Record<UserRole | "ALL", string> = {
   ALL: "All Roles", STUDENT: "Students", TUTOR: "Tutors", ADMIN: "Admins",
 };
 const STATUS_LABEL: Record<UserStatus | "ALL", string> = {
-  ALL: "All Status", ACTIVE: "Active", BANNED: "Banned",
+  ALL: "All Status", ACTIVE: "Active", INACTIVE: "Inactive", BANNED: "Banned",
 };
 
 export function UsersFilter({

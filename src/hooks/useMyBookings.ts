@@ -1,5 +1,6 @@
+import { Booking, BookingReview } from "@/types";
 import { useState, useEffect, useCallback } from "react";
-import { bookingService, Booking, BookingReview } from "@/services/booking.service";
+import { bookingService } from "@/services/booking.service";
 
 export function useMyBookings() {
   const [bookings, setBookings] = useState<Booking[]>([]);

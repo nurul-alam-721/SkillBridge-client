@@ -14,9 +14,9 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
-import { TutorSectionCards } from "@/components/modules/tutorDashboard/tutorSectionCards";
-import { TutorSessionsTable } from "@/components/modules/tutorDashboard/TutorSessionsTable";
-import { CreateProfileDialog } from "@/components/modules/tutor/CreateProfileDialog";
+import { TutorSectionCards } from "@/app/(dashboardRoute)/tutor/_components/dashboard/tutorSectionCards";
+import { TutorSessionsTable } from "@/app/(dashboardRoute)/tutor/_components/dashboard/TutorSessionsTable";
+import { CreateProfileDialog } from "@/app/(dashboardRoute)/tutor/_components/profile/CreateProfileDialog";
 import { useTutorDashboard } from "@/hooks/useTutorDashboard";
 
 function DashboardSkeleton() {
@@ -86,7 +86,7 @@ export default function TutorDashboardPage() {
     return (
       <CreateProfileDialog
         open={true}
-        onCreated={refresh} 
+        onCreated={refresh}
       />
     );
   }
@@ -115,7 +115,7 @@ export default function TutorDashboardPage() {
               <div className="flex flex-wrap items-center gap-3 text-sm text-muted-foreground">
                 <span className="flex items-center gap-1">
                   <Star className="h-3.5 w-3.5 fill-amber-400 text-amber-400" />
-                  {tutorProfile.rating.toFixed(1)} · {tutorProfile.totalReviews} review{tutorProfile.totalReviews !== 1 ? "s" : ""}
+                  {(tutorProfile.rating ?? 0).toFixed(1)} · {tutorProfile.totalReviews} review{tutorProfile.totalReviews !== 1 ? "s" : ""}
                 </span>
                 <span className="flex items-center gap-1">
                   <Clock className="h-3.5 w-3.5" />
@@ -212,7 +212,7 @@ export default function TutorDashboardPage() {
                         <div className="flex items-center gap-1 shrink-0">
                           <Star className="h-3.5 w-3.5 fill-amber-400 text-amber-400" />
                           <span className="text-sm font-medium">
-                            {parseFloat(review.rating).toFixed(1)}
+                            {review.rating.toFixed(1)}
                           </span>
                         </div>
                       </div>
