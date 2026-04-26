@@ -104,7 +104,7 @@ export default function CategoriesPage() {
               Subjects
             </span>
           </div>
-          <h1 className="text-3xl font-bold tracking-tight text-foreground">
+          <h1 className="font-serif text-3xl font-bold tracking-tight text-foreground">
             Browse by Subject
           </h1>
           <p className="text-muted-foreground mt-1.5 text-sm max-w-lg">
