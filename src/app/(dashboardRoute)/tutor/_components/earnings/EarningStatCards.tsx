@@ -15,13 +15,13 @@ export function EarningStatCards({ payments, loading }: Props) {
   const pending = payments.filter((p) => p.status === "PENDING");
   const refunded = payments.filter((p) => p.status === "REFUNDED");
 
-  const totalEarned = completed.reduce((acc, p) => acc + (p.tutorEarning ?? p.amount), 0);
-  const pendingAmount = pending.reduce((acc, p) => acc + (p.tutorEarning ?? p.amount), 0);
+  const totalEarned = completed.reduce((acc, p) => acc + Number(p.tutorEarning ?? p.amount), 0);
+  const pendingAmount = pending.reduce((acc, p) => acc + Number(p.tutorEarning ?? p.amount), 0);
 
   const stats = [
     {
       label: "Total Earned",
-      value: `$${totalEarned.toFixed(2)}`,
+      value: `৳${totalEarned.toFixed(2)}`,
       icon: DollarSign,
       description: `${completed.length} completed session${completed.length !== 1 ? "s" : ""}`,
       iconClass: "text-emerald-500",
@@ -29,7 +29,7 @@ export function EarningStatCards({ payments, loading }: Props) {
     },
     {
       label: "Pending",
-      value: `$${pendingAmount.toFixed(2)}`,
+      value: `৳${pendingAmount.toFixed(2)}`,
       icon: Clock,
       description: `${pending.length} pending payment${pending.length !== 1 ? "s" : ""}`,
       iconClass: "text-amber-500",

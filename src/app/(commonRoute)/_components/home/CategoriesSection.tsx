@@ -36,7 +36,7 @@ export function CategoriesSection({
           <p className="text-xs font-semibold uppercase tracking-widest text-primary mb-1">
             SUBJECTS
           </p>
-          <h2 className="text-3xl font-bold tracking-tight">Browse by Category</h2>
+          <h2 className="font-serif text-3xl font-bold tracking-tight">Browse by Category</h2>
         </div>
 
         {!loading && categories.length > 6 && (

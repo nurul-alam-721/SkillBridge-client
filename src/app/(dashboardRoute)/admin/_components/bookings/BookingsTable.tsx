@@ -7,7 +7,6 @@ import Image from "next/image";
 import {
   Hourglass, Clock, CheckCircle2, XCircle,
   ArrowUpDown, ArrowUp, ArrowDown,
-  ChevronLeft, ChevronRight,
 } from "lucide-react";
 import {
   useReactTable,
@@ -18,7 +17,7 @@ import {
   ColumnDef,
   SortingState,
 } from "@tanstack/react-table";
-import { Button } from "@/components/ui/button";
+import { DataTablePagination } from "@/components/layout/DataTablePagination";
 
 
 /* ── Status badge ────────────────────────────────────────────── */
@@ -54,13 +53,14 @@ function AvatarCell({
   return (
     <div className="flex items-center gap-2.5 min-w-0">
       {image ? (
-        <Image
-          src={image}
-          alt={name ?? ""}
-          width={32}
-          height={32}
-          className="rounded-full object-cover shrink-0 border border-border"
-        />
+        <div className="relative h-8 w-8 shrink-0">
+          <Image
+            src={image}
+            alt={name ?? ""}
+            fill
+            className="rounded-full object-cover border border-border"
+          />
+        </div>
       ) : (
         <div className="h-8 w-8 rounded-full bg-violet-100 dark:bg-violet-900/30 flex items-center justify-center shrink-0 border border-border text-xs font-bold text-violet-600 dark:text-violet-400">
           {(name ?? "?").charAt(0).toUpperCase()}
@@ -85,6 +85,7 @@ function SortIcon({ direction }: { direction: "asc" | "desc" | false }) {
 /* ── Date helper ─────────────────────────────────────────────── */
 
 function safeFormat(value: string | Date, fmt: string, fallback = "—"): string {
+  if (!value) return fallback;
   const date = typeof value === "string" ? parseISO(value) : value;
   return isValid(date) ? format(date, fmt) : fallback;
 }
@@ -135,7 +136,7 @@ const columns: ColumnDef<AdminBooking>[] = [
         <AvatarCell
           name={student.name}
           email={student.email}
-
+          image={student.image}
         />
       );
     },
@@ -267,19 +268,8 @@ export function BookingsTable({
 
   if (loading) return <TableSkeleton />;
 
-  const current = table.getState().pagination.pageIndex;
-  const total   = table.getPageCount();
-
-  const delta = 2;
-  const pages: (number | "…")[] = [];
-  const rangeStart = Math.max(0, current - delta);
-  const rangeEnd   = Math.min(total - 1, current + delta);
-  if (rangeStart > 0) { pages.push(0); if (rangeStart > 1) pages.push("…"); }
-  for (let i = rangeStart; i <= rangeEnd; i++) pages.push(i);
-  if (rangeEnd < total - 1) { if (rangeEnd < total - 2) pages.push("…"); pages.push(total - 1); }
-
   return (
-    <div className="space-y-3">
+    <div className="space-y-4">
       <div className="rounded-xl border border-border bg-card overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
@@ -323,43 +313,7 @@ export function BookingsTable({
         </div>
       </div>
 
-      {total > 1 && (
-        <div className="flex items-center justify-between px-1">
-          <p className="text-xs text-muted-foreground">
-            {bookings.length} booking{bookings.length !== 1 ? "s" : ""}
-          </p>
-          <div className="flex items-center gap-1">
-            <Button
-              variant="outline" size="icon" className="h-8 w-8 rounded-xl"
-              onClick={() => table.previousPage()} disabled={!table.getCanPreviousPage()}
-            >
-              <ChevronLeft className="h-4 w-4" />
-            </Button>
-
-            {pages.map((p, i) =>
-              p === "…" ? (
-                <span key={`e-${i}`} className="h-8 w-8 flex items-center justify-center text-xs text-muted-foreground select-none">…</span>
-              ) : (
-                <Button
-                  key={p}
-                  variant={p === current ? "default" : "outline"}
-                  size="icon" className="h-8 w-8 rounded-xl text-xs"
-                  onClick={() => table.setPageIndex(p as number)}
-                >
-                  {(p as number) + 1}
-                </Button>
-              )
-            )}
-
-            <Button
-              variant="outline" size="icon" className="h-8 w-8 rounded-xl"
-              onClick={() => table.nextPage()} disabled={!table.getCanNextPage()}
-            >
-              <ChevronRight className="h-4 w-4" />
-            </Button>
-          </div>
-        </div>
-      )}
+      <DataTablePagination table={table} totalLabel="bookings" />
     </div>
   );
 }

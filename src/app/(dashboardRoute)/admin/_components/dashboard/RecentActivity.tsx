@@ -50,10 +50,19 @@ function ActivityRow({ booking }: { booking: RecentBooking }) {
         <p className="text-sm font-medium truncate leading-snug">
           {booking.student.name ?? "Unknown Student"}
         </p>
-        <p className="text-xs text-muted-foreground truncate">
-          → {booking.tutorProfile.user.name} &middot;{" "}
-          {booking.tutorProfile.category.name}
-        </p>
+        <div className="flex items-center gap-1 text-xs text-muted-foreground truncate mt-0.5">
+          <span>→</span>
+          <Avatar className="h-4 w-4 shrink-0 border border-border">
+            <AvatarImage src={booking.tutorProfile.user.image ?? undefined} />
+            <AvatarFallback className="text-[8px] font-bold">
+              {(booking.tutorProfile.user.name ?? "T").charAt(0).toUpperCase()}
+            </AvatarFallback>
+          </Avatar>
+          <span className="truncate">
+            {booking.tutorProfile.user.name} &middot;{" "}
+            {booking.tutorProfile.category.name}
+          </span>
+        </div>
       </div>
 
       <div className="flex flex-col items-end gap-1 shrink-0">

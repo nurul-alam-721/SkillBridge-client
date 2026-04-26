@@ -99,7 +99,7 @@ function StarDisplay({ rating }: { rating: number }) {
         ))}
       </div>
       <span className="text-lg font-bold text-amber-500 tabular-nums">
-        {rating.toFixed(1)}
+        {Number(rating ?? 0).toFixed(1)}
       </span>
     </div>
   );

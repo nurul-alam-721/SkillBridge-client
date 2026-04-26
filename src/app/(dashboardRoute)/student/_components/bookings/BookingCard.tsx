@@ -198,7 +198,7 @@ export function BookingCard({
                 hover:bg-amber-100 transition-colors"
             >
               <Star className="h-3 w-3 fill-amber-400 text-amber-400" />
-              {booking.review.rating.toFixed(1)} · Your Review
+              {Number(booking.review.rating ?? 0).toFixed(1)} · Your Review
             </button>
           </div>
         )}

@@ -9,7 +9,7 @@ export interface RecentBooking {
   student: { name: string | null; image: string | null };
   tutorProfile: {
     hourlyRate: number;
-    user: { name: string | null };
+    user: { name: string | null; image: string | null; email: string | null };
     category: { name: string };
   };
   slot: { startTime: string; endTime: string };

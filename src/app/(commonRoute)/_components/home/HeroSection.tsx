@@ -1,21 +1,68 @@
 "use client";
 
 import Link from "next/link";
-import { Search, Star, Users, BookOpen, ArrowRight } from "lucide-react";
+import { Search, Star, Users, BookOpen, ArrowRight, GraduationCap } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { motion, Variants } from "framer-motion";
+import { motion, Variants, animate } from "framer-motion";
 import { useEffect, useState, useRef } from "react";
+import type { LucideIcon } from "lucide-react";
 
 interface HeroSectionProps {
   search: string;
   onSearchChange: (value: string) => void;
   onSearchSubmit: () => void;
+  totalStudents: number;
   totalTutors: number;
   totalSubjects: number;
   avgRating: number;
   loading: boolean;
   categories?: { id: string; name: string }[];
+}
+
+function StatCounter({ value, label, icon: Icon, delay = 0, loading }: { value: number; label: string; icon: LucideIcon; delay?: number; loading: boolean }) {
+  const [displayValue, setDisplayValue] = useState(0);
+  const countRef = useRef(0);
+
+  useEffect(() => {
+    if (value === 0 || loading) return;
+    
+    const timeout = setTimeout(() => {
+      const controls = animate(countRef.current, value, {
+        duration: 2,
+        ease: "easeOut",
+        onUpdate: (latest) => {
+          countRef.current = latest;
+          setDisplayValue(latest);
+        }
+      });
+      return () => controls.stop();
+    }, delay * 1000);
+
+    return () => clearTimeout(timeout);
+  }, [value, delay, loading]);
+
+  const formattedValue = label === "Average Rating" 
+    ? (loading ? "..." : displayValue.toFixed(1)) 
+    : (loading ? "..." : `${Math.floor(displayValue)}+`);
+
+  return (
+    <div className="flex items-center">
+      <div className="flex items-center gap-3">
+        <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary/8 ring-1 ring-primary/12">
+          <Icon className="h-4 w-4 text-primary" />
+        </div>
+        <div className="text-left">
+          <p className={`text-sm font-semibold leading-none tabular-nums ${loading ? "text-muted-foreground" : "text-foreground"}`}>
+            {formattedValue}
+          </p>
+          <p className="text-xs text-muted-foreground mt-1">
+            {label}
+          </p>
+        </div>
+      </div>
+    </div>
+  );
 }
 
 function AnimatedTitle() {
@@ -60,7 +107,7 @@ function AnimatedTitle() {
       variants={containerVariants}
       initial="hidden"
       animate="visible"
-      className="text-[2.75rem] sm:text-5xl font-bold tracking-tight leading-[1.2] mb-5 text-foreground"
+      className="font-serif text-[2.75rem] sm:text-5xl font-bold tracking-tight leading-[1.2] mb-5 text-foreground"
     >
       <span className="block">{renderChars(line1, true)}</span>
       <span className="block">{renderChars(line2, false)}</span>
@@ -72,78 +119,13 @@ export function HeroSection({
   search,
   onSearchChange,
   onSearchSubmit,
+  totalStudents,
   totalTutors,
   totalSubjects,
   avgRating,
   loading,
   categories = [],
 }: HeroSectionProps) {
-  const [animatedStats, setAnimatedStats] = useState({
-    tutors: 0,
-    subjects: 0,
-    rating: 0,
-  });
-
-  const hasAnimatedRef = useRef(false);
-
-  useEffect(() => {
-    if (!loading && !hasAnimatedRef.current) {
-      hasAnimatedRef.current = true;
-
-      const animate = (
-        key: keyof typeof animatedStats,
-        target: number,
-        duration: number
-      ) => {
-        const interval = setInterval(() => {
-          setAnimatedStats((prev) => {
-            const next = Math.min(
-              prev[key] + target / (duration / 16),
-              target
-            );
-            return { ...prev, [key]: next };
-          });
-        }, 16);
-        setTimeout(() => clearInterval(interval), duration);
-      };
-
-      animate("tutors", totalTutors, 2500);
-      animate("subjects", totalSubjects, 2500);
-      animate("rating", avgRating, 2000);
-    }
-  }, [loading, totalTutors, totalSubjects, avgRating]);
-
-  const stats = [
-    {
-      icon: Users,
-      value: loading
-        ? "..."
-        : totalTutors > 0
-        ? `${Math.floor(animatedStats.tutors)}+`
-        : "—",
-      label: "Expert Tutors",
-    },
-    {
-      icon: BookOpen,
-      value: loading
-        ? "..."
-        : totalSubjects > 0
-        ? Math.floor(animatedStats.subjects).toLocaleString()
-        : "—",
-      label: "Subjects Covered",
-    },
-    {
-      icon: Star,
-      value: loading
-        ? "..."
-        : avgRating > 0
-        ? animatedStats.rating.toFixed(1)
-        : "—",
-      label: "Average Rating",
-    },
-  ];
-
-  // Use real category names from DB; fall back to defaults while loading
   const popularSubjects =
     categories.length > 0
       ? categories.slice(0, 5).map((c) => c.name)
@@ -218,31 +200,16 @@ export function HeroSection({
           transition={{ duration: 0.5, delay: 1.2 }}
           className="flex flex-wrap items-center justify-center gap-0"
         >
-          {stats.map(({ icon: Icon, value, label }, i) => (
-            <div key={label} className="flex items-center">
-              {i > 0 && (
-                <div className="h-8 w-px bg-border/60 mx-5 hidden sm:block" />
-              )}
-              {i > 0 && <div className="sm:hidden w-3" />}
-              <div className="flex items-center gap-3">
-                <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary/8 ring-1 ring-primary/12">
-                  <Icon className="h-4 w-4 text-primary" />
-                </div>
-                <div className="text-left">
-                  <p
-                    className={`text-sm font-semibold leading-none tabular-nums ${
-                      loading ? "text-muted-foreground" : "text-foreground"
-                    }`}
-                  >
-                    {value}
-                  </p>
-                  <p className="text-xs text-muted-foreground mt-1">
-                    {label}
-                  </p>
-                </div>
-              </div>
-            </div>
-          ))}
+          <StatCounter icon={GraduationCap} value={totalStudents} label="Students Joined" loading={loading} />
+          <div className="h-8 w-px bg-border/60 mx-5 hidden sm:block" />
+          <div className="sm:hidden w-3" />
+          <StatCounter icon={Users} value={totalTutors} label="Expert Tutors" loading={loading} />
+          <div className="h-8 w-px bg-border/60 mx-5 hidden sm:block" />
+          <div className="sm:hidden w-3" />
+          <StatCounter icon={BookOpen} value={totalSubjects} label="Subjects Covered" loading={loading} />
+          <div className="h-8 w-px bg-border/60 mx-5 hidden sm:block" />
+          <div className="sm:hidden w-3" />
+          <StatCounter icon={Star} value={avgRating} label="Average Rating" loading={loading} />
         </motion.div>
       </div>
     </section>

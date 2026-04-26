@@ -3,47 +3,97 @@ import { Booking, BookingStatus, BookingReview } from "@/types";
 
 import { useState } from "react";
 import { format } from "date-fns";
-import { Star } from "lucide-react";
+import { Star, Clock, Calendar, SearchX } from "lucide-react";
 import {
-  Table, TableBody, TableCell,
-  TableHead, TableHeader, TableRow,
-} from "@/components/ui/table";
+  useReactTable,
+  getCoreRowModel,
+  getSortedRowModel,
+  getPaginationRowModel,
+  flexRender,
+  ColumnDef,
+  SortingState,
+} from "@tanstack/react-table";
+import Image from "next/image";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 
 import { LeaveReviewDialog } from "./LeaveReviewDialog";
 import { ViewReviewDialog } from "./ViewReviewDialog";
-import { DataPagination } from "@/app/utils/DataPagination";
+import { DataTablePagination } from "@/components/layout/DataTablePagination";
 
-const PAGE_SIZE = 10;
+// ── Status badge ──────────────────────────────────────────────────────────
 
-const STATUS_CONFIG: Record<BookingStatus, { label: string; className: string }> = {
+const STATUS_CONFIG: Record<BookingStatus, { label: string; cls: string }> = {
   PENDING: {
     label: "Pending",
-    className: "text-amber-700 bg-amber-50 ring-1 ring-amber-200 dark:text-amber-400 dark:bg-amber-900/30 dark:ring-amber-800",
+    cls: "bg-amber-500/10 text-amber-600 border-amber-500/20",
   },
   CONFIRMED: {
     label: "Confirmed",
-    className: "text-sky-700 bg-sky-50 ring-1 ring-sky-200 dark:text-sky-400 dark:bg-sky-900/30 dark:ring-sky-800",
+    cls: "bg-sky-500/10 text-sky-600 border-sky-500/20",
   },
   COMPLETED: {
     label: "Completed",
-    className: "text-emerald-700 bg-emerald-50 ring-1 ring-emerald-200 dark:text-emerald-400 dark:bg-emerald-900/30 dark:ring-emerald-800",
+    cls: "bg-emerald-500/10 text-emerald-600 border-emerald-500/20",
   },
   CANCELLED: {
     label: "Cancelled",
-    className: "text-rose-700 bg-rose-50 ring-1 ring-rose-200 dark:text-rose-400 dark:bg-rose-900/30 dark:ring-rose-800",
+    cls: "bg-red-500/10 text-red-600 border-red-500/20",
   },
 };
 
 function StatusBadge({ status }: { status: BookingStatus }) {
-  const { label, className } = STATUS_CONFIG[status];
+  const { label, cls } = STATUS_CONFIG[status];
   return (
-    <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold ${className}`}>
+    <span className={`inline-flex items-center rounded-full px-2.5 py-1 text-xs font-semibold border ${cls}`}>
       {label}
     </span>
   );
 }
+
+// ── Avatar Cell ───────────────────────────────────────────────────────────
+
+function AvatarCell({ name, image, email }: { name: string; image: string | null; email?: string | null }) {
+  return (
+    <div className="flex items-center gap-2.5 min-w-0">
+      {image ? (
+        <div className="relative h-8 w-8 shrink-0">
+          <Image
+            src={image}
+            alt={name}
+            fill
+            className="rounded-full object-cover border border-border"
+          />
+        </div>
+      ) : (
+        <div className="h-8 w-8 rounded-full bg-muted flex items-center justify-center shrink-0 text-xs font-bold text-muted-foreground border border-border">
+          {name.charAt(0).toUpperCase()}
+        </div>
+      )}
+      <div className="min-w-0">
+        <p className="text-sm font-medium text-foreground truncate">{name}</p>
+        {email && <p className="text-xs text-muted-foreground truncate">{email}</p>}
+      </div>
+    </div>
+  );
+}
+
+function ArrowUp({ className }: { className?: string }) {
+  return <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="m18 15-6-6-6 6"/></svg>;
+}
+function ArrowDown({ className }: { className?: string }) {
+  return <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="m6 9 6 6 6-6"/></svg>;
+}
+function ArrowUpDown({ className }: { className?: string }) {
+  return <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="m21 15-9-9-9 9"/><path d="m21 9-9 9-9-9"/></svg>;
+}
+
+function SortIcon({ direction }: { direction: "asc" | "desc" | false }) {
+  if (direction === "asc") return <ArrowUp className="h-3 w-3" />;
+  if (direction === "desc") return <ArrowDown className="h-3 w-3" />;
+  return <ArrowUpDown className="h-3 w-3 opacity-40" />;
+}
+
+// ── Main Table Component ──────────────────────────────────────────────────
 
 export function BookingsTable({
   bookings,
@@ -54,107 +104,191 @@ export function BookingsTable({
   onReviewed?: () => void;
   patchReview?: (bookingId: string, review: BookingReview | null) => void;
 }) {
-  const [page, setPage] = useState(1);
+  const [sorting, setSorting] = useState<SortingState>([]);
   const [reviewBooking, setReviewBooking] = useState<Booking | null>(null);
   const [viewReview, setViewReview] = useState<{ booking: Booking; review: BookingReview } | null>(null);
 
-  const totalPages = Math.ceil(bookings.length / PAGE_SIZE);
-  const paginated = bookings.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
+  const columns: ColumnDef<Booking>[] = [
+    {
+      id: "tutor",
+      accessorFn: (row) => row.tutorProfile.user?.name ?? "",
+      header: ({ column }) => (
+        <button
+          className="flex items-center gap-1 hover:text-foreground transition-colors"
+          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+        >
+          Tutor <SortIcon direction={column.getIsSorted()} />
+        </button>
+      ),
+      cell: ({ row }) => (
+        <AvatarCell
+          name={row.original.tutorProfile.user?.name ?? "—"}
+          image={row.original.tutorProfile.user?.image}
+          email={row.original.tutorProfile.category?.name}
+        />
+      ),
+    },
+    {
+      id: "session",
+      accessorFn: (row) => row.slot.startTime,
+      header: ({ column }) => (
+        <button
+          className="flex items-center gap-1 hover:text-foreground transition-colors"
+          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+        >
+          Session <SortIcon direction={column.getIsSorted()} />
+        </button>
+      ),
+      cell: ({ row }) => {
+        const b = row.original;
+        return (
+          <div className="tabular-nums">
+            <div className="flex items-center gap-1.5 text-sm font-medium text-foreground">
+               <Calendar className="h-3.5 w-3.5 text-muted-foreground" />
+               {format(new Date(b.slot.startTime), "MMM d, yyyy")}
+            </div>
+            <div className="flex items-center gap-1.5 text-xs text-muted-foreground mt-0.5">
+               <Clock className="h-3.5 w-3.5" />
+               {format(new Date(b.slot.startTime), "h:mm a")} → {format(new Date(b.slot.endTime), "h:mm a")}
+            </div>
+          </div>
+        );
+      },
+    },
+    {
+      id: "rate",
+      accessorFn: (row) => row.tutorProfile.hourlyRate,
+      header: ({ column }) => (
+        <button
+          className="flex items-center gap-1 hover:text-foreground transition-colors"
+          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+        >
+          Rate <SortIcon direction={column.getIsSorted()} />
+        </button>
+      ),
+      cell: ({ row }) => (
+        <span className="text-sm font-semibold tabular-nums">
+          ৳{row.original.tutorProfile.hourlyRate}/hr
+        </span>
+      ),
+    },
+    {
+      accessorKey: "status",
+      header: ({ column }) => (
+        <button
+          className="flex items-center gap-1 hover:text-foreground transition-colors"
+          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+        >
+          Status <SortIcon direction={column.getIsSorted()} />
+        </button>
+      ),
+      cell: ({ row }) => <StatusBadge status={row.original.status} />,
+    },
+    {
+      id: "actions",
+      header: "",
+      enableSorting: false,
+      cell: ({ row }) => {
+        const booking = row.original;
+        if (booking.review) {
+          return (
+            <Button
+              variant="outline"
+              size="sm"
+              className="h-8 rounded-xl text-xs gap-1.5 border-amber-200 text-amber-700 hover:bg-amber-50 dark:border-amber-800 dark:text-amber-400 dark:hover:bg-amber-900/30 shadow-sm"
+              onClick={() => setViewReview({ booking, review: booking.review! })}
+            >
+              <Star className="h-3.5 w-3.5 fill-amber-400 text-amber-400" />
+              View Review
+            </Button>
+          );
+        }
+
+        if (booking.status === "COMPLETED" || booking.status === "CONFIRMED") {
+          return (
+            <Button
+              variant="outline"
+              size="sm"
+              className={`h-8 rounded-xl text-xs gap-1.5 shadow-sm transition-all ${
+                booking.status === "COMPLETED"
+                  ? "border-amber-200 text-amber-700 hover:bg-amber-50 dark:border-amber-800 dark:text-amber-400 dark:hover:bg-amber-900/30"
+                  : "border-sky-200 text-sky-700 hover:bg-sky-50 dark:border-sky-800 dark:text-sky-400 dark:hover:bg-sky-900/30"
+              }`}
+              onClick={() => setReviewBooking(booking)}
+            >
+              <Star className={`h-3.5 w-3.5 ${
+                booking.status === "COMPLETED" ? "fill-amber-400 text-amber-400" : "fill-sky-400 text-sky-400"
+              }`} />
+              Review
+            </Button>
+          );
+        }
+
+        return null;
+      },
+    }
+  ];
+
+  const table = useReactTable({
+    data: bookings,
+    columns,
+    state: { sorting },
+    onSortingChange: setSorting,
+    getCoreRowModel: getCoreRowModel(),
+    getSortedRowModel: getSortedRowModel(),
+    getPaginationRowModel: getPaginationRowModel(),
+    initialState: { pagination: { pageSize: 10 } },
+  });
 
   return (
-    <>
-      <div className="px-4 lg:px-6">
-        <Card>
-          <CardHeader>
-            <CardTitle>Recent Bookings</CardTitle>
-            <CardDescription>
-              {bookings.length} booking{bookings.length !== 1 ? "s" : ""} total
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="p-0">
-            {bookings.length === 0 ? (
-              <p className="text-sm text-muted-foreground py-8 text-center">
-                No bookings yet. Browse tutors to get started.
-              </p>
-            ) : (
-              <>
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Tutor</TableHead>
-                      <TableHead>Category</TableHead>
-                      <TableHead>Date</TableHead>
-                      <TableHead>Time</TableHead>
-                      <TableHead>Rate</TableHead>
-                      <TableHead>Status</TableHead>
-                      <TableHead className="text-right">Action</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {paginated.map((booking) => (
-                      <TableRow key={booking.id}>
-                        <TableCell className="font-medium">
-                          {booking.tutorProfile.user?.name ?? "—"}
-                        </TableCell>
-                        <TableCell className="text-muted-foreground">
-                          {booking.tutorProfile.category?.name ?? "—"}
-                        </TableCell>
-                        <TableCell>
-                          {format(new Date(booking.slot.date), "MMM d, yyyy")}
-                        </TableCell>
-                        <TableCell className="tabular-nums text-sm">
-                          {format(new Date(booking.slot.startTime), "h:mm a")}
-                          {" – "}
-                          {format(new Date(booking.slot.endTime), "h:mm a")}
-                        </TableCell>
-                        <TableCell>BDT {booking.tutorProfile.hourlyRate}/hr</TableCell>
-                        <TableCell>
-                          <StatusBadge status={booking.status} />
-                        </TableCell>
-                        <TableCell className="text-right">
-                          {booking.review ? (
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              className="h-7 rounded-lg text-xs gap-1.5 border-amber-200 text-amber-700 hover:bg-amber-50 dark:border-amber-800 dark:text-amber-400 dark:hover:bg-amber-900/30"
-                              onClick={() => setViewReview({ booking, review: booking.review! })}
-                            >
-                              <Star className="h-3 w-3 fill-amber-400 text-amber-400" />
-                              View Review
-                            </Button>
-                          ) : (booking.status === "COMPLETED" || booking.status === "CONFIRMED") ? (
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              className={`h-7 rounded-lg text-xs gap-1.5 ${booking.status === "COMPLETED"
-                                ? "border-amber-200 text-amber-700 hover:bg-amber-50 dark:border-amber-800 dark:text-amber-400 dark:hover:bg-amber-900/30"
-                                : "border-sky-200 text-sky-700 hover:bg-sky-50 dark:border-sky-800 dark:text-sky-400 dark:hover:bg-sky-900/30"
-                                }`}
-                              onClick={() => setReviewBooking(booking)}
-                            >
-                              <Star className={`h-3 w-3 ${booking.status === "COMPLETED"
-                                ? "fill-amber-400 text-amber-400"
-                                : "fill-sky-400 text-sky-400"
-                                }`} />
-                              Review
-                            </Button>
-                          ) : null}
-                        </TableCell>
-                      </TableRow>
+    <div className="space-y-4">
+      <div className="rounded-xl border border-border bg-card overflow-hidden">
+        <div className="overflow-x-auto">
+          <table className="w-full text-sm">
+            <thead>
+              {table.getHeaderGroups().map((hg) => (
+                <tr key={hg.id} className="border-b border-border bg-muted/40">
+                  {hg.headers.map((header) => (
+                    <th
+                      key={header.id}
+                      className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-muted-foreground whitespace-nowrap"
+                    >
+                      {flexRender(header.column.columnDef.header, header.getContext())}
+                    </th>
+                  ))}
+                </tr>
+              ))}
+            </thead>
+            <tbody>
+              {table.getRowModel().rows.length === 0 ? (
+                <tr>
+                  <td colSpan={columns.length} className="py-20 text-center">
+                    <div className="flex flex-col items-center justify-center gap-3">
+                       <SearchX className="h-10 w-10 text-muted-foreground/30" />
+                       <p className="text-sm font-medium text-muted-foreground">No bookings found</p>
+                    </div>
+                  </td>
+                </tr>
+              ) : (
+                table.getRowModel().rows.map((row) => (
+                  <tr
+                    key={row.id}
+                    className="border-b border-border last:border-0 hover:bg-muted/30 transition-colors"
+                  >
+                    {row.getVisibleCells().map((cell) => (
+                      <td key={cell.id} className="px-4 py-3 whitespace-nowrap">
+                        {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                      </td>
                     ))}
-                  </TableBody>
-                </Table>
-
-                <DataPagination
-                  page={page}
-                  totalPages={totalPages}
-                  onPage={(p) => setPage(p)}
-                />
-              </>
-            )}
-          </CardContent>
-        </Card>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
+        </div>
       </div>
+
+      <DataTablePagination table={table} totalLabel="bookings" />
 
       {reviewBooking && (
         <LeaveReviewDialog
@@ -186,6 +320,6 @@ export function BookingsTable({
           }}
         />
       )}
-    </>
+    </div>
   );
 }

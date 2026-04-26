@@ -181,7 +181,7 @@ export default function TutorDashboardPage() {
               <CardHeader>
                 <CardTitle>Student Reviews</CardTitle>
                 <CardDescription>
-                  {stats.totalReviews} review{stats.totalReviews !== 1 ? "s" : ""} · {stats.rating.toFixed(1)} avg rating
+                  {stats.totalReviews} review{stats.totalReviews !== 1 ? "s" : ""} · {Number(stats.rating ?? 0).toFixed(1)} avg rating
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-0">
@@ -212,7 +212,7 @@ export default function TutorDashboardPage() {
                         <div className="flex items-center gap-1 shrink-0">
                           <Star className="h-3.5 w-3.5 fill-amber-400 text-amber-400" />
                           <span className="text-sm font-medium">
-                            {review.rating.toFixed(1)}
+                            {Number(review.rating ?? 0).toFixed(1)}
                           </span>
                         </div>
                       </div>

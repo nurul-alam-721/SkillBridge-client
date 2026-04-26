@@ -43,7 +43,7 @@ export function FeaturedTutorsSection({
             <p className="text-xs font-semibold uppercase tracking-widest text-primary mb-1">
               Top Picks
             </p>
-            <h2 className="text-2xl font-bold tracking-tight">
+            <h2 className="font-serif text-3xl font-bold tracking-tight">
               Featured Tutors
             </h2>
           </div>

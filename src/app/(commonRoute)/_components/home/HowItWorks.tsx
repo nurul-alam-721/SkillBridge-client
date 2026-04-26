@@ -34,7 +34,7 @@ export function HowItWorksSection() {
           <span className="inline-flex items-center rounded-full border border-primary/20 bg-primary/8 px-3 py-1 text-xs font-semibold text-primary uppercase tracking-widest mb-4">
             Simple Process
           </span>
-          <h2 className="text-3xl font-bold tracking-tight mb-3">
+          <h2 className="font-serif text-3xl font-bold tracking-tight mb-3">
             How SkillBridge Works
           </h2>
           <p className="text-muted-foreground text-sm max-w-sm mx-auto leading-relaxed">

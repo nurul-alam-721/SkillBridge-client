@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { format } from "date-fns";
-import { ArrowUpDown, ArrowUp, ArrowDown, ChevronLeft, ChevronRight, Loader2, ShieldBan, ShieldCheck, SearchX } from "lucide-react";
+import { ArrowUpDown, ArrowUp, ArrowDown, ShieldBan, ShieldCheck, SearchX } from "lucide-react";
 import {
   useReactTable,
   getCoreRowModel,
@@ -12,11 +12,11 @@ import {
   ColumnDef,
   SortingState,
 } from "@tanstack/react-table";
-import { Button } from "@/components/ui/button";
 
 import { UserAvatarCell } from "./UserAvaterCell";
 import { AdminUser, UserStatus, UserRole } from "@/types";
 import { UserToggleButton } from "./UserToggleButton";
+import { DataTablePagination } from "@/components/layout/DataTablePagination";
 
 function SortIcon({ direction }: { direction: "asc" | "desc" | false }) {
   if (direction === "asc") return <ArrowUp className="h-3 w-3" />;
@@ -44,7 +44,6 @@ export function RoleBadge({ role }: { role: UserRole }) {
     </span>
   );
 }
-
 
 export function UserTableSkeleton() {
   return (
@@ -186,20 +185,8 @@ export function UsersTable({ users, loading, onToggle }: Props) {
   if (loading) return <UserTableSkeleton />;
   if (users.length === 0) return <UserEmptyState />;
 
-  const current = table.getState().pagination.pageIndex;
-  const total = table.getPageCount();
-
-  /* build page buttons */
-  const delta = 2;
-  const pages: (number | "…")[] = [];
-  const rangeStart = Math.max(0, current - delta);
-  const rangeEnd = Math.min(total - 1, current + delta);
-  if (rangeStart > 0) { pages.push(0); if (rangeStart > 1) pages.push("…"); }
-  for (let i = rangeStart; i <= rangeEnd; i++) pages.push(i);
-  if (rangeEnd < total - 1) { if (rangeEnd < total - 2) pages.push("…"); pages.push(total - 1); }
-
   return (
-    <div className="space-y-3">
+    <div className="space-y-4">
       <div className="rounded-xl border border-border bg-card overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
@@ -236,43 +223,7 @@ export function UsersTable({ users, loading, onToggle }: Props) {
         </div>
       </div>
 
-      {total > 1 && (
-        <div className="flex items-center justify-between px-1">
-          <p className="text-xs text-muted-foreground">
-            {users.length} user{users.length !== 1 ? "s" : ""}
-          </p>
-          <div className="flex items-center gap-1">
-            <Button
-              variant="outline" size="icon" className="h-8 w-8 rounded-xl"
-              onClick={() => table.previousPage()} disabled={!table.getCanPreviousPage()}
-            >
-              <ChevronLeft className="h-4 w-4" />
-            </Button>
-
-            {pages.map((p, i) =>
-              p === "…" ? (
-                <span key={`e-${i}`} className="h-8 w-8 flex items-center justify-center text-xs text-muted-foreground select-none">…</span>
-              ) : (
-                <Button
-                  key={p}
-                  variant={p === current ? "default" : "outline"}
-                  size="icon" className="h-8 w-8 rounded-xl text-xs"
-                  onClick={() => table.setPageIndex(p as number)}
-                >
-                  {(p as number) + 1}
-                </Button>
-              )
-            )}
-
-            <Button
-              variant="outline" size="icon" className="h-8 w-8 rounded-xl"
-              onClick={() => table.nextPage()} disabled={!table.getCanNextPage()}
-            >
-              <ChevronRight className="h-4 w-4" />
-            </Button>
-          </div>
-        </div>
-      )}
+      <DataTablePagination table={table} totalLabel="users" />
     </div>
   );
 }

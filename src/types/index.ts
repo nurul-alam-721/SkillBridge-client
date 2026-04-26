@@ -7,3 +7,4 @@ export * from "./booking.types";
 export * from "./payment.types";
 export * from "./admin.types";
 export * from "./auth.types";
+export * from "./meta.types";

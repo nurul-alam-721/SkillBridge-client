@@ -9,8 +9,6 @@ import {
   ArrowUpDown,
   ArrowUp,
   ArrowDown,
-  ChevronLeft,
-  ChevronRight,
   Users,
   Tag,
 } from "lucide-react";
@@ -24,26 +22,18 @@ import {
   SortingState,
 } from "@tanstack/react-table";
 import { Button } from "@/components/ui/button";
-import { Skeleton } from "@/components/ui/skeleton";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
+import { DataTablePagination } from "@/components/layout/DataTablePagination";
 
 
 // ── Sort Icon ─────────────────────────────────────────────────────────────
 
 function SortIcon({ direction }: { direction: "asc" | "desc" | false }) {
   if (direction === "asc")
-    return <ArrowUp className="ml-1.5 h-3 w-3 shrink-0 text-foreground" />;
+    return <ArrowUp className="h-3 w-3" />;
   if (direction === "desc")
-    return <ArrowDown className="ml-1.5 h-3 w-3 shrink-0 text-foreground" />;
+    return <ArrowDown className="h-3 w-3" />;
   return (
-    <ArrowUpDown className="ml-1.5 h-3 w-3 shrink-0 opacity-30 group-hover:opacity-60 transition-opacity" />
+    <ArrowUpDown className="h-3 w-3 opacity-40" />
   );
 }
 
@@ -51,37 +41,22 @@ function SortIcon({ direction }: { direction: "asc" | "desc" | false }) {
 
 function TableSkeleton() {
   return (
-    <>
-      {Array.from({ length: 6 }).map((_, i) => (
-        <TableRow
-          key={i}
-          className="border-border/40"
-          style={{ opacity: 1 - i * 0.12 }}
-        >
-          <TableCell className="py-3.5 pl-6">
-            <div className="flex items-center gap-3">
-              <Skeleton className="h-8 w-8 rounded-lg shrink-0" />
-              <Skeleton className="h-3.5 w-28 rounded-full" />
+    <div className="rounded-xl border border-border bg-card overflow-hidden">
+      <div className="divide-y divide-border">
+        {Array.from({ length: 6 }).map((_, i) => (
+          <div key={i} className="flex items-center gap-4 px-4 py-3">
+            <div className="h-8 w-8 rounded-lg bg-muted animate-pulse shrink-0" />
+            <div className="flex-1 space-y-1.5">
+              <div className="h-3.5 w-28 bg-muted animate-pulse rounded" />
+              <div className="h-3 w-52 bg-muted animate-pulse rounded" />
             </div>
-          </TableCell>
-          <TableCell>
-            <Skeleton className="h-3 w-52 rounded-full" />
-          </TableCell>
-          <TableCell>
-            <Skeleton className="h-6 w-12 rounded-full" />
-          </TableCell>
-          <TableCell>
-            <Skeleton className="h-3 w-20 rounded-full" />
-          </TableCell>
-          <TableCell className="pr-6">
-            <div className="flex gap-2 justify-end">
-              <Skeleton className="h-8 w-8 rounded-lg" />
-              <Skeleton className="h-8 w-8 rounded-lg" />
-            </div>
-          </TableCell>
-        </TableRow>
-      ))}
-    </>
+            <div className="h-6 w-12 bg-muted animate-pulse rounded-full" />
+            <div className="h-3.5 w-20 bg-muted animate-pulse rounded" />
+            <div className="h-8 w-16 bg-muted animate-pulse rounded-lg" />
+          </div>
+        ))}
+      </div>
+    </div>
   );
 }
 
@@ -96,17 +71,15 @@ function buildColumns(
       accessorKey: "name",
       header: ({ column }) => (
         <button
-          className="group flex items-center text-[11px] font-semibold uppercase tracking-widest text-muted-foreground hover:text-foreground transition-colors"
+          className="flex items-center gap-1 hover:text-foreground transition-colors"
           onClick={() =>
             column.toggleSorting(column.getIsSorted() === "asc")
           }
         >
-          Name
-          <SortIcon direction={column.getIsSorted()} />
+          Name <SortIcon direction={column.getIsSorted()} />
         </button>
       ),
       cell: ({ row }) => {
-        // Generate a deterministic pastel background from name
         const colors = [
           "bg-violet-100 text-violet-600 dark:bg-violet-900/30 dark:text-violet-400",
           "bg-sky-100 text-sky-600 dark:bg-sky-900/30 dark:text-sky-400",
@@ -125,13 +98,13 @@ function buildColumns(
         const initial = row.original.name[0]?.toUpperCase() ?? "?";
 
         return (
-          <div className="flex items-center gap-3 pl-2">
+          <div className="flex items-center gap-3">
             <span
               className={`h-8 w-8 rounded-lg flex items-center justify-center text-xs font-bold shrink-0 ${colorClass}`}
             >
               {initial}
             </span>
-            <span className="font-semibold text-sm tracking-tight">
+            <span className="font-semibold text-sm tracking-tight text-foreground truncate">
               {row.original.name}
             </span>
           </div>
@@ -140,11 +113,7 @@ function buildColumns(
     },
     {
       accessorKey: "description",
-      header: () => (
-        <span className="text-[11px] font-semibold uppercase tracking-widest text-muted-foreground">
-          Description
-        </span>
-      ),
+      header: "Description",
       cell: ({ row }) => (
         <span className="text-sm text-muted-foreground leading-relaxed line-clamp-1 max-w-xs">
           {row.original.description ?? (
@@ -159,13 +128,12 @@ function buildColumns(
       accessorFn: (row) => row._count?.tutors ?? 0,
       header: ({ column }) => (
         <button
-          className="group flex items-center text-[11px] font-semibold uppercase tracking-widest text-muted-foreground hover:text-foreground transition-colors"
+          className="flex items-center gap-1 hover:text-foreground transition-colors"
           onClick={() =>
             column.toggleSorting(column.getIsSorted() === "asc")
           }
         >
-          Tutors
-          <SortIcon direction={column.getIsSorted()} />
+          Tutors <SortIcon direction={column.getIsSorted()} />
         </button>
       ),
       cell: ({ row }) => {
@@ -190,31 +158,30 @@ function buildColumns(
       accessorKey: "createdAt",
       header: ({ column }) => (
         <button
-          className="group flex items-center text-[11px] font-semibold uppercase tracking-widest text-muted-foreground hover:text-foreground transition-colors"
+          className="flex items-center gap-1 hover:text-foreground transition-colors"
           onClick={() =>
             column.toggleSorting(column.getIsSorted() === "asc")
           }
         >
-          Created
-          <SortIcon direction={column.getIsSorted()} />
+          Created <SortIcon direction={column.getIsSorted()} />
         </button>
       ),
       cell: ({ row }) => (
-        <time className="text-xs text-muted-foreground/70 tabular-nums font-medium">
+        <time className="text-sm text-muted-foreground tabular-nums">
           {format(new Date(row.original.createdAt), "MMM d, yyyy")}
         </time>
       ),
     },
     {
       id: "actions",
-      header: () => <span className="sr-only">Actions</span>,
+      header: "",
       enableSorting: false,
       cell: ({ row }) => (
-        <div className="flex items-center gap-1.5 justify-end pr-2">
+        <div className="flex items-center gap-2 justify-end">
           <Button
             variant="ghost"
             size="icon"
-            className="h-8 w-8 rounded-lg opacity-0 group-hover/row:opacity-100 transition-all hover:bg-accent"
+            className="h-8 w-8 rounded-lg hover:bg-accent"
             onClick={() => onEdit(row.original)}
           >
             <Pencil className="h-3.5 w-3.5" />
@@ -222,7 +189,7 @@ function buildColumns(
           <Button
             variant="ghost"
             size="icon"
-            className="h-8 w-8 rounded-lg opacity-0 group-hover/row:opacity-100 transition-all text-rose-500 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-900/20"
+            className="h-8 w-8 rounded-lg text-rose-500 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-900/20"
             onClick={() => onDelete(row.original)}
           >
             <Trash2 className="h-3.5 w-3.5" />
@@ -233,35 +200,6 @@ function buildColumns(
   ];
 }
 
-// ── Pagination Button ─────────────────────────────────────────────────────
-
-function PageBtn({
-  active,
-  onClick,
-  children,
-  disabled,
-}: {
-  active?: boolean;
-  onClick: () => void;
-  children: React.ReactNode;
-  disabled?: boolean;
-}) {
-  return (
-    <button
-      onClick={onClick}
-      disabled={disabled}
-      className={`h-8 min-w-[2rem] px-2 rounded-lg text-xs font-medium transition-all
-        ${
-          active
-            ? "bg-foreground text-background shadow-sm"
-            : "text-muted-foreground hover:text-foreground hover:bg-accent"
-        }
-        disabled:opacity-30 disabled:pointer-events-none`}
-    >
-      {children}
-    </button>
-  );
-}
 
 // ── Main Table ────────────────────────────────────────────────────────────
 
@@ -293,30 +231,12 @@ export function CategoriesTable({
     initialState: { pagination: { pageSize: 10 } },
   });
 
-  const totalPages = table.getPageCount();
-  const currentPage = table.getState().pagination.pageIndex;
-
-  const getPageNumbers = () => {
-    const delta = 2;
-    const pages: (number | "…")[] = [];
-    const rangeStart = Math.max(0, currentPage - delta);
-    const rangeEnd = Math.min(totalPages - 1, currentPage + delta);
-    if (rangeStart > 0) {
-      pages.push(0);
-      if (rangeStart > 1) pages.push("…");
-    }
-    for (let i = rangeStart; i <= rangeEnd; i++) pages.push(i);
-    if (rangeEnd < totalPages - 1) {
-      if (rangeEnd < totalPages - 2) pages.push("…");
-      pages.push(totalPages - 1);
-    }
-    return pages;
-  };
+  if (loading) return <TableSkeleton />;
 
   return (
     <div className="space-y-4">
       {/* Stats bar */}
-      {!loading && categories.length > 0 && (
+      {categories.length > 0 && (
         <div className="flex items-center gap-4 px-1">
           <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
             <Tag className="h-3.5 w-3.5" />
@@ -341,124 +261,53 @@ export function CategoriesTable({
       )}
 
       {/* Table card */}
-      <div className="rounded-2xl border border-border/50 bg-card overflow-hidden shadow-sm">
-        <Table>
-          <TableHeader>
-            {table.getHeaderGroups().map((hg) => (
-              <TableRow
-                key={hg.id}
-                className="border-border/50 hover:bg-transparent"
-              >
-                {hg.headers.map((header, i) => (
-                  <TableHead
-                    key={header.id}
-                    className={`py-3 bg-muted/30 ${i === 0 ? "pl-6" : ""} ${
-                      i === hg.headers.length - 1 ? "pr-6 text-right" : ""
-                    }`}
-                  >
-                    {flexRender(
-                      header.column.columnDef.header,
-                      header.getContext(),
-                    )}
-                  </TableHead>
-                ))}
-              </TableRow>
-            ))}
-          </TableHeader>
-
-          <TableBody>
-            {loading ? (
-              <TableSkeleton />
-            ) : table.getRowModel().rows.length === 0 ? (
-              <TableRow className="hover:bg-transparent border-0">
-                <TableCell
-                  colSpan={columns.length}
-                  className="py-20 text-center"
-                >
-                  <div className="flex flex-col items-center gap-3">
-                    <div className="h-12 w-12 rounded-2xl bg-muted/60 flex items-center justify-center">
-                      <Tag className="h-5 w-5 text-muted-foreground/40" />
-                    </div>
-                    <div>
-                      <p className="text-sm font-medium text-muted-foreground">
-                        No categories yet
-                      </p>
-                      <p className="text-xs text-muted-foreground/60 mt-0.5">
-                        Create one to get started
-                      </p>
-                    </div>
-                  </div>
-                </TableCell>
-              </TableRow>
-            ) : (
-              table.getRowModel().rows.map((row) => (
-                <TableRow
-                  key={row.id}
-                  className="group/row border-border/40 hover:bg-muted/25 transition-colors cursor-default"
-                >
-                  {row.getVisibleCells().map((cell, i) => (
-                    <TableCell
-                      key={cell.id}
-                      className={`py-3 ${i === 0 ? "pl-4" : ""} ${
-                        i === row.getVisibleCells().length - 1 ? "pr-4" : ""
-                      }`}
+      <div className="rounded-xl border border-border bg-card overflow-hidden">
+        <div className="overflow-x-auto">
+          <table className="w-full text-sm">
+            <thead>
+              {table.getHeaderGroups().map((hg) => (
+                <tr key={hg.id} className="border-b border-border bg-muted/40">
+                  {hg.headers.map((header) => (
+                    <th
+                      key={header.id}
+                      className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-muted-foreground whitespace-nowrap"
                     >
-                      {flexRender(
-                        cell.column.columnDef.cell,
-                        cell.getContext(),
-                      )}
-                    </TableCell>
+                      {flexRender(header.column.columnDef.header, header.getContext())}
+                    </th>
                   ))}
-                </TableRow>
-              ))
-            )}
-          </TableBody>
-        </Table>
+                </tr>
+              ))}
+            </thead>
+            <tbody>
+              {table.getRowModel().rows.length === 0 ? (
+                 <tr>
+                  <td colSpan={columns.length} className="py-20 text-center">
+                    <div className="flex flex-col items-center gap-2">
+                       <Tag className="h-8 w-8 text-muted-foreground/30" />
+                       <p className="text-sm font-medium text-muted-foreground">No categories found</p>
+                    </div>
+                  </td>
+                 </tr>
+              ) : (
+                table.getRowModel().rows.map((row) => (
+                  <tr
+                    key={row.id}
+                    className="border-b border-border last:border-0 hover:bg-muted/30 transition-colors"
+                  >
+                    {row.getVisibleCells().map((cell) => (
+                      <td key={cell.id} className="px-4 py-3 whitespace-nowrap">
+                        {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                      </td>
+                    ))}
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
+        </div>
       </div>
 
-      {/* Pagination */}
-      {!loading && totalPages > 1 && (
-        <div className="flex items-center justify-between px-1">
-          <p className="text-xs text-muted-foreground/60">
-            Page {currentPage + 1} of {totalPages}
-          </p>
-
-          <div className="flex items-center gap-1">
-            <PageBtn
-              onClick={() => table.previousPage()}
-              disabled={!table.getCanPreviousPage()}
-            >
-              <ChevronLeft className="h-4 w-4" />
-            </PageBtn>
-
-            {getPageNumbers().map((p, i) =>
-              p === "…" ? (
-                <span
-                  key={`e-${i}`}
-                  className="h-8 w-6 flex items-center justify-center text-xs text-muted-foreground/40 select-none"
-                >
-                  ···
-                </span>
-              ) : (
-                <PageBtn
-                  key={p}
-                  active={p === currentPage}
-                  onClick={() => table.setPageIndex(p as number)}
-                >
-                  {(p as number) + 1}
-                </PageBtn>
-              ),
-            )}
-
-            <PageBtn
-              onClick={() => table.nextPage()}
-              disabled={!table.getCanNextPage()}
-            >
-              <ChevronRight className="h-4 w-4" />
-            </PageBtn>
-          </div>
-        </div>
-      )}
+      <DataTablePagination table={table} totalLabel="categories" />
     </div>
   );
 }

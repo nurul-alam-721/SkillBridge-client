@@ -20,12 +20,10 @@ import {
   RotateCcw,
   Receipt,
   ExternalLink,
-  ChevronLeft,
-  ChevronRight,
 } from "lucide-react";
 import Image from "next/image";
-import { Button } from "@/components/ui/button";
 import { Payment, PaymentStatus, BookingStatus } from "@/types";
+import { DataTablePagination } from "@/components/layout/DataTablePagination";
 
 // ── Sort icon ─────────────────────────────────────────────────────────────
 
@@ -73,13 +71,14 @@ function AvatarCell({ name, image }: { name: string; image: string | null }) {
   return (
     <div className="flex items-center gap-2.5 min-w-0">
       {image ? (
-        <Image
-          src={image}
-          alt={name}
-          width={32}
-          height={32}
-          className="rounded-full object-cover shrink-0 border border-border"
-        />
+         <div className="relative h-8 w-8 shrink-0">
+          <Image
+            src={image}
+            alt={name}
+            fill
+            className="rounded-full object-cover border border-border"
+          />
+        </div>
       ) : (
         <div className="h-8 w-8 rounded-full bg-muted flex items-center justify-center shrink-0 text-xs font-bold text-muted-foreground border border-border">
           {name.charAt(0).toUpperCase()}
@@ -261,20 +260,10 @@ export function PaymentTable({
     initialState: { pagination: { pageSize: 8 } },
   });
 
-  const currentPage = table.getState().pagination.pageIndex;
-  const totalPages  = table.getPageCount();
-  const delta = 2;
-  const pages: (number | "…")[] = [];
-  const rangeStart = Math.max(0, currentPage - delta);
-  const rangeEnd   = Math.min(totalPages - 1, currentPage + delta);
-  if (rangeStart > 0) { pages.push(0); if (rangeStart > 1) pages.push("…"); }
-  for (let i = rangeStart; i <= rangeEnd; i++) pages.push(i);
-  if (rangeEnd < totalPages - 1) { if (rangeEnd < totalPages - 2) pages.push("…"); pages.push(totalPages - 1); }
-
   if (loading) return <PaymentTableSkeleton />;
 
   return (
-    <div className="space-y-3">
+    <div className="space-y-4">
       <div className="rounded-xl border border-border bg-card overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
@@ -337,57 +326,7 @@ export function PaymentTable({
         </div>
       </div>
 
-      {totalPages > 1 && (
-        <div className="flex items-center justify-between px-1">
-          <p className="text-xs text-muted-foreground">
-            Showing {table.getRowModel().rows.length} of {payments.length} payment
-            {payments.length !== 1 ? "s" : ""}
-          </p>
-
-          <div className="flex items-center gap-1">
-            <Button
-              variant="outline"
-              size="icon"
-              className="h-8 w-8 rounded-xl"
-              onClick={() => table.previousPage()}
-              disabled={!table.getCanPreviousPage()}
-            >
-              <ChevronLeft className="h-4 w-4" />
-            </Button>
-
-            {pages.map((p, i) =>
-              p === "…" ? (
-                <span
-                  key={`ellipsis-${i}`}
-                  className="h-8 w-8 flex items-center justify-center text-xs text-muted-foreground select-none"
-                >
-                  …
-                </span>
-              ) : (
-                <Button
-                  key={p}
-                  variant={p === currentPage ? "default" : "outline"}
-                  size="icon"
-                  className="h-8 w-8 rounded-xl text-xs"
-                  onClick={() => table.setPageIndex(p as number)}
-                >
-                  {(p as number) + 1}
-                </Button>
-              )
-            )}
-
-            <Button
-              variant="outline"
-              size="icon"
-              className="h-8 w-8 rounded-xl"
-              onClick={() => table.nextPage()}
-              disabled={!table.getCanNextPage()}
-            >
-              <ChevronRight className="h-4 w-4" />
-            </Button>
-          </div>
-        </div>
-      )}
+      <DataTablePagination table={table} totalLabel="payments" />
     </div>
   );
 }

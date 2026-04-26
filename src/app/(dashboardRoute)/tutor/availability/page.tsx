@@ -163,7 +163,7 @@ export default function AvailabilityPage() {
             <CalendarClock className="h-4 w-4 text-primary" />
           </div>
           <div>
-            <h1 className="text-lg font-bold leading-tight">Manage Availability</h1>
+            <h1 className="font-serif text-lg font-bold leading-tight">Manage Availability</h1>
             <p className="text-xs text-muted-foreground mt-0.5">
               Add time slots when you&apos;re available to tutor students
             </p>

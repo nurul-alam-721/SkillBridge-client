@@ -65,13 +65,13 @@ function TutorsContent() {
         <div className="container mx-auto px-4 py-8">
           <div className="flex items-center gap-1.5 mb-2">
             <BookOpen className="h-3.5 w-3.5 text-primary" />
-            <span className="text-xs font-medium text-primary uppercase tracking-wide">
+            <span className=" text-xs font-medium text-primary uppercase tracking-wide">
               Tutors
             </span>
           </div>
           <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-3">
             <div>
-              <h1 className="text-2xl font-bold tracking-tight">
+              <h1 className="font-serif text-2xl font-bold tracking-tight">
                 {selectedCategory ? selectedCategory.name : "Browse Tutors"}
               </h1>
               <p className="text-sm text-muted-foreground mt-0.5">

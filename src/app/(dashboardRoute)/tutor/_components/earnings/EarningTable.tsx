@@ -74,7 +74,7 @@ export function EarningTable({ payments, loading, sorting, onSortingChange }: Pr
     {
       accessorKey: "amount",
       header: () => <div className="text-right">Total</div>,
-      cell: ({ getValue }) => <div className="text-right text-sm font-medium">${(getValue<number>() ?? 0).toFixed(2)}</div>,
+      cell: ({ getValue }) => <div className="text-right text-sm font-medium">৳{Number(getValue<number>() ?? 0).toFixed(2)}</div>,
     },
     {
       accessorKey: "status",

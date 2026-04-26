@@ -31,7 +31,7 @@ export function TutorSectionCards({ stats }: { stats: TutorStats }) {
     },
     {
       title: "Rating",
-      value: stats.rating.toFixed(1),
+      value: Number(stats.rating ?? 0).toFixed(1),
       badge: `${stats.totalReviews} review${stats.totalReviews !== 1 ? "s" : ""}`,
       description: "Average student rating",
     },
