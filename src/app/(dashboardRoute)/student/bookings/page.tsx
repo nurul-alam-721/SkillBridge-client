@@ -202,7 +202,7 @@ export default function BookingsPage() {
       {/* ── Page header ── */}
       <div className="px-4 lg:px-6 flex items-center justify-between">
         <div>
-          <h1 className="text-lg font-bold leading-tight">My Bookings</h1>
+          <h1 className="font-serif text-lg font-bold leading-tight">My Bookings</h1>
           <p className="text-xs text-muted-foreground mt-0.5">
             {loading
               ? "Loading..."

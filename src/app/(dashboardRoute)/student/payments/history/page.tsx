@@ -49,8 +49,8 @@ export default function PaymentHistoryPage() {
   return (
     <div className="space-y-6 p-6">
       <div>
-        <h1 className="text-2xl font-bold text-foreground flex items-center gap-2.5">
-          <Receipt className="h-6 w-6 text-muted-foreground" />
+        <h1 className="font-serif text-2xl font-bold text-foreground flex items-center gap-2.5">
+          <Receipt className=" h-6 w-6 text-muted-foreground" />
           Payment History
         </h1>
         <p className="text-sm text-muted-foreground mt-1">

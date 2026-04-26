@@ -93,7 +93,7 @@ export default function AdminCategoriesPage() {
     <div className="space-y-5 p-3">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight">Categories</h1>
+          <h1 className="font-serif text-2xl font-bold tracking-tight">Categories</h1>
           <p className="text-sm text-muted-foreground mt-0.5">
             Manage subject categories for tutors
           </p>

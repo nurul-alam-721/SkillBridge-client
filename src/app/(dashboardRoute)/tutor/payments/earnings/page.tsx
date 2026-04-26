@@ -42,7 +42,7 @@ export default function TutorEarningPage() {
   return (
     <div className="space-y-6 p-6">
       <div>
-        <h1 className="text-2xl font-bold text-foreground flex items-center gap-2.5">
+        <h1 className="font-serif text-2xl font-bold text-foreground flex items-center gap-2.5">
           <Wallet className="h-6 w-6 text-muted-foreground" />
           My Earnings
         </h1>

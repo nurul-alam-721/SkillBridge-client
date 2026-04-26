@@ -105,7 +105,7 @@ export default function AdminUsersPage() {
     <div className="space-y-5 px-4 py-2">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight">Users</h1>
+          <h1 className="font-serif text-2xl font-bold tracking-tight">Users</h1>
           <p className="text-sm text-muted-foreground mt-0.5">
             Manage students, tutors and admins
           </p>
